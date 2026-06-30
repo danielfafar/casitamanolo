@@ -1,0 +1,222 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Casita Manolo | Home">
+    
+    <!-- CAPA VÍDEO -->
+    <div class="media-layer" id="media-layer">
+        <video id="house-video" muted loop playsinline>
+            <source src="/videos/interior.mp4" type="video/mp4" />
+        </video>
+        <button class="close-btn" id="close-video-btn">✕ CERRAR</button>
+    </div>
+
+    <!-- ESCENA PRINCIPAL (La Casa) -->
+    <div class="stage">
+        <svg class="svg-layer" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
+            
+            <polygon points="325,233 450,140 575,233" fill="#0b1714" class="house-parts" opacity="0.8" />
+
+            <!-- Chimenea -->
+            <g class="line-art house-parts">
+                <rect x="520" y="160" width="30" height="40" class="fill-bg" />
+                <path d="M 535,150 Q 520,120 540,90 T 530,40" class="smoke" />
+                <path d="M 545,130 Q 560,100 550,70 T 560,20" class="smoke smoke-2" />
+            </g>
+
+            <!-- 1. VINO -->
+            <g class="item link-item" id="wine-group" data-link="Carta de Vinos">
+                <rect x="210" y="220" width="120" height="210" fill="transparent" />
+                <line x1="285" y1="420" x2="315" y2="420" class="line-art" />
+                <line x1="300" y1="420" x2="300" y2="380" class="line-art" />
+                <path d="M 285,350 L 315,350 L 315,360 Q 315,380 300,380 Q 285,380 285,360 Z" class="line-art fill-bg" />
+                <path class="wine-liquid" d="M 287,365 Q 300,380 313,365 Z" fill="var(--accent-color)" stroke="none" opacity="0.8" />
+                <path class="wine-stream" d="M 295,300 Q 310,300 300,370" />
+                <g class="bottle">
+                    <path d="M 230,420 L 230,320 Q 230,300 240,280 L 240,240 L 250,240 L 250,280 Q 260,300 260,320 L 260,420 Z" class="line-art fill-bg" />
+                    <rect x="230" y="340" width="30" height="40" stroke="none" fill="rgba(17, 35, 30, 0.1)" />
+                </g>
+            </g>
+
+            <!-- 2. MESA -->
+            <g class="house-parts">
+                <ellipse cx="680" cy="350" rx="60" ry="12" class="line-art fill-bg" />
+                <line x1="640" y1="360" x2="630" y2="420" class="line-art" />
+                <line x1="720" y1="360" x2="730" y2="420" class="line-art" />
+                <line x1="680" y1="362" x2="680" y2="420" class="line-art" />
+            </g>
+
+            <!-- 3. VINILOS (AHORA ES UN LINK REAL A /portfolio) -->
+            <a href="/portfolio" class="item" id="vinyl-group">
+                <g transform="translate(680, 335)">
+                    <rect x="-40" y="-45" width="80" height="60" fill="transparent" />
+                    <g class="vinyls">
+                        <g transform="translate(-15, -20) rotate(-15)">
+                            <circle cx="0" cy="0" r="18" class="fill-ink" />
+                            <circle cx="0" cy="0" r="6" fill="#E8B059" />
+                            <circle cx="0" cy="0" r="1.5" class="fill-bg" />
+                        </g>
+                        <g transform="translate(5, -15) rotate(10)">
+                            <circle cx="0" cy="0" r="18" class="fill-ink" />
+                            <circle cx="0" cy="0" r="6" fill="var(--accent-color)" />
+                            <circle cx="0" cy="0" r="1.5" class="fill-bg" />
+                        </g>
+                    </g>
+                </g>
+            </a>
+
+            <!-- 4. TABURETE -->
+            <g class="item link-item" id="stool-group" data-link="Eventos Privados">
+                <rect x="740" y="360" width="80" height="70" fill="transparent" />
+                <g class="jump-anim">
+                    <ellipse cx="780" cy="380" rx="25" ry="6" class="line-art fill-bg" />
+                    <line x1="765" y1="385" x2="760" y2="420" class="line-art" />
+                    <line x1="795" y1="385" x2="800" y2="420" class="line-art" />
+                    <line x1="780" y1="386" x2="780" y2="420" class="line-art" />
+                    <line x1="762" y1="405" x2="798" y2="405" class="line-art" />
+                </g>
+            </g>
+
+            <!-- 5. ESTRUCTURA -->
+            <rect x="340" y="240" width="220" height="180" class="line-art fill-bg house-parts" />
+
+            <!-- 6. VENTANA -->
+            <g class="item link-item house-parts" id="window-group" data-link="Galería de Fotos">
+                <rect x="450" y="280" width="90" height="90" fill="transparent" />
+                <g class="window-anim">
+                    <rect x="470" y="300" width="50" height="50" class="line-art fill-bg window-pane" />
+                    <line x1="495" y1="300" x2="495" y2="350" class="line-art" />
+                    <line x1="470" y1="325" x2="520" y2="325" class="line-art" />
+                </g>
+            </g>
+
+            <!-- 7. PUERTA (El Cine) -->
+            <g class="item house-parts" id="door-group">
+                <rect x="360" y="320" width="90" height="110" fill="transparent" />
+                <g class="door-anim">
+                    <path d="M 380,420 L 380,340 A 25 25 0 0 1 430,340 L 430,420 Z" class="line-art fill-bg door-panel" />
+                    <circle cx="415" cy="380" r="3" class="fill-ink door-knob" />
+                </g>
+            </g>
+
+            <!-- 8. TEJADO -->
+            <g class="item house-parts" id="roof-group">
+                <rect x="250" y="80" width="400" height="180" fill="transparent" />
+                <g class="roof-anim">
+                    <polygon points="310,240 450,130 590,240" class="fill-accent" />
+                    <polygon points="325,233 450,140 575,233" fill="none" stroke="rgba(17,35,30,0.3)" stroke-width="3" stroke-linejoin="round" />
+                </g>
+            </g>
+
+            <line x1="150" y1="420" x2="850" y2="420" stroke="var(--ink-color)" stroke-width="2" stroke-dasharray="8 12" opacity="0.2" stroke-linecap="round" />
+        </svg>
+    </div>
+
+    <!-- BRANDING -->
+    <div class="branding">
+        <h1>Casita Manolo</h1>
+        <p>Music House Madrid</p>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">Abriendo...</div>
+
+</Layout>
+
+<style>
+    /* Estilos Home */
+    body.video-mode { background-color: #0b1714; }
+    
+    .media-layer { position: absolute; top: 50%; left: 50%; width: 640px; height: 360px; border-radius: 16px; overflow: hidden; background-color: var(--ink-color); opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(0.7); transition: opacity 0.6s var(--ease-out), transform 0.8s var(--ease-spring); box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5); z-index: 50; }
+    .media-layer video { width: 100%; height: 100%; object-fit: cover; }
+    
+    .close-btn { position: absolute; top: -60px; right: 0; background: rgba(17, 35, 30, 0.6); border: 1px solid rgba(244, 241, 236, 0.3); color: var(--bg-color); font-family: 'Space Mono', monospace; padding: 10px 20px; border-radius: 30px; font-size: 0.8rem; cursor: pointer; backdrop-filter: blur(4px); opacity: 0; transition: all 0.3s ease; pointer-events: none; }
+    .close-btn:hover { background: var(--bg-color); color: var(--ink-color); }
+    
+    body.video-mode .media-layer { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+    body.video-mode .close-btn { top: 20px; opacity: 1; transition-delay: 0.5s; pointer-events: auto; right: 20px; }
+    body.video-mode .house-parts, body.video-mode .item, body.video-mode .branding { opacity: 0; pointer-events: none; }
+
+    .stage { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 900px; height: 600px; display: flex; align-items: center; justify-content: center; }
+    .svg-layer { position: relative; width: 100%; height: 100%; z-index: 10; }
+    .line-art { stroke: var(--ink-color); stroke-width: 4px; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+    .fill-bg { fill: var(--bg-color); }
+    .fill-ink { fill: var(--ink-color); stroke: none; }
+    .fill-accent { fill: var(--accent-color); stroke: var(--ink-color); stroke-width: 4px; stroke-linejoin: round; }
+    
+    .house-parts { transition: opacity 0.6s var(--ease-out); }
+    .item { cursor: pointer; }
+    .jump-anim { transition: transform 0.4s var(--ease-spring); }
+    .item:hover .jump-anim { transform: translateY(-10px) scale(1.05); }
+
+    .bottle { transform-origin: 245px 330px; transition: transform 0.6s var(--ease-spring); }
+    .wine-stream { stroke: var(--accent-color); stroke-width: 3.5px; stroke-linecap: round; fill: none; stroke-dasharray: 90; stroke-dashoffset: 90; opacity: 0; transition: opacity 0.2s, stroke-dashoffset 0.1s; }
+    .wine-liquid { transform-origin: 300px 380px; transition: transform 0.4s ease-out; }
+    #wine-group:hover .bottle { transform: translate(-35px, -30px) rotate(90deg); }
+    #wine-group:hover .wine-stream { opacity: 1; stroke-dashoffset: 0; transition: opacity 0.2s 0.3s, stroke-dashoffset 0.4s cubic-bezier(0.4, 0, 1, 1) 0.3s; }
+    #wine-group:hover .wine-liquid { transform: scaleY(1.4) scaleX(1.15); transition: transform 0.6s var(--ease-out) 0.5s; }
+
+    .vinyls { transition: transform 0.4s var(--ease-spring); }
+    #vinyl-group:hover .vinyls { transform: translateY(-8px) scale(1.08) rotate(-4deg); }
+
+    #stool-group { transform-origin: 780px 420px; }
+    .door-anim { transform-origin: 380px 420px; transition: transform 0.4s var(--ease-spring); }
+    #door-group:hover .door-anim { transform: scaleX(0.85) skewY(3deg); }
+    #door-group:hover .door-panel { fill: #E8E2D5; transition: fill 0.3s ease; } 
+    .window-anim { transform-origin: 495px 325px; transition: transform 0.4s var(--ease-spring); }
+    #window-group:hover .window-anim { transform: scale(1.1); }
+    #window-group:hover .window-pane { fill: #FDE68A; transition: fill 0.3s ease; }
+    .roof-anim { transform-origin: 450px 240px; transition: transform 0.8s var(--ease-spring); }
+    #roof-group:hover .roof-anim { transform: translateY(-140px) rotate(-6deg) scale(1.05); }
+    
+    .smoke { animation: float 4s ease-in-out infinite alternate; transform-origin: center bottom; }
+    .smoke-2 { animation-delay: -2s; }
+    @keyframes float { 0% { transform: translateY(0) skewX(0deg); opacity: 0.8; } 100% { transform: translateY(-15px) skewX(5deg); opacity: 0.2; } }
+
+    .branding { position: absolute; bottom: 40px; text-align: center; z-index: 10; transition: opacity 0.5s ease; width: 100%; pointer-events: none; }
+    .branding h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; line-height: 1.2; margin-bottom: 0.5rem; }
+    .branding p { font-size: 0.8rem; letter-spacing: 0.4em; text-transform: uppercase; opacity: 0.6; }
+
+    .toast { position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%); background: var(--ink-color); color: var(--bg-color); padding: 12px 24px; border-radius: 30px; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0; transition: all 0.4s var(--ease-out); z-index: 100; pointer-events: none; }
+    .toast.show { bottom: 40px; opacity: 1; }
+</style>
+
+<script>
+    // Usamos astro:page-load para que la lógica sobreviva a las ViewTransitions
+    document.addEventListener('astro:page-load', () => {
+        const body = document.body;
+        const door = document.getElementById('door-group');
+        const video = document.getElementById('house-video') as HTMLVideoElement;
+        const closeVideoBtn = document.getElementById('close-video-btn');
+        const toast = document.getElementById('toast');
+        let toastTimeout;
+
+        document.querySelectorAll('.link-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                const sectionName = item.getAttribute('data-link');
+                if(toast) {
+                    toast.textContent = `Navegando a: ${sectionName}`;
+                    toast.classList.add('show');
+                    clearTimeout(toastTimeout);
+                    toastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
+                }
+            });
+        });
+
+        if (door && video) {
+            door.addEventListener('click', () => {
+                body.classList.add('video-mode');
+                video.currentTime = 0;
+                video.play().catch(() => {});
+            });
+        }
+        if (closeVideoBtn) {
+            closeVideoBtn.addEventListener('click', () => {
+                body.classList.remove('video-mode');
+                setTimeout(() => video.pause(), 500);
+            });
+        }
+    });
+</script>
