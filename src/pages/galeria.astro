@@ -197,10 +197,51 @@ import { ClientRouter } from 'astro:transitions';
         }
         .napkin-base::before { content: ""; position: absolute; inset: 6px; border: 2px dotted rgba(17,35,30,0.15); }
 
-        .photo-print {
-            width: 90%; height: 90%; background-size: cover; background-position: center;
-            mix-blend-mode: multiply; filter: grayscale(100%) contrast(1.1);
+        /* HUECO DE FOTO
+           Antes esto era un div vacio dentro del recuadro punteado de la
+           servilleta, asi que sin imagen se leia como un campo de texto.
+           Ahora lleva esquineras de foto y un aviso de que la imagen esta
+           por llegar. La foto real se pinta como background solo cuando el
+           archivo existe (ver el script), asi nunca sale un icono roto. */
+        .photo-slot {
+            position: relative; width: 90%; height: 90%;
+            display: flex; align-items: center; justify-content: center;
+            background-size: cover; background-position: center; background-repeat: no-repeat;
         }
+
+        /* Esquineras tipo album de fotos: cuatro angulos, no un recuadro */
+        .photo-slot::before {
+            content: ""; position: absolute; inset: -7px; pointer-events: none;
+            --c: rgba(17, 35, 30, 0.38); --len: 22px; --w: 3px;
+            background:
+                linear-gradient(var(--c), var(--c)) 0    0    / var(--len) var(--w)   no-repeat,
+                linear-gradient(var(--c), var(--c)) 0    0    / var(--w)   var(--len) no-repeat,
+                linear-gradient(var(--c), var(--c)) 100% 0    / var(--len) var(--w)   no-repeat,
+                linear-gradient(var(--c), var(--c)) 100% 0    / var(--w)   var(--len) no-repeat,
+                linear-gradient(var(--c), var(--c)) 0    100% / var(--len) var(--w)   no-repeat,
+                linear-gradient(var(--c), var(--c)) 0    100% / var(--w)   var(--len) no-repeat,
+                linear-gradient(var(--c), var(--c)) 100% 100% / var(--len) var(--w)   no-repeat,
+                linear-gradient(var(--c), var(--c)) 100% 100% / var(--w)   var(--len) no-repeat;
+        }
+
+        .photo-pending {
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            color: rgba(17, 35, 30, 0.42); text-align: center; padding: 0 10px;
+        }
+        .photo-pending svg {
+            width: 48px; height: auto; fill: none; stroke: currentColor;
+            stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .photo-pending .pending-label {
+            font-size: 0.5rem; font-weight: 700; letter-spacing: 0.2em;
+        }
+        .photo-pending .pending-subject {
+            font-size: 0.45rem; letter-spacing: 0.12em; opacity: 0.75; line-height: 1.5;
+        }
+
+        /* Con la foto puesta, el hueco se comporta como la impresion original */
+        .photo-slot.is-filled { mix-blend-mode: multiply; filter: grayscale(100%) contrast(1.1); }
+        .photo-slot.is-filled .photo-pending { display: none; }
 
         .napkin-flap {
             position: absolute; top: 0; left: 0; right: 0; height: 50%; 
@@ -276,12 +317,12 @@ import { ClientRouter } from 'astro:transitions';
 
                 <!-- Servilletas Mesa 1 -->
                 <div class="napkin-wrapper n1">
-                    <div class="napkin-flap"><div class="flap-front"><div class="napkin-branding text-blue">GRACIAS POR SU VISITA<span>EVENTOS NOCTURNOS</span></div></div><div class="flap-back"></div></div>
-                    <div class="napkin-base"><div class="photo-print" style="background-image: url('/images/foto1.jpg');"></div></div>
+                    <div class="napkin-flap"><div class="flap-front"><div class="napkin-branding text-blue">GRACIAS POR SU VISITA<span>SESIONES DE ESTUDIO</span></div></div><div class="flap-back"></div></div>
+                    <div class="napkin-base"><div class="photo-slot" data-photo="/images/foto1.jpg" role="img" aria-label="Sesión de grabación en el estudio de Casita Manolo"><div class="photo-pending"><svg viewBox="0 0 34 26" aria-hidden="true"><rect x="1.2" y="4" width="31.6" height="21" rx="2.5" /><path d="M10 4 L12.5 1 H21.5 L24 4" /><circle cx="17" cy="14.5" r="6" /><circle cx="17" cy="14.5" r="2.4" /></svg><span class="pending-label">FOTO PENDIENTE</span><span class="pending-subject">SESIÓN DE<br />ESTUDIO</span></div></div></div>
                 </div>
                 <div class="napkin-wrapper n2">
-                    <div class="napkin-flap"><div class="flap-front"><div class="napkin-branding text-red">GRACIAS POR SU VISITA<span>CONCIERTOS</span></div></div><div class="flap-back"></div></div>
-                    <div class="napkin-base"><div class="photo-print" style="background-image: url('/images/foto2.jpg');"></div></div>
+                    <div class="napkin-flap"><div class="flap-front"><div class="napkin-branding text-red">GRACIAS POR SU VISITA<span>CUERDAS Y METALES</span></div></div><div class="flap-back"></div></div>
+                    <div class="napkin-base"><div class="photo-slot" data-photo="/images/foto2.jpg" role="img" aria-label="Grabación de cuerdas y metales para una banda sonora"><div class="photo-pending"><svg viewBox="0 0 34 26" aria-hidden="true"><rect x="1.2" y="4" width="31.6" height="21" rx="2.5" /><path d="M10 4 L12.5 1 H21.5 L24 4" /><circle cx="17" cy="14.5" r="6" /><circle cx="17" cy="14.5" r="2.4" /></svg><span class="pending-label">FOTO PENDIENTE</span><span class="pending-subject">GRABACIÓN<br />DE ORQUESTA</span></div></div></div>
                 </div>
             </section>
 
@@ -312,12 +353,12 @@ import { ClientRouter } from 'astro:transitions';
 
                 <!-- Servilletas Mesa 2 -->
                 <div class="napkin-wrapper n3">
-                    <div class="napkin-flap"><div class="flap-front"><div class="napkin-branding text-blue">GRACIAS POR SU VISITA<span>DISEÑO CORPORATIVO</span></div></div><div class="flap-back"></div></div>
-                    <div class="napkin-base"><div class="photo-print" style="background-image: url('/images/foto3.jpg');"></div></div>
+                    <div class="napkin-flap"><div class="flap-front"><div class="napkin-branding text-blue">GRACIAS POR SU VISITA<span>RODAJES</span></div></div><div class="flap-back"></div></div>
+                    <div class="napkin-base"><div class="photo-slot" data-photo="/images/foto3.jpg" role="img" aria-label="El equipo de música durante un rodaje"><div class="photo-pending"><svg viewBox="0 0 34 26" aria-hidden="true"><rect x="1.2" y="4" width="31.6" height="21" rx="2.5" /><path d="M10 4 L12.5 1 H21.5 L24 4" /><circle cx="17" cy="14.5" r="6" /><circle cx="17" cy="14.5" r="2.4" /></svg><span class="pending-label">FOTO PENDIENTE</span><span class="pending-subject">MÚSICA<br />EN RODAJE</span></div></div></div>
                 </div>
                 <div class="napkin-wrapper n4">
-                    <div class="napkin-flap"><div class="flap-front"><div class="napkin-branding text-red">GRACIAS POR SU VISITA<span>PROYECTOS DE DÍA</span></div></div><div class="flap-back"></div></div>
-                    <div class="napkin-base"><div class="photo-print" style="background-image: url('/images/foto4.jpg');"></div></div>
+                    <div class="napkin-flap"><div class="flap-front"><div class="napkin-branding text-red">GRACIAS POR SU VISITA<span>LA CASA POR DENTRO</span></div></div><div class="flap-back"></div></div>
+                    <div class="napkin-base"><div class="photo-slot" data-photo="/images/foto4.jpg" role="img" aria-label="Interior de la casa: sala de control y cabina"><div class="photo-pending"><svg viewBox="0 0 34 26" aria-hidden="true"><rect x="1.2" y="4" width="31.6" height="21" rx="2.5" /><path d="M10 4 L12.5 1 H21.5 L24 4" /><circle cx="17" cy="14.5" r="6" /><circle cx="17" cy="14.5" r="2.4" /></svg><span class="pending-label">FOTO PENDIENTE</span><span class="pending-subject">LA CASA<br />POR DENTRO</span></div></div></div>
                 </div>
             </section>
 
@@ -370,6 +411,23 @@ import { ClientRouter } from 'astro:transitions';
 
             // Inicialización
             updateCarousel();
+
+            // FOTOS DE LAS SERVILLETAS
+            // Las imagenes aun no estan en /public/images. Las probamos antes
+            // de pintarlas: si el archivo existe se coloca como fondo del
+            // hueco, y si no, se queda el aviso de "foto pendiente" en vez de
+            // un icono de imagen rota.
+            document.querySelectorAll('.photo-slot').forEach((slot) => {
+                const src = slot.dataset.photo;
+                if (!src) return;
+
+                const probe = new Image();
+                probe.addEventListener('load', () => {
+                    slot.style.backgroundImage = `url('${src}')`;
+                    slot.classList.add('is-filled');
+                });
+                probe.src = src;
+            });
         });
     </script>
 </body>

@@ -4,29 +4,38 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Casita Manolo | Home">
-    
+
     <!-- CAPA VÍDEO (Modo Cine) -->
-    <div class="media-layer" id="media-layer">
+    <div class="media-layer" id="media-layer" role="dialog" aria-modal="true" aria-label="Vídeo del local">
         <video id="house-video" muted loop playsinline>
             <source src="/videos/interior.mp4" type="video/mp4" />
         </video>
-        <button class="close-btn" id="close-video-btn">✕ CERRAR</button>
+        <p class="video-fallback" id="video-fallback" hidden>El vídeo del local aún no está disponible.</p>
+        <button class="close-btn" id="close-video-btn">✕ CERRAR <span class="kbd">ESC</span></button>
     </div>
+    <div class="media-backdrop" id="media-backdrop"></div>
 
     <!-- ESCENA PRINCIPAL (La Casa limpia y restaurada) -->
     <div class="stage">
-        <svg class="svg-layer fade-in-up" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
-            
+        <svg class="svg-layer fade-in-up" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" role="navigation" aria-label="Mapa interactivo de la casa">
+
             <!-- CHIMENEA Y HUMO -->
-            <g class="house-parts">
+            <g class="house-parts deco">
                 <rect x="520" y="160" width="30" height="40" class="line-art fill-bg" />
                 <path d="M 535,150 Q 520,120 540,90 T 530,40" class="smoke" />
                 <path d="M 545,130 Q 560,100 550,70 T 560,20" class="smoke smoke-2" />
             </g>
 
-            <!-- 1. VINO (ENLACE AL MENÚ DE SERVICIOS) -->
-            <a href="/servicios" class="item" id="wine-group">
-                <rect x="210" y="220" width="120" height="210" fill="transparent" />
+            <!-- ============================================================
+                 1. VINO  ->  /servicios
+                 ============================================================ -->
+            <a href="/servicios" class="item" id="wine-group"
+               aria-label="La carta: ir a servicios"
+               data-label="La carta" data-desc="Sirve una copa y mira la carta: qué compone la casa">
+                <title>La carta — servicios</title>
+                <rect x="185" y="215" width="160" height="215" fill="transparent" />
+                <rect class="focus-ring" x="185" y="215" width="160" height="215" rx="14" />
+
                 <line x1="285" y1="420" x2="315" y2="420" class="line-art" />
                 <line x1="300" y1="420" x2="300" y2="380" class="line-art" />
                 <path d="M 285,350 L 315,350 L 315,360 Q 315,380 300,380 Q 285,380 285,360 Z" class="line-art fill-bg" />
@@ -36,20 +45,38 @@ import Layout from '../layouts/Layout.astro';
                     <path d="M 230,420 L 230,320 Q 230,300 240,280 L 240,240 L 250,240 L 250,280 Q 260,300 260,320 L 260,420 Z" class="line-art fill-bg" />
                     <rect x="230" y="340" width="30" height="40" stroke="none" fill="rgba(17, 35, 30, 0.1)" class="bottle-label" />
                 </g>
+
+                <g transform="translate(278, 252)"><g class="pulse" style="--delay: 0s">
+                    <circle class="pulse-ring" r="7" /><circle class="pulse-dot" r="4.5" />
+                </g></g>
+
+                <path class="leader" d="M 255,456 L 255,432" />
+                <g transform="translate(255, 470)"><g class="hint">
+                    <rect class="hint-bg" x="-52" y="-14" width="104" height="28" rx="14" />
+                    <text class="hint-text" x="0" y="4">LA CARTA</text>
+                    <text class="hint-sub" x="0" y="26">servicios</text>
+                </g></g>
             </a>
 
-            <!-- 2. MESA -->
-            <g class="house-parts">
+            <!-- 2. MESA (decorativa) -->
+            <g class="house-parts deco">
                 <ellipse cx="680" cy="350" rx="60" ry="12" class="line-art fill-bg" />
                 <line x1="640" y1="360" x2="630" y2="420" class="line-art" />
                 <line x1="720" y1="360" x2="730" y2="420" class="line-art" />
                 <line x1="680" y1="362" x2="680" y2="420" class="line-art" />
             </g>
 
-            <!-- 3. VINILOS (ENLACE A PORTFOLIO) -->
-            <a href="/portfolio" class="item" id="vinyl-group">
+            <!-- ============================================================
+                 3. VINILOS  ->  /portfolio
+                 ============================================================ -->
+            <a href="/portfolio" class="item" id="vinyl-group"
+               aria-label="Archivo musical: ir al portfolio"
+               data-label="Archivo musical" data-desc="Pon un vinilo: el archivo de proyectos">
+                <title>Archivo musical — portfolio</title>
+                <rect x="620" y="280" width="120" height="80" fill="transparent" />
+                <rect class="focus-ring" x="620" y="280" width="120" height="80" rx="14" />
+
                 <g transform="translate(680, 335)">
-                    <rect x="-40" y="-45" width="80" height="60" fill="transparent" />
                     <g class="vinyls">
                         <g transform="translate(-15, -20) rotate(-15)">
                             <circle cx="0" cy="0" r="18" class="line-art" fill="var(--ink-color)" />
@@ -63,11 +90,29 @@ import Layout from '../layouts/Layout.astro';
                         </g>
                     </g>
                 </g>
+
+                <g transform="translate(722, 300)"><g class="pulse" style="--delay: -1.2s">
+                    <circle class="pulse-ring" r="7" /><circle class="pulse-dot" r="4.5" />
+                </g></g>
+
+                <path class="leader" d="M 680,272 L 680,292" />
+                <g transform="translate(680, 258)"><g class="hint hint-above">
+                    <rect class="hint-bg" x="-78" y="-14" width="156" height="28" rx="14" />
+                    <text class="hint-text" x="0" y="4">ARCHIVO MUSICAL</text>
+                    <text class="hint-sub" x="0" y="-22">portfolio</text>
+                </g></g>
             </a>
 
-            <!-- 4. TABURETE (ENLACE A CONTACTO) -->
-            <a href="/contacto" class="item" id="stool-group">
-                <rect x="740" y="360" width="80" height="70" fill="transparent" />
+            <!-- ============================================================
+                 4. TABURETE  ->  /contacto
+                 ============================================================ -->
+            <a href="/contacto" class="item" id="stool-group"
+               aria-label="El ticket: ir a contacto"
+               data-label="El ticket" data-desc="Siéntate en la barra y escríbenos">
+                <title>El ticket — contacto</title>
+                <rect x="735" y="355" width="90" height="75" fill="transparent" />
+                <rect class="focus-ring" x="735" y="355" width="90" height="75" rx="14" />
+
                 <g class="jump-anim">
                     <ellipse cx="780" cy="380" rx="25" ry="6" class="line-art fill-bg" />
                     <line x1="765" y1="385" x2="760" y2="420" class="line-art" />
@@ -75,227 +120,428 @@ import Layout from '../layouts/Layout.astro';
                     <line x1="780" y1="386" x2="780" y2="420" class="line-art" />
                     <line x1="762" y1="405" x2="798" y2="405" class="line-art" />
                 </g>
+
+                <g transform="translate(816, 362)"><g class="pulse" style="--delay: -1.8s">
+                    <circle class="pulse-ring" r="7" /><circle class="pulse-dot" r="4.5" />
+                </g></g>
+
+                <path class="leader" d="M 800,456 L 800,432" />
+                <g transform="translate(800, 470)"><g class="hint">
+                    <rect class="hint-bg" x="-56" y="-14" width="112" height="28" rx="14" />
+                    <text class="hint-text" x="0" y="4">EL TICKET</text>
+                    <text class="hint-sub" x="0" y="26">contacto</text>
+                </g></g>
             </a>
 
             <!-- 5. ESTRUCTURA (Pared de la casa) -->
-            <rect x="340" y="240" width="220" height="180" class="line-art fill-bg house-parts" />
+            <rect x="340" y="240" width="220" height="180" class="line-art fill-bg house-parts deco" />
 
-            <!-- 6. VENTANA (Luz amarilla restaurada) -->
-            <a href="/galeria" class="item house-parts" id="window-group">
-                <rect x="450" y="280" width="90" height="90" fill="transparent" />
+            <!-- ============================================================
+                 6. VENTANA  ->  /galeria
+                 ============================================================ -->
+            <a href="/galeria" class="item house-parts" id="window-group"
+               aria-label="Galería: ir a la galería de mesas"
+               data-label="Galería" data-desc="Asómate a la galería de mesas y montajes">
+                <title>Galería — mesas y montajes</title>
+                <rect x="458" y="288" width="74" height="74" fill="transparent" />
+                <rect class="focus-ring" x="458" y="288" width="74" height="74" rx="12" />
+
                 <g class="window-anim">
-                    <rect x="470" y="300" width="50" height="50" class="line-art" fill="#FDE68A" />
+                    <rect x="470" y="300" width="50" height="50" class="line-art window-glass" fill="#FDE68A" />
                     <line x1="495" y1="300" x2="495" y2="350" class="line-art" />
                     <line x1="470" y1="325" x2="520" y2="325" class="line-art" />
                 </g>
+
+                <g transform="translate(530, 292)"><g class="pulse" style="--delay: -0.6s">
+                    <circle class="pulse-ring" r="7" /><circle class="pulse-dot" r="4.5" />
+                </g></g>
+
+                <path class="leader" d="M 600,456 L 600,325 L 528,325" />
+                <g transform="translate(600, 470)"><g class="hint">
+                    <rect class="hint-bg" x="-52" y="-14" width="104" height="28" rx="14" />
+                    <text class="hint-text" x="0" y="4">GALERÍA</text>
+                    <text class="hint-sub" x="0" y="26">mesas y montajes</text>
+                </g></g>
             </a>
 
-            <!-- 7. PUERTA (EL CINE) -->
-            <g class="item house-parts" id="door-group">
-                <rect x="360" y="320" width="90" height="110" fill="transparent" />
+            <!-- ============================================================
+                 7. PUERTA  ->  vídeo (modo cine), no navega
+                 ============================================================ -->
+            <g class="item house-parts" id="door-group" role="button" tabindex="0"
+               aria-label="Modo cine: abrir el vídeo del local"
+               data-label="Modo cine" data-desc="Entra por la puerta: se abre el vídeo del local">
+                <title>Modo cine — vídeo del local</title>
+                <rect x="368" y="322" width="74" height="105" fill="transparent" />
+                <rect class="focus-ring" x="368" y="322" width="74" height="105" rx="12" />
+
                 <g class="door-anim">
                     <path d="M 380,420 L 380,340 A 25 25 0 0 1 430,340 L 430,420 Z" class="line-art fill-bg door-panel" />
                     <circle cx="415" cy="380" r="3" class="door-knob" fill="var(--ink-color)" />
                 </g>
+
+                <g transform="translate(444, 332)"><g class="pulse" style="--delay: -0.3s">
+                    <circle class="pulse-ring" r="7" /><circle class="pulse-dot" r="4.5" />
+                </g></g>
+
+                <path class="leader" d="M 400,456 L 400,432" />
+                <g transform="translate(400, 470)"><g class="hint">
+                    <rect class="hint-bg" x="-58" y="-14" width="116" height="28" rx="14" />
+                    <text class="hint-text" x="0" y="4">MODO CINE</text>
+                    <text class="hint-sub" x="0" y="26">vídeo del local</text>
+                </g></g>
             </g>
 
-            <!-- 8. TEJADO INTERACTIVO (ENLACE A /clientes) -->
-            <a href="/clientes" class="item house-parts" id="roof-clients-link">
-                
-                <style>
-                    #roof-clients-link { cursor: pointer; outline: none; }
-                    
-                    /* El tejado rojo que se levanta */
-                    .interactive-roof {
-                        transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.2);
-                        transform-origin: 450px 240px; 
-                    }
-                    
-                    /* El texto del logo en el ático */
-                    .attic-text {
-                        font-family: 'Space Mono', monospace; font-size: 16px; font-weight: bold;
-                        fill: var(--bg-color); text-anchor: middle; opacity: 0;
-                        transition: opacity 0.4s ease 0.1s, transform 0.4s ease;
-                        transform: translateY(10px);
-                        pointer-events: none; /* Para no estorbar el hover */
-                    }
+            <!-- ============================================================
+                 8. TEJADO  ->  /clientes
+                 ============================================================ -->
+            <a href="/clientes" class="item house-parts" id="roof-clients-link"
+               aria-label="Clientes y marcas: ver quién ha pasado por la casa"
+               data-label="Clientes y marcas" data-desc="Levanta el tejado: las marcas que han pasado por la casa">
+                <title>Clientes y marcas</title>
+                <rect x="300" y="130" width="300" height="115" fill="transparent" />
+                <rect class="focus-ring" x="300" y="130" width="300" height="115" rx="14" />
 
-                    /* Al pasar el ratón: Levantamos el tejado de forma exagerada y mostramos el logo */
-                    #roof-clients-link:hover .interactive-roof {
-                        transform: translateY(-80px) rotate(-6deg) scale(1.05);
-                    }
-                    #roof-clients-link:hover .attic-text {
-                        opacity: 1; transform: translateY(0);
-                    }
-                </style>
-
-                <!-- Hitbox (Caja invisible para capturar el ratón fácilmente) -->
-                <rect x="250" y="80" width="400" height="180" fill="transparent" />
-
-                <!-- 1. EL ÁTICO (Fondo oscuro, usando tus coordenadas exactas) -->
+                <!-- El ático (fondo oscuro) -->
                 <polygon points="325,233 450,140 575,233" class="line-art" fill="var(--ink-color)" />
 
-                <!-- 2. EL LOGO ALEATORIO (Oculto bajo el tejado) -->
+                <!-- Logo aleatorio oculto bajo el tejado -->
                 <text id="random-client-logo" x="450" y="215" class="attic-text">CLIENTE</text>
 
-                <!-- 3. EL TEJADO REAL (El que tapa todo y está animado) -->
+                <!-- El tejado real (el que se levanta) -->
                 <g class="interactive-roof">
                     <polygon points="325,233 450,140 575,233" class="line-art" fill="var(--accent-color)" />
                 </g>
+
+                <g transform="translate(588, 226)"><g class="pulse" style="--delay: -2.1s">
+                    <circle class="pulse-ring" r="7" /><circle class="pulse-dot" r="4.5" />
+                </g></g>
+
+                <path class="leader" d="M 410,109 L 410,165" />
+                <g transform="translate(410, 95)"><g class="hint hint-above">
+                    <rect class="hint-bg" x="-88" y="-14" width="176" height="28" rx="14" />
+                    <text class="hint-text" x="0" y="4">CLIENTES Y MARCAS</text>
+                    <text class="hint-sub" x="0" y="-22">quién ha pasado por aquí</text>
+                </g></g>
             </a>
 
             <!-- LÍNEA DE SUELO -->
-            <line x1="150" y1="420" x2="850" y2="420" stroke="var(--ink-color)" stroke-width="2" stroke-dasharray="8 12" opacity="0.2" stroke-linecap="round" />
+            <line x1="150" y1="420" x2="850" y2="420" stroke="var(--ink-color)" stroke-width="2" stroke-dasharray="8 12" opacity="0.2" stroke-linecap="round" class="deco" />
         </svg>
     </div>
 
-    <!-- BRANDING -->
+    <!-- BRANDING + BARRA DE ESTADO -->
     <div class="branding fade-in-up" style="animation-delay: 0.3s;">
         <h1>Casita Manolo</h1>
-        <p>Music House Madrid</p>
+        <p class="tagline">Music House Madrid</p>
+        <p class="status" id="nav-status" aria-live="polite"
+           data-idle-pointer="6 zonas interactivas — pasa el ratón o navega con Tab"
+           data-idle-touch="6 zonas interactivas — toca la que quieras">
+            6 zonas interactivas — pasa el ratón o navega con Tab
+        </p>
     </div>
 
     <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="toast">Abriendo...</div>
+    <div id="toast" class="toast" role="status" aria-live="polite">Abriendo...</div>
 
 </Layout>
 
 <style>
     /* ========================================================
-       1. ESTILOS BASE Y MODO CINE
+       1. MODO CINE
        ======================================================== */
     body.video-mode { background-color: #0b1714; }
-    
-    .media-layer { position: absolute; top: 50%; left: 50%; width: 640px; height: 360px; border-radius: 16px; overflow: hidden; background-color: var(--ink-color); opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(0.7); transition: opacity 0.6s var(--ease-out), transform 0.8s var(--ease-spring); box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5); z-index: 50; }
+
+    .media-backdrop { position: fixed; inset: 0; background: rgba(11, 23, 20, 0.75); opacity: 0; pointer-events: none; transition: opacity 0.5s var(--ease-out); z-index: 40; }
+    body.video-mode .media-backdrop { opacity: 1; pointer-events: auto; }
+
+    .media-layer { position: absolute; top: 50%; left: 50%; width: min(640px, 92vw); height: min(360px, 52vw); border-radius: 16px; overflow: hidden; background-color: var(--ink-color); opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(0.7); transition: opacity 0.6s var(--ease-out), transform 0.8s var(--ease-spring); box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5); z-index: 50; }
     .media-layer video { width: 100%; height: 100%; object-fit: cover; }
-    
-    .close-btn { position: absolute; top: 20px; right: 20px; background: rgba(17, 35, 30, 0.6); border: 1px solid rgba(244, 241, 236, 0.3); color: var(--bg-color); font-family: 'Space Mono', monospace; padding: 10px 20px; border-radius: 30px; font-size: 0.8rem; cursor: pointer; backdrop-filter: blur(4px); opacity: 0; transition: all 0.3s ease; pointer-events: none; }
-    .close-btn:hover { background: var(--bg-color); color: var(--ink-color); }
-    
+
+    .video-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; margin: 0; padding: 0 2rem; text-align: center; color: var(--bg-color); font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.7; }
+    .video-fallback[hidden] { display: none; }
+
+    .close-btn { position: absolute; top: 20px; right: 20px; display: inline-flex; align-items: center; gap: 8px; background: rgba(17, 35, 30, 0.6); border: 1px solid rgba(244, 241, 236, 0.3); color: var(--bg-color); font-family: 'Space Mono', monospace; padding: 10px 18px; border-radius: 30px; font-size: 0.8rem; cursor: pointer; backdrop-filter: blur(4px); opacity: 0; transition: background 0.3s ease, color 0.3s ease, opacity 0.3s ease, transform 0.2s var(--ease-spring); pointer-events: none; z-index: 2; }
+    .close-btn:hover { background: var(--bg-color); color: var(--ink-color); transform: scale(1.04); }
+    .close-btn:active { transform: scale(0.96); }
+    .close-btn .kbd { font-size: 0.6rem; border: 1px solid currentColor; border-radius: 4px; padding: 1px 5px; opacity: 0.7; }
+
     body.video-mode .media-layer { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
     body.video-mode .close-btn { opacity: 1; transition-delay: 0.5s; pointer-events: auto; }
-    body.video-mode .house-parts, body.video-mode .item, body.video-mode .branding { opacity: 0; pointer-events: none; }
+    body.video-mode .house-parts,
+    body.video-mode .item,
+    body.video-mode .deco,
+    body.video-mode .branding { opacity: 0 !important; pointer-events: none; }
 
     .stage { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 900px; height: 600px; display: flex; align-items: center; justify-content: center; }
     .svg-layer { position: relative; width: 100%; height: 100%; z-index: 10; }
-    
+
     /* ========================================================
-       2. LÍNEAS LIMPIAS Y COLORES
+       2. LINEAS Y COLORES
        ======================================================== */
-    .line-art { 
-        stroke: var(--ink-color); 
-        stroke-width: 4px; 
-        stroke-linecap: round; 
-        stroke-linejoin: round; 
-    }
-    
+    .line-art { stroke: var(--ink-color); stroke-width: 4px; stroke-linecap: round; stroke-linejoin: round; }
     .fill-bg { fill: var(--bg-color); }
 
     /* ========================================================
-       3. INTERACTIVIDAD Y ANIMACIONES
+       3. LENGUAJE COMUN DE "ESTO SE PUEDE PULSAR"
        ======================================================== */
-    .house-parts { transition: opacity 0.6s var(--ease-out); }
-    .item { cursor: pointer; }
-    
+    .item { cursor: pointer; transition: opacity 0.3s var(--ease-out); outline: none; -webkit-tap-highlight-color: transparent; }
+    .deco, .house-parts { transition: opacity 0.35s var(--ease-out); }
+
+    /* --- Punto pulsante: marca cada zona como interactiva de un vistazo --- */
+    .pulse { transition: opacity 0.3s var(--ease-out); }
+    .pulse-dot { fill: var(--accent-color); stroke: var(--bg-color); stroke-width: 2px; }
+    .pulse-ring { fill: none; stroke: var(--accent-color); stroke-width: 2px; transform-box: fill-box; transform-origin: center; animation: pulseRing 2.8s var(--ease-out) infinite; animation-delay: var(--delay, 0s); }
+    @keyframes pulseRing {
+        0%   { transform: scale(0.7); opacity: 0.75; }
+        70%  { transform: scale(2.4); opacity: 0; }
+        100% { transform: scale(2.4); opacity: 0; }
+    }
+    /* Al interactuar, el punto sobra: la etiqueta ya lo dice todo */
+    .item:hover .pulse,
+    .item:focus-visible .pulse { opacity: 0; }
+
+    /* --- Etiqueta: nombre del destino, siempre legible --- */
+    .leader { fill: none; stroke: var(--ink-color); stroke-width: 1.5px; stroke-dasharray: 3 5; opacity: 0.22; transition: stroke 0.3s var(--ease-out), opacity 0.3s var(--ease-out); }
+    .hint { transition: transform 0.35s var(--ease-spring); }
+    .hint-bg { fill: var(--bg-color); stroke: var(--ink-color); stroke-width: 1.5px; opacity: 0.35; transition: fill 0.3s var(--ease-out), stroke 0.3s var(--ease-out), opacity 0.3s var(--ease-out); }
+    .hint-text { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-anchor: middle; fill: var(--ink-color); opacity: 0.6; transition: fill 0.3s var(--ease-out), opacity 0.3s var(--ease-out); pointer-events: none; }
+    .hint-sub { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; text-anchor: middle; fill: var(--ink-color); opacity: 0.35; transition: fill 0.3s var(--ease-out), opacity 0.3s var(--ease-out); pointer-events: none; }
+
+    .item:hover .hint,
+    .item:focus-visible .hint { transform: translateY(-3px); }
+    .item:hover .hint-above,
+    .item:focus-visible .hint-above { transform: translateY(3px); }
+    .item:hover .hint-bg,
+    .item:focus-visible .hint-bg { fill: var(--accent-color); stroke: var(--accent-color); opacity: 1; }
+    .item:hover .hint-text,
+    .item:focus-visible .hint-text { fill: var(--bg-color); opacity: 1; }
+    .item:hover .hint-sub,
+    .item:focus-visible .hint-sub { fill: var(--accent-color); opacity: 1; }
+    .item:hover .leader,
+    .item:focus-visible .leader { stroke: var(--accent-color); opacity: 0.9; }
+
+    .item:active .hint-bg { opacity: 0.85; }
+
+    /* --- Anillo de foco para teclado --- */
+    .focus-ring { fill: none; stroke: var(--accent-color); stroke-width: 2px; stroke-dasharray: 7 6; opacity: 0; transition: opacity 0.2s var(--ease-out); pointer-events: none; }
+    .item:focus-visible .focus-ring { opacity: 0.9; }
+
+    /* --- Al senalar una zona, el resto se aparta --- */
+    body:not(.video-mode) .svg-layer:has(.item:hover) .deco,
+    body:not(.video-mode) .svg-layer:has(.item:focus-visible) .deco { opacity: 0.45; }
+    body:not(.video-mode) .svg-layer:has(.item:hover) .item:not(:hover),
+    body:not(.video-mode) .svg-layer:has(.item:focus-visible) .item:not(:focus-visible):not(:hover) { opacity: 0.35; }
+
+    /* ========================================================
+       4. ANIMACIONES POR ZONA
+       ======================================================== */
     .jump-anim { transition: transform 0.4s var(--ease-spring); }
-    .item:hover .jump-anim { transform: translateY(-10px) scale(1.05); }
+    #stool-group:hover .jump-anim,
+    #stool-group:focus-visible .jump-anim { transform: translateY(-10px) scale(1.05); }
 
     .bottle { transform-origin: 245px 330px; transition: transform 0.6s var(--ease-spring); }
     .wine-stream { stroke: var(--accent-color); stroke-width: 3.5px; stroke-linecap: round; fill: none; stroke-dasharray: 90; stroke-dashoffset: 90; opacity: 0; transition: opacity 0.2s, stroke-dashoffset 0.1s; }
     .wine-liquid { transform-origin: 300px 380px; transition: transform 0.4s ease-out; }
-    #wine-group:hover .bottle { transform: translate(-35px, -30px) rotate(90deg); }
-    #wine-group:hover .wine-stream { opacity: 1; stroke-dashoffset: 0; transition: opacity 0.2s 0.3s, stroke-dashoffset 0.4s cubic-bezier(0.4, 0, 1, 1) 0.3s; }
-    #wine-group:hover .wine-liquid { transform: scaleY(1.4) scaleX(1.15); transition: transform 0.6s var(--ease-out) 0.5s; }
+    #wine-group:hover .bottle,
+    #wine-group:focus-visible .bottle { transform: translate(-35px, -30px) rotate(90deg); }
+    #wine-group:hover .wine-stream,
+    #wine-group:focus-visible .wine-stream { opacity: 1; stroke-dashoffset: 0; transition: opacity 0.2s 0.3s, stroke-dashoffset 0.4s cubic-bezier(0.4, 0, 1, 1) 0.3s; }
+    #wine-group:hover .wine-liquid,
+    #wine-group:focus-visible .wine-liquid { transform: scaleY(1.4) scaleX(1.15); transition: transform 0.6s var(--ease-out) 0.5s; }
 
     .vinyls { transition: transform 0.4s var(--ease-spring); }
-    #vinyl-group:hover .vinyls { transform: translateY(-8px) scale(1.08) rotate(-4deg); }
+    #vinyl-group:hover .vinyls,
+    #vinyl-group:focus-visible .vinyls { transform: translateY(-8px) scale(1.08) rotate(-4deg); }
 
-    #stool-group { transform-origin: 780px 420px; }
-    
     .door-anim { transform-origin: 380px 420px; transition: transform 0.4s var(--ease-spring); }
-    #door-group:hover .door-anim { transform: scaleX(0.85) skewY(3deg); }
-    #door-group:hover .door-panel { fill: #E8E2D5; transition: fill 0.3s ease; } 
-    
+    .door-panel { transition: fill 0.3s ease; }
+    #door-group:hover .door-anim,
+    #door-group:focus-visible .door-anim { transform: scaleX(0.85) skewY(3deg); }
+    #door-group:hover .door-panel,
+    #door-group:focus-visible .door-panel { fill: #E8E2D5; }
+
     .window-anim { transform-origin: 495px 325px; transition: transform 0.4s var(--ease-spring); }
-    #window-group:hover .window-anim { transform: scale(1.1); }
-    #window-group:hover .line-art[fill="#FDE68A"] { fill: #fff3b0; transition: fill 0.3s ease; } 
-    
-    .smoke { stroke: var(--ink-color); stroke-width: 4px; stroke-linecap: round; fill: none; opacity: 0; animation: float 4s ease-in-out infinite alternate; transform-origin: center bottom; }
+    .window-glass { transition: fill 0.3s ease; }
+    #window-group:hover .window-anim,
+    #window-group:focus-visible .window-anim { transform: scale(1.1); }
+    #window-group:hover .window-glass,
+    #window-group:focus-visible .window-glass { fill: #fff3b0; }
+
+    /* Tejado que se levanta y revela el atico */
+    #roof-clients-link { cursor: pointer; }
+    .interactive-roof { transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.2); transform-origin: 450px 240px; }
+    .attic-text { font-family: 'Space Mono', monospace; font-size: 16px; font-weight: bold; fill: var(--bg-color); text-anchor: middle; opacity: 0; transition: opacity 0.4s ease 0.1s, transform 0.4s ease; transform: translateY(10px); pointer-events: none; }
+    #roof-clients-link:hover .interactive-roof,
+    #roof-clients-link:focus-visible .interactive-roof { transform: translateY(-80px) rotate(-6deg) scale(1.05); }
+    #roof-clients-link:hover .attic-text,
+    #roof-clients-link:focus-visible .attic-text { opacity: 1; transform: translateY(0); }
+    /* La etiqueta sube con el tejado para no quedar tapada */
+    #roof-clients-link:hover .hint,
+    #roof-clients-link:focus-visible .hint { transform: translateY(-62px); }
+    #roof-clients-link:hover .leader,
+    #roof-clients-link:focus-visible .leader { opacity: 0; }
+
+    .smoke { stroke: var(--ink-color); stroke-width: 4px; stroke-linecap: round; fill: none; opacity: 0; animation: float 4s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center bottom; }
     .smoke-2 { animation-delay: -1.5s; }
-    @keyframes float { 0% { transform: translateY(0) skewX(0deg); opacity: 0.8;} 100% { transform: translateY(-15px) skewX(5deg); opacity: 0.2; } }
+    @keyframes float { 0% { transform: translateY(0) skewX(0deg); opacity: 0.8; } 100% { transform: translateY(-15px) skewX(5deg); opacity: 0.2; } }
 
     /* ========================================================
-       4. ANIMACIÓN DE ENTRADA (SUTIL Y ELEGANTE)
+       5. ENTRADA
        ======================================================== */
-    .fade-in-up {
-        opacity: 0;
-        transform: translateY(20px);
-        animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    @keyframes fadeInUp {
-        to { opacity: 1; transform: translateY(0); }
-    }
+    .fade-in-up { opacity: 0; transform: translateY(20px); animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 
     /* ========================================================
-       5. BRANDING Y TOAST
+       6. BRANDING, ESTADO Y TOAST
        ======================================================== */
-    .branding { position: absolute; bottom: 40px; text-align: center; z-index: 10; width: 100%; pointer-events: none; }
-    .branding h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; line-height: 1.2; margin-bottom: 0.5rem; }
-    .branding p { font-size: 0.8rem; letter-spacing: 0.4em; text-transform: uppercase; opacity: 0.6; }
+    .branding { position: absolute; bottom: 32px; text-align: center; z-index: 10; width: 100%; pointer-events: none; transition: opacity 0.4s var(--ease-out); }
+    .branding h1 { font-size: clamp(1.6rem, 4.5vw, 3.2rem); font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; line-height: 1.2; margin-bottom: 0.4rem; }
+    .tagline { font-size: 0.75rem; letter-spacing: 0.4em; text-transform: uppercase; opacity: 0.55; margin: 0 0 0.9rem; }
+
+    .status { display: inline-block; margin: 0; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; padding: 7px 16px; border-radius: 30px; border: 1px solid rgba(17, 35, 30, 0.15); opacity: 0.6; transition: opacity 0.3s var(--ease-out), color 0.3s var(--ease-out), border-color 0.3s var(--ease-out), background 0.3s var(--ease-out); }
+    .status.active { opacity: 1; color: var(--bg-color); background: var(--ink-color); border-color: var(--ink-color); }
 
     .toast { position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%); background: var(--ink-color); color: var(--bg-color); padding: 12px 24px; border-radius: 30px; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0; transition: all 0.4s var(--ease-out); z-index: 100; pointer-events: none; }
     .toast.show { bottom: 40px; opacity: 1; }
+
+    /* ========================================================
+       7. TACTIL: sin hover, todo tiene que verse ya
+       ======================================================== */
+    @media (hover: none) {
+        .hint-bg { opacity: 0.6; }
+        .hint-text { opacity: 0.85; }
+        .hint-sub { opacity: 0.6; }
+        .leader { opacity: 0.35; }
+        .item:active .hint-bg { fill: var(--accent-color); stroke: var(--accent-color); opacity: 1; }
+        .item:active .hint-text { fill: var(--bg-color); opacity: 1; }
+    }
+
+    /* ========================================================
+       8. MOVIMIENTO REDUCIDO
+       ======================================================== */
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.15s !important;
+        }
+        .pulse-ring { display: none; }
+        .fade-in-up { opacity: 1; transform: none; }
+        .hint-bg { opacity: 0.6; }
+        .hint-text { opacity: 0.9; }
+        .hint-sub { opacity: 0.6; }
+    }
 </style>
 
 <script>
     document.addEventListener('astro:page-load', () => {
         const body = document.body;
-        const door = document.getElementById('door-group');
-        const video = document.getElementById('house-video') as HTMLVideoElement;
+        const video = document.getElementById('house-video') as HTMLVideoElement | null;
+        const videoFallback = document.getElementById('video-fallback');
         const closeVideoBtn = document.getElementById('close-video-btn');
+        const backdrop = document.getElementById('media-backdrop');
         const toast = document.getElementById('toast');
-        let toastTimeout;
+        const status = document.getElementById('nav-status');
+        // El mensaje en reposo cambia segun el dispositivo: el raton y el Tab
+        // no existen en tactil.
+        const isTouch = window.matchMedia('(hover: none)').matches;
+        const idleStatus =
+            (isTouch ? status?.dataset.idleTouch : status?.dataset.idlePointer) ?? '';
+        let toastTimeout: ReturnType<typeof setTimeout>;
 
-        // RULETA RUSA DE MARCAS (Se actualiza cada vez que pasas el ratón)
-        const marcas = ["NETFLIX", "A24 FILMS", "HBO MAX", "VOGUE", "McCANN", "SONY PIC", "AMAZON", "NIKE", "SPOTIFY"];
-        const roofLink = document.getElementById('roof-clients-link');
-        const logoElement = document.getElementById('random-client-logo');
-        
-        if (roofLink && logoElement) {
-            // Ponemos uno inicial
-            logoElement.textContent = marcas[Math.floor(Math.random() * marcas.length)];
-            
-            // Cada vez que el ratón toca el tejado, cambia el texto
-            roofLink.addEventListener('mouseenter', () => {
-                logoElement.textContent = marcas[Math.floor(Math.random() * marcas.length)];
-            });
-        }
+        /* --------------------------------------------------
+           Barra de estado: dice a donde lleva lo que senalas
+           -------------------------------------------------- */
+        const setStatus = (text?: string) => {
+            if (!status) return;
+            status.textContent = text ?? idleStatus;
+            status.classList.toggle('active', Boolean(text));
+        };
 
-        document.querySelectorAll('.link-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.stopPropagation(); 
-                const sectionName = item.getAttribute('data-link');
-                if(toast) {
-                    toast.textContent = `Navegando a: ${sectionName}`;
-                    toast.classList.add('show');
-                    clearTimeout(toastTimeout);
-                    toastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
-                }
+        setStatus(); // en tactil el texto por defecto del HTML no aplica
+
+        document.querySelectorAll<SVGElement>('.item').forEach((item) => {
+            const label = item.dataset.label ?? '';
+            const desc = item.dataset.desc ?? '';
+            const announce = () => setStatus(desc || label);
+            const clear = () => setStatus();
+
+            item.addEventListener('mouseenter', announce);
+            item.addEventListener('focus', announce);
+            item.addEventListener('mouseleave', clear);
+            item.addEventListener('blur', clear);
+
+            item.addEventListener('click', () => {
+                if (item.id === 'door-group') return; // la puerta no navega
+                if (!toast) return;
+                toast.textContent = `Abriendo: ${label}`;
+                toast.classList.add('show');
+                clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
             });
         });
 
-        if (door && video) {
-            door.addEventListener('click', () => {
-                body.classList.add('video-mode');
-                video.currentTime = 0;
-                video.play().catch(() => {});
+        /* --------------------------------------------------
+           Ruleta de marcas bajo el tejado
+           -------------------------------------------------- */
+        const marcas = ['NETFLIX', 'A24 FILMS', 'HBO MAX', 'VOGUE', 'McCANN', 'SONY PIC', 'AMAZON', 'NIKE', 'SPOTIFY'];
+        const roofLink = document.getElementById('roof-clients-link');
+        const logoElement = document.getElementById('random-client-logo');
+
+        if (roofLink && logoElement) {
+            const shuffle = () => {
+                logoElement.textContent = marcas[Math.floor(Math.random() * marcas.length)];
+            };
+            shuffle();
+            roofLink.addEventListener('mouseenter', shuffle);
+            roofLink.addEventListener('focus', shuffle);
+        }
+
+        /* --------------------------------------------------
+           Modo cine (puerta): raton, teclado y cierre con ESC
+           -------------------------------------------------- */
+        const door = document.getElementById('door-group');
+
+        const openVideo = () => {
+            body.classList.add('video-mode');
+            closeVideoBtn?.focus();
+            if (!video) return;
+            if (videoIsBroken()) showFallback();
+            video.currentTime = 0;
+            video.play().catch(() => {});
+        };
+
+        const closeVideo = () => {
+            if (!body.classList.contains('video-mode')) return;
+            body.classList.remove('video-mode');
+            (door as HTMLElement | null)?.focus();
+            setTimeout(() => video?.pause(), 500);
+        };
+
+        if (door) {
+            door.addEventListener('click', openVideo);
+            door.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openVideo();
+                }
             });
         }
-        if (closeVideoBtn) {
-            closeVideoBtn.addEventListener('click', () => {
-                body.classList.remove('video-mode');
-                setTimeout(() => video.pause(), 500);
-            });
-        }
+
+        closeVideoBtn?.addEventListener('click', closeVideo);
+        backdrop?.addEventListener('click', closeVideo);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeVideo();
+        });
+
+        // Si el video no existe todavia, decirlo en vez de mostrar un hueco negro.
+        // El fallo de <source> ocurre al cargar la pagina, antes de este script,
+        // asi que ademas del evento comprobamos el estado actual del elemento.
+        const showFallback = () => videoFallback?.removeAttribute('hidden');
+        const videoIsBroken = () =>
+            !!video && (!!video.error || video.networkState === video.NETWORK_NO_SOURCE);
+
+        video?.addEventListener('error', showFallback, true);
+        if (videoIsBroken()) showFallback();
     });
 </script>
