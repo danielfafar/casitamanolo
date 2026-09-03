@@ -1,10 +1,11 @@
 ---
+// src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Casita Manolo | Home">
     
-    <!-- CAPA VÍDEO -->
+    <!-- CAPA VÍDEO (Modo Cine) -->
     <div class="media-layer" id="media-layer">
         <video id="house-video" muted loop playsinline>
             <source src="/videos/interior.mp4" type="video/mp4" />
@@ -12,32 +13,30 @@ import Layout from '../layouts/Layout.astro';
         <button class="close-btn" id="close-video-btn">✕ CERRAR</button>
     </div>
 
-    <!-- ESCENA PRINCIPAL (La Casa) -->
+    <!-- ESCENA PRINCIPAL (La Casa limpia y restaurada) -->
     <div class="stage">
-        <svg class="svg-layer" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
+        <svg class="svg-layer fade-in-up" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
             
-            <polygon points="325,233 450,140 575,233" fill="#0b1714" class="house-parts" opacity="0.8" />
-
-            <!-- Chimenea -->
-            <g class="line-art house-parts">
-                <rect x="520" y="160" width="30" height="40" class="fill-bg" />
+            <!-- CHIMENEA Y HUMO -->
+            <g class="house-parts">
+                <rect x="520" y="160" width="30" height="40" class="line-art fill-bg" />
                 <path d="M 535,150 Q 520,120 540,90 T 530,40" class="smoke" />
                 <path d="M 545,130 Q 560,100 550,70 T 560,20" class="smoke smoke-2" />
             </g>
 
-            <!-- 1. VINO -->
-            <g class="item link-item" id="wine-group" data-link="Carta de Vinos">
+            <!-- 1. VINO (ENLACE AL MENÚ DE SERVICIOS) -->
+            <a href="/servicios" class="item" id="wine-group">
                 <rect x="210" y="220" width="120" height="210" fill="transparent" />
                 <line x1="285" y1="420" x2="315" y2="420" class="line-art" />
                 <line x1="300" y1="420" x2="300" y2="380" class="line-art" />
                 <path d="M 285,350 L 315,350 L 315,360 Q 315,380 300,380 Q 285,380 285,360 Z" class="line-art fill-bg" />
-                <path class="wine-liquid" d="M 287,365 Q 300,380 313,365 Z" fill="var(--accent-color)" stroke="none" opacity="0.8" />
+                <path class="wine-liquid" d="M 287,365 Q 300,380 313,365 Z" fill="var(--accent-color)" stroke="none" />
                 <path class="wine-stream" d="M 295,300 Q 310,300 300,370" />
                 <g class="bottle">
                     <path d="M 230,420 L 230,320 Q 230,300 240,280 L 240,240 L 250,240 L 250,280 Q 260,300 260,320 L 260,420 Z" class="line-art fill-bg" />
-                    <rect x="230" y="340" width="30" height="40" stroke="none" fill="rgba(17, 35, 30, 0.1)" />
+                    <rect x="230" y="340" width="30" height="40" stroke="none" fill="rgba(17, 35, 30, 0.1)" class="bottle-label" />
                 </g>
-            </g>
+            </a>
 
             <!-- 2. MESA -->
             <g class="house-parts">
@@ -47,18 +46,18 @@ import Layout from '../layouts/Layout.astro';
                 <line x1="680" y1="362" x2="680" y2="420" class="line-art" />
             </g>
 
-            <!-- 3. VINILOS (AHORA ES UN LINK REAL A /portfolio) -->
+            <!-- 3. VINILOS (ENLACE A PORTFOLIO) -->
             <a href="/portfolio" class="item" id="vinyl-group">
                 <g transform="translate(680, 335)">
                     <rect x="-40" y="-45" width="80" height="60" fill="transparent" />
                     <g class="vinyls">
                         <g transform="translate(-15, -20) rotate(-15)">
-                            <circle cx="0" cy="0" r="18" class="fill-ink" />
+                            <circle cx="0" cy="0" r="18" class="line-art" fill="var(--ink-color)" />
                             <circle cx="0" cy="0" r="6" fill="#E8B059" />
                             <circle cx="0" cy="0" r="1.5" class="fill-bg" />
                         </g>
                         <g transform="translate(5, -15) rotate(10)">
-                            <circle cx="0" cy="0" r="18" class="fill-ink" />
+                            <circle cx="0" cy="0" r="18" class="line-art" fill="var(--ink-color)" />
                             <circle cx="0" cy="0" r="6" fill="var(--accent-color)" />
                             <circle cx="0" cy="0" r="1.5" class="fill-bg" />
                         </g>
@@ -66,8 +65,8 @@ import Layout from '../layouts/Layout.astro';
                 </g>
             </a>
 
-            <!-- 4. TABURETE -->
-            <g class="item link-item" id="stool-group" data-link="Eventos Privados">
+            <!-- 4. TABURETE (ENLACE A CONTACTO) -->
+            <a href="/contacto" class="item" id="stool-group">
                 <rect x="740" y="360" width="80" height="70" fill="transparent" />
                 <g class="jump-anim">
                     <ellipse cx="780" cy="380" rx="25" ry="6" class="line-art fill-bg" />
@@ -76,45 +75,82 @@ import Layout from '../layouts/Layout.astro';
                     <line x1="780" y1="386" x2="780" y2="420" class="line-art" />
                     <line x1="762" y1="405" x2="798" y2="405" class="line-art" />
                 </g>
-            </g>
+            </a>
 
-            <!-- 5. ESTRUCTURA -->
+            <!-- 5. ESTRUCTURA (Pared de la casa) -->
             <rect x="340" y="240" width="220" height="180" class="line-art fill-bg house-parts" />
 
-            <!-- 6. VENTANA -->
-            <g class="item link-item house-parts" id="window-group" data-link="Galería de Fotos">
+            <!-- 6. VENTANA (Luz amarilla restaurada) -->
+            <a href="/galeria" class="item house-parts" id="window-group">
                 <rect x="450" y="280" width="90" height="90" fill="transparent" />
                 <g class="window-anim">
-                    <rect x="470" y="300" width="50" height="50" class="line-art fill-bg window-pane" />
+                    <rect x="470" y="300" width="50" height="50" class="line-art" fill="#FDE68A" />
                     <line x1="495" y1="300" x2="495" y2="350" class="line-art" />
                     <line x1="470" y1="325" x2="520" y2="325" class="line-art" />
                 </g>
-            </g>
+            </a>
 
-            <!-- 7. PUERTA (El Cine) -->
+            <!-- 7. PUERTA (EL CINE) -->
             <g class="item house-parts" id="door-group">
                 <rect x="360" y="320" width="90" height="110" fill="transparent" />
                 <g class="door-anim">
                     <path d="M 380,420 L 380,340 A 25 25 0 0 1 430,340 L 430,420 Z" class="line-art fill-bg door-panel" />
-                    <circle cx="415" cy="380" r="3" class="fill-ink door-knob" />
+                    <circle cx="415" cy="380" r="3" class="door-knob" fill="var(--ink-color)" />
                 </g>
             </g>
 
-            <!-- 8. TEJADO -->
-            <g class="item house-parts" id="roof-group">
+            <!-- 8. TEJADO INTERACTIVO (ENLACE A /clientes) -->
+            <a href="/clientes" class="item house-parts" id="roof-clients-link">
+                
+                <style>
+                    #roof-clients-link { cursor: pointer; outline: none; }
+                    
+                    /* El tejado rojo que se levanta */
+                    .interactive-roof {
+                        transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+                        transform-origin: 450px 240px; 
+                    }
+                    
+                    /* El texto del logo en el ático */
+                    .attic-text {
+                        font-family: 'Space Mono', monospace; font-size: 16px; font-weight: bold;
+                        fill: var(--bg-color); text-anchor: middle; opacity: 0;
+                        transition: opacity 0.4s ease 0.1s, transform 0.4s ease;
+                        transform: translateY(10px);
+                        pointer-events: none; /* Para no estorbar el hover */
+                    }
+
+                    /* Al pasar el ratón: Levantamos el tejado de forma exagerada y mostramos el logo */
+                    #roof-clients-link:hover .interactive-roof {
+                        transform: translateY(-80px) rotate(-6deg) scale(1.05);
+                    }
+                    #roof-clients-link:hover .attic-text {
+                        opacity: 1; transform: translateY(0);
+                    }
+                </style>
+
+                <!-- Hitbox (Caja invisible para capturar el ratón fácilmente) -->
                 <rect x="250" y="80" width="400" height="180" fill="transparent" />
-                <g class="roof-anim">
-                    <polygon points="310,240 450,130 590,240" class="fill-accent" />
-                    <polygon points="325,233 450,140 575,233" fill="none" stroke="rgba(17,35,30,0.3)" stroke-width="3" stroke-linejoin="round" />
-                </g>
-            </g>
 
+                <!-- 1. EL ÁTICO (Fondo oscuro, usando tus coordenadas exactas) -->
+                <polygon points="325,233 450,140 575,233" class="line-art" fill="var(--ink-color)" />
+
+                <!-- 2. EL LOGO ALEATORIO (Oculto bajo el tejado) -->
+                <text id="random-client-logo" x="450" y="215" class="attic-text">CLIENTE</text>
+
+                <!-- 3. EL TEJADO REAL (El que tapa todo y está animado) -->
+                <g class="interactive-roof">
+                    <polygon points="325,233 450,140 575,233" class="line-art" fill="var(--accent-color)" />
+                </g>
+            </a>
+
+            <!-- LÍNEA DE SUELO -->
             <line x1="150" y1="420" x2="850" y2="420" stroke="var(--ink-color)" stroke-width="2" stroke-dasharray="8 12" opacity="0.2" stroke-linecap="round" />
         </svg>
     </div>
 
     <!-- BRANDING -->
-    <div class="branding">
+    <div class="branding fade-in-up" style="animation-delay: 0.3s;">
         <h1>Casita Manolo</h1>
         <p>Music House Madrid</p>
     </div>
@@ -125,28 +161,42 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <style>
-    /* Estilos Home */
+    /* ========================================================
+       1. ESTILOS BASE Y MODO CINE
+       ======================================================== */
     body.video-mode { background-color: #0b1714; }
     
     .media-layer { position: absolute; top: 50%; left: 50%; width: 640px; height: 360px; border-radius: 16px; overflow: hidden; background-color: var(--ink-color); opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(0.7); transition: opacity 0.6s var(--ease-out), transform 0.8s var(--ease-spring); box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5); z-index: 50; }
     .media-layer video { width: 100%; height: 100%; object-fit: cover; }
     
-    .close-btn { position: absolute; top: -60px; right: 0; background: rgba(17, 35, 30, 0.6); border: 1px solid rgba(244, 241, 236, 0.3); color: var(--bg-color); font-family: 'Space Mono', monospace; padding: 10px 20px; border-radius: 30px; font-size: 0.8rem; cursor: pointer; backdrop-filter: blur(4px); opacity: 0; transition: all 0.3s ease; pointer-events: none; }
+    .close-btn { position: absolute; top: 20px; right: 20px; background: rgba(17, 35, 30, 0.6); border: 1px solid rgba(244, 241, 236, 0.3); color: var(--bg-color); font-family: 'Space Mono', monospace; padding: 10px 20px; border-radius: 30px; font-size: 0.8rem; cursor: pointer; backdrop-filter: blur(4px); opacity: 0; transition: all 0.3s ease; pointer-events: none; }
     .close-btn:hover { background: var(--bg-color); color: var(--ink-color); }
     
     body.video-mode .media-layer { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
-    body.video-mode .close-btn { top: 20px; opacity: 1; transition-delay: 0.5s; pointer-events: auto; right: 20px; }
+    body.video-mode .close-btn { opacity: 1; transition-delay: 0.5s; pointer-events: auto; }
     body.video-mode .house-parts, body.video-mode .item, body.video-mode .branding { opacity: 0; pointer-events: none; }
 
     .stage { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 900px; height: 600px; display: flex; align-items: center; justify-content: center; }
     .svg-layer { position: relative; width: 100%; height: 100%; z-index: 10; }
-    .line-art { stroke: var(--ink-color); stroke-width: 4px; stroke-linecap: round; stroke-linejoin: round; fill: none; }
-    .fill-bg { fill: var(--bg-color); }
-    .fill-ink { fill: var(--ink-color); stroke: none; }
-    .fill-accent { fill: var(--accent-color); stroke: var(--ink-color); stroke-width: 4px; stroke-linejoin: round; }
     
+    /* ========================================================
+       2. LÍNEAS LIMPIAS Y COLORES
+       ======================================================== */
+    .line-art { 
+        stroke: var(--ink-color); 
+        stroke-width: 4px; 
+        stroke-linecap: round; 
+        stroke-linejoin: round; 
+    }
+    
+    .fill-bg { fill: var(--bg-color); }
+
+    /* ========================================================
+       3. INTERACTIVIDAD Y ANIMACIONES
+       ======================================================== */
     .house-parts { transition: opacity 0.6s var(--ease-out); }
     .item { cursor: pointer; }
+    
     .jump-anim { transition: transform 0.4s var(--ease-spring); }
     .item:hover .jump-anim { transform: translateY(-10px) scale(1.05); }
 
@@ -161,20 +211,35 @@ import Layout from '../layouts/Layout.astro';
     #vinyl-group:hover .vinyls { transform: translateY(-8px) scale(1.08) rotate(-4deg); }
 
     #stool-group { transform-origin: 780px 420px; }
+    
     .door-anim { transform-origin: 380px 420px; transition: transform 0.4s var(--ease-spring); }
     #door-group:hover .door-anim { transform: scaleX(0.85) skewY(3deg); }
     #door-group:hover .door-panel { fill: #E8E2D5; transition: fill 0.3s ease; } 
+    
     .window-anim { transform-origin: 495px 325px; transition: transform 0.4s var(--ease-spring); }
     #window-group:hover .window-anim { transform: scale(1.1); }
-    #window-group:hover .window-pane { fill: #FDE68A; transition: fill 0.3s ease; }
-    .roof-anim { transform-origin: 450px 240px; transition: transform 0.8s var(--ease-spring); }
-    #roof-group:hover .roof-anim { transform: translateY(-140px) rotate(-6deg) scale(1.05); }
+    #window-group:hover .line-art[fill="#FDE68A"] { fill: #fff3b0; transition: fill 0.3s ease; } 
     
-    .smoke { animation: float 4s ease-in-out infinite alternate; transform-origin: center bottom; }
-    .smoke-2 { animation-delay: -2s; }
-    @keyframes float { 0% { transform: translateY(0) skewX(0deg); opacity: 0.8; } 100% { transform: translateY(-15px) skewX(5deg); opacity: 0.2; } }
+    .smoke { stroke: var(--ink-color); stroke-width: 4px; stroke-linecap: round; fill: none; opacity: 0; animation: float 4s ease-in-out infinite alternate; transform-origin: center bottom; }
+    .smoke-2 { animation-delay: -1.5s; }
+    @keyframes float { 0% { transform: translateY(0) skewX(0deg); opacity: 0.8;} 100% { transform: translateY(-15px) skewX(5deg); opacity: 0.2; } }
 
-    .branding { position: absolute; bottom: 40px; text-align: center; z-index: 10; transition: opacity 0.5s ease; width: 100%; pointer-events: none; }
+    /* ========================================================
+       4. ANIMACIÓN DE ENTRADA (SUTIL Y ELEGANTE)
+       ======================================================== */
+    .fade-in-up {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeInUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ========================================================
+       5. BRANDING Y TOAST
+       ======================================================== */
+    .branding { position: absolute; bottom: 40px; text-align: center; z-index: 10; width: 100%; pointer-events: none; }
     .branding h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; line-height: 1.2; margin-bottom: 0.5rem; }
     .branding p { font-size: 0.8rem; letter-spacing: 0.4em; text-transform: uppercase; opacity: 0.6; }
 
@@ -183,7 +248,6 @@ import Layout from '../layouts/Layout.astro';
 </style>
 
 <script>
-    // Usamos astro:page-load para que la lógica sobreviva a las ViewTransitions
     document.addEventListener('astro:page-load', () => {
         const body = document.body;
         const door = document.getElementById('door-group');
@@ -191,6 +255,21 @@ import Layout from '../layouts/Layout.astro';
         const closeVideoBtn = document.getElementById('close-video-btn');
         const toast = document.getElementById('toast');
         let toastTimeout;
+
+        // RULETA RUSA DE MARCAS (Se actualiza cada vez que pasas el ratón)
+        const marcas = ["NETFLIX", "A24 FILMS", "HBO MAX", "VOGUE", "McCANN", "SONY PIC", "AMAZON", "NIKE", "SPOTIFY"];
+        const roofLink = document.getElementById('roof-clients-link');
+        const logoElement = document.getElementById('random-client-logo');
+        
+        if (roofLink && logoElement) {
+            // Ponemos uno inicial
+            logoElement.textContent = marcas[Math.floor(Math.random() * marcas.length)];
+            
+            // Cada vez que el ratón toca el tejado, cambia el texto
+            roofLink.addEventListener('mouseenter', () => {
+                logoElement.textContent = marcas[Math.floor(Math.random() * marcas.length)];
+            });
+        }
 
         document.querySelectorAll('.link-item').forEach(item => {
             item.addEventListener('click', (e) => {

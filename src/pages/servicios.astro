@@ -1,0 +1,345 @@
+---
+// src/pages/servicios.astro
+import { ClientRouter } from 'astro:transitions';
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casita Manolo | La Pizarra</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <ClientRouter />
+    
+    <style>
+        /* ========================================================
+           1. RESET Y AMBIENTE
+           ======================================================== */
+        :root {
+            --paper: #F4F1EC;    
+            --ink-red: #D74F42;  
+            --chalk-pink: #ff9d9d;
+            --wood-dark: #2c1a11;
+            --wood-light: #4a2e1b;
+            --chalkboard: #252825; 
+            --chalk: rgba(255, 255, 255, 0.85); 
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #0b1714;
+            background-image: radial-gradient(circle at 50% 100%, rgba(255,255,255,0.04) 0%, transparent 60%);
+            font-family: 'Space Mono', monospace;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; /* Ocultamos el scroll del body, el scroll va en la pizarra */
+        }
+
+        .btn-volver {
+            position: fixed;
+            top: 40px;
+            left: 40px;
+            color: var(--paper);
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            z-index: 100;
+            transition: color 0.3s;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+        .btn-volver:hover { color: var(--ink-red); }
+
+        /* ========================================================
+           2. EL CABALLETE (Más recto y dinámico)
+           ======================================================== */
+        .chalkboard-scene {
+            perspective: 1200px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .chalkboard-frame {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 85vh; /* Aprovecha mucho mejor el espacio vertical */
+            background-color: var(--wood-light);
+            
+            background-image: 
+                repeating-linear-gradient(0deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 2px, transparent 2px, transparent 15px),
+                linear-gradient(90deg, var(--wood-dark), var(--wood-light), var(--wood-dark));
+            
+            border-radius: 8px;
+            padding: 25px; 
+            
+            box-shadow: 
+                0 40px 60px rgba(0,0,0,0.7),
+                inset 0 0 10px rgba(0,0,0,0.8);
+                
+            /* Inclinación 3D sutil (más recta) */
+            transform: rotateX(4deg);
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+            
+            opacity: 0;
+            animation: standUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Al hacer hover en el marco, se levanta hacia ti para leer mejor */
+        .chalkboard-frame:hover {
+            transform: rotateX(0deg) translateY(-5px);
+        }
+
+        @keyframes standUp {
+            0% { transform: translateY(100px) rotateX(20deg); opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        /* Repisa y patas */
+        .chalk-ledge {
+            position: absolute; bottom: 0; left: -10px; right: -10px; height: 25px;
+            background: linear-gradient(to bottom, var(--wood-light), var(--wood-dark));
+            border-radius: 4px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.6), inset 0 2px 2px rgba(255,255,255,0.1);
+            transform: translateZ(20px); 
+        }
+        .chalk-piece { position: absolute; top: -6px; height: 8px; background-color: #f4f4f0; border-radius: 2px; box-shadow: 1px 2px 3px rgba(0,0,0,0.5), inset -2px -2px 4px rgba(0,0,0,0.2); }
+        .chalk-1 { left: 40px; width: 30px; transform: rotate(15deg); }
+        .chalk-2 { right: 60px; width: 20px; transform: rotate(-10deg); }
+
+        .frame-leg { position: absolute; bottom: -40px; width: 35px; height: 50px; background: var(--wood-dark); z-index: -1; border-radius: 0 0 5px 5px; }
+        .leg-left { left: 20px; box-shadow: inset -5px 0 10px rgba(0,0,0,0.5); }
+        .leg-right { right: 20px; box-shadow: inset 5px 0 10px rgba(0,0,0,0.5); }
+
+        /* ========================================================
+           3. LA PIZARRA DESLIZABLE (SCROLL)
+           ======================================================== */
+        .chalkboard-surface {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: var(--chalkboard);
+            border-radius: 2px;
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.9);
+            overflow: hidden; 
+        }
+
+        /* Manchas de tiza fijas de fondo */
+        .chalk-smudges {
+            position: absolute; inset: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255,255,255,0.05) 0%, transparent 25%),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.04) 0%, transparent 35%);
+            filter: url(#chalk-noise);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Contenedor que hace scroll */
+        .menu-content {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            padding: 30px 25px 50px 25px; /* Espacio extra al fondo */
+            overflow-y: auto; /* Magia del deslizamiento */
+            overflow-x: hidden;
+            
+            font-family: 'Architects Daughter', cursive;
+            color: var(--chalk);
+            text-shadow: 0px 0px 3px rgba(255, 255, 255, 0.4);
+            
+            /* Suaviza el scroll en Firefox/Chrome */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.3) transparent;
+        }
+
+        /* Barra de scroll personalizada (Simulando polvo de tiza) */
+        .menu-content::-webkit-scrollbar { width: 8px; }
+        .menu-content::-webkit-scrollbar-track { background: transparent; }
+        .menu-content::-webkit-scrollbar-thumb { 
+            background: rgba(255,255,255,0.2); 
+            border-radius: 10px; 
+            border: 2px solid var(--chalkboard); /* Crea un pequeño margen */
+        }
+        .menu-content::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
+
+        /* ========================================================
+           4. TIPOGRAFÍA Y DISEÑO
+           ======================================================== */
+        .menu-header { text-align: center; margin-bottom: 35px; position: relative; }
+        .menu-header::after { content: ""; display: block; width: 80%; height: 4px; margin: 15px auto 0; border-top: 2px solid var(--chalk); border-bottom: 1px solid var(--chalk); opacity: 0.6; transform: rotate(-1deg); }
+        .menu-header h1 { font-size: 2.2rem; line-height: 1; margin-bottom: 5px; transform: rotate(-2deg); }
+        .menu-header p { font-size: 1rem; opacity: 0.8; transform: rotate(1deg); }
+
+        .course { margin-bottom: 35px; }
+        .course-title { font-size: 1.4rem; color: var(--chalk-pink); margin-bottom: 20px; text-align: center; transform: rotate(-1.5deg); text-shadow: 0px 0px 3px rgba(255, 157, 157, 0.4); }
+
+        .dish { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; font-size: 1.2rem; line-height: 1.2; position: relative; }
+        
+        .dots { flex-grow: 1; border-bottom: 2px dashed rgba(255,255,255,0.3); margin: 0 15px; position: relative; top: -6px; }
+
+        .dish-desc { font-size: 0.9rem; opacity: 0.7; display: block; padding-left: 5px; transform: rotate(0.5deg); margin-bottom: 20px; }
+
+        /* ========================================================
+           5. EL BOTÓN "S/M" (Llamada a la acción al Ticket)
+           ======================================================== */
+        .price-link {
+            border: 1.5px solid var(--chalk);
+            border-radius: 50% 40% 60% 40% / 40% 50% 40% 60%;
+            padding: 4px 10px;
+            font-size: 1.1rem;
+            color: var(--chalk);
+            text-decoration: none; /* Quitamos el subrayado del link */
+            transform: rotate(5deg);
+            transition: all 0.3s ease;
+            display: inline-block;
+            cursor: pointer;
+            /* Indicador visual de que es clicable */
+            box-shadow: inset 0 0 0 rgba(255, 157, 157, 0);
+        }
+
+        .price-link:hover {
+            color: var(--chalk-pink);
+            border-color: var(--chalk-pink);
+            transform: rotate(0deg) scale(1.1);
+            text-shadow: 0px 0px 5px rgba(255, 157, 157, 0.6);
+            box-shadow: inset 0 0 10px rgba(255, 157, 157, 0.2);
+        }
+        
+        /* Pequeño texto guía que aparece al hacer hover en el botón */
+        .price-link::after {
+            content: "Pedir";
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.6rem;
+            opacity: 0;
+            color: var(--chalk-pink);
+            transition: opacity 0.3s, transform 0.3s;
+            font-family: 'Space Mono', monospace;
+            text-shadow: none;
+            letter-spacing: 0.1em;
+        }
+
+        .price-link:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+    </style>
+</head>
+<body>
+
+    <svg style="display: none;">
+        <filter id="chalk-noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" result="noise" />
+            <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.15 0" in="noise" result="coloredNoise" />
+            <feBlend in="SourceGraphic" in2="coloredNoise" mode="multiply" />
+        </filter>
+    </svg>
+
+    <a href="/" class="btn-volver">← VOLVER AL BAR</a>
+
+    <main class="chalkboard-scene">
+        
+        <article class="chalkboard-frame">
+            <div class="frame-leg leg-left"></div>
+            <div class="frame-leg leg-right"></div>
+
+            <div class="chalkboard-surface">
+                <div class="chalk-smudges"></div>
+                
+                <!-- Contenedor con Scroll -->
+                <div class="menu-content">
+                    
+                    <header class="menu-header">
+                        <h1>MENÚ DEL DÍA</h1>
+                        <p>Diseño y Desarrollo Web</p>
+                    </header>
+
+                    <!-- PRIMEROS -->
+                    <div class="course">
+                        <h2 class="course-title">~ Primeros ~</h2>
+                        
+                        <div class="dish">
+                            <span class="dish-name">Landing Page</span>
+                            <span class="dots"></span>
+                            <!-- Botón enlazado al contacto -->
+                            <a href="/contacto" class="price-link">S/M</a>
+                        </div>
+                        <span class="dish-desc">Web de una sola página. Directo al grano.</span>
+                        
+                        <div class="dish">
+                            <span class="dish-name">Auditoría UX</span>
+                            <span class="dots"></span>
+                            <a href="/contacto" class="price-link">S/M</a>
+                        </div>
+                        <span class="dish-desc">Análisis y mejora de la experiencia de usuario.</span>
+                    </div>
+
+                    <!-- SEGUNDOS -->
+                    <div class="course">
+                        <h2 class="course-title">~ Segundos ~</h2>
+                        
+                        <div class="dish">
+                            <span class="dish-name">Web Corporativa</span>
+                            <span class="dots"></span>
+                            <a href="/contacto" class="price-link">S/M</a>
+                        </div>
+                        <span class="dish-desc">Multi-página, rápida como el rayo.</span>
+
+                        <div class="dish">
+                            <span class="dish-name">E-Commerce</span>
+                            <span class="dots"></span>
+                            <a href="/contacto" class="price-link">S/M</a>
+                        </div>
+                        <span class="dish-desc">Tu tienda online, abierta 24/7.</span>
+                    </div>
+
+                    <!-- POSTRES (Añade más para probar el scroll) -->
+                    <div class="course">
+                        <h2 class="course-title">~ Postres ~</h2>
+                        
+                        <div class="dish">
+                            <span class="dish-name">Mantenimiento</span>
+                            <span class="dots"></span>
+                            <a href="/contacto" class="price-link">S/M</a>
+                        </div>
+                        <span class="dish-desc">Yo limpio la mesa. Soporte y actualizaciones.</span>
+                        
+                        <!-- Plato extra para forzar un poco de scroll en pantallas bajas -->
+                        <div class="dish" style="margin-top: 15px;">
+                            <span class="dish-name">SEO Local</span>
+                            <span class="dots"></span>
+                            <a href="/contacto" class="price-link">S/M</a>
+                        </div>
+                        <span class="dish-desc">Para que te encuentren en el barrio (Google).</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="chalk-ledge">
+                <div class="chalk-piece chalk-1"></div>
+                <div class="chalk-piece chalk-2"></div>
+            </div>
+        </article>
+
+    </main>
+
+</body>
+</html>
