@@ -21,12 +21,12 @@ const { title } = Astro.props;
 		
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 		
 		<!-- Magia de Astro: Enrutador de cliente para transiciones suaves -->
 		<ClientRouter />
 	</head>
-	<body class="bg-[#F4F1EC] text-[#11231E] font-['Space_Mono'] antialiased selection:bg-[#D74F42] selection:text-white overflow-hidden transition-colors duration-700">
+	<body>
 		<slot />
 	</body>
 </html>
@@ -46,4 +46,6 @@ const { title } = Astro.props;
 		--ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.2);
 		--ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 	}
+	body { background: #F4F1EC; color: #11231E; font-family: 'Space Mono', monospace; }
+	::selection { background: #D74F42; color: #fff; }
 </style>

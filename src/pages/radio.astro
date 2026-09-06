@@ -1,0 +1,109 @@
+---
+import ListeningRoom from '../components/ListeningRoom.astro';
+import { moods } from '../data/listening';
+---
+<ListeningRoom title="Casita Manolo | Radio Manolo" current="radio">
+  <header class="room-intro">
+    <p class="room-kicker">En la frecuencia de la casa</p>
+    <h1>Radio Manolo</h1>
+    <p>¿Cómo quieres que suene este rato? Sintoniza una emoción y dale al play.</p>
+  </header>
+  <section class="radio-console" aria-label="Reproductor Radio Manolo" id="radio-console">
+    <div class="radio-display">
+      <div class="display-top"><span>RM / ESTÉREO</span><span id="radio-power">APAGADA</span></div>
+      <div class="station-readout"><span id="station-number">01</span><h2 id="station-name">Calma</h2></div>
+      <p id="station-description">{moods[0].description}</p>
+      <div class="tuning-scale" aria-hidden="true"><span id="tuning-needle"></span></div>
+      <label class="dial-label" for="radio-dial">Sintonizador <output id="dial-output" for="radio-dial">01 · Calma</output></label>
+      <input id="radio-dial" class="radio-dial" type="range" min="0" max="3" value="0" step="1" aria-valuetext="Calma" />
+    </div>
+    <fieldset class="channel-options"><legend>Elige una frecuencia</legend>
+      {moods.map((mood, index) => <label class="channel-choice"><input type="radio" name="radio-mood" value={mood.id} checked={index === 0} /><span>{mood.name}</span></label>)}
+    </fieldset>
+    <div class="room-actions">
+      <button class="room-button" id="radio-play" type="button" aria-pressed="false">Encender la radio</button>
+      <label class="volume-control">Volumen <input id="radio-volume" type="range" min="0" max="100" value="50" /><output id="radio-volume-value">50 %</output></label>
+    </div>
+    <p id="radio-status" class="sound-status" role="status">La radio espera a que la enciendas.</p>
+  </section>
+  <p class="demo-note">Cuatro bocetos sonoros de demostración. No forman parte del portfolio del estudio.</p>
+  <p><a href="/television">Prueba estas emociones sobre una misma escena →</a></p>
+  <noscript><p>Activa JavaScript para sintonizar la radio.</p></noscript>
+</ListeningRoom>
+<style>
+  .radio-console { padding: clamp(20px, 5vw, 48px); background: #203a31; border: 2px solid #bda889; border-radius: 8px 13px 9px 15px; box-shadow: 7px 8px 0 #081a13; }
+  .radio-display { color: #11231e; background: #e8dcbc; padding: clamp(20px, 4vw, 36px); border-radius: 5px 8px 4px 7px; border: 2px solid #11231e; }
+  .display-top { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 13px; letter-spacing: .12em; }
+  .station-readout { display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap; margin-top: 20px; }
+  .station-readout > span { font-size: 24px; color: #ab352a; }
+  .station-readout h2 { margin: 0; font-family: 'Architects Daughter', cursive; font-size: clamp(2.5rem, 7vw, 4rem); font-weight: 400; }
+  .radio-display p { font-size: 16px; line-height: 1.7; min-height: 3.4em; }
+  .tuning-scale { position: relative; height: 28px; margin: 24px 4px 12px; border-bottom: 2px solid #11231e; background: repeating-linear-gradient(90deg, #596757 0 1px, transparent 1px 4%); }
+  #tuning-needle { position: absolute; width: 4px; height: 34px; top: -4px; left: 0%; transform: translateX(-50%); background: #d74f42; transition: left .25s ease; }
+  .dial-label { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 14px; }
+  .radio-dial { width: 100%; min-height: 44px; accent-color: #ae352a; cursor: pointer; }
+</style>
+<script>
+  import { moods, type MoodId } from '../data/listening';
+  import { SoundPlayer } from '../scripts/sound-player';
+  document.addEventListener('astro:page-load', () => {
+    const console = document.querySelector<HTMLElement>('#radio-console');
+    if (!console) return;
+    const lifetime = new AbortController();
+    const options = { signal: lifetime.signal };
+    const player = new SoundPlayer();
+    const button = console.querySelector<HTMLButtonElement>('#radio-play')!;
+    const dial = console.querySelector<HTMLInputElement>('#radio-dial')!;
+    const status = console.querySelector<HTMLElement>('#radio-status')!;
+    const power = console.querySelector<HTMLElement>('#radio-power')!;
+    let index = 0;
+    let on = false;
+    let revision = 0;
+    const updateButton = () => {
+      button.textContent = on ? 'Apagar la radio' : 'Encender la radio';
+      button.setAttribute('aria-pressed', String(on));
+      power.textContent = on ? 'ENCENDIDA' : 'APAGADA';
+    };
+    const tune = async () => {
+      const request = ++revision;
+      status.textContent = 'Sintonizando…';
+      try {
+        const started = await player.play(moods[index].id);
+        if (started && request === revision && on) status.textContent = `Suena: ${moods[index].title}.`;
+      } catch {
+        if (request !== revision) return;
+        on = false; player.stop(); updateButton();
+        status.textContent = 'No se pudo reproducir. Pulsa encender para intentarlo otra vez.';
+      }
+    };
+    const select = (next: number) => {
+      index = next;
+      const mood = moods[index];
+      console.querySelector('#station-number')!.textContent = mood.number;
+      console.querySelector('#station-name')!.textContent = mood.name;
+      console.querySelector('#station-description')!.textContent = mood.description;
+      console.querySelector('#dial-output')!.textContent = `${mood.number} · ${mood.name}`;
+      console.querySelector<HTMLElement>('#tuning-needle')!.style.left = `${index / 3 * 100}%`;
+      dial.value = String(index); dial.setAttribute('aria-valuetext', mood.name);
+      console.querySelectorAll<HTMLInputElement>('[name="radio-mood"]').forEach(input => input.checked = input.value === mood.id);
+      if (on) void tune(); else status.textContent = `${mood.name}, lista para escuchar.`;
+    };
+    button.addEventListener('click', () => {
+      on = !on; updateButton();
+      if (on) void tune();
+      else { ++revision; player.stop(); status.textContent = 'Radio apagada.'; }
+    }, options);
+    dial.addEventListener('input', () => select(Number(dial.value)), options);
+    console.querySelectorAll<HTMLInputElement>('[name="radio-mood"]').forEach(input => input.addEventListener('change', () => select(moods.findIndex(mood => mood.id === input.value as MoodId)), options));
+    console.querySelector<HTMLInputElement>('#radio-volume')!.addEventListener('input', event => {
+      const value = Number((event.target as HTMLInputElement).value);
+      player.setVolume(value / 100);
+      console.querySelector('#radio-volume-value')!.textContent = `${value} %`;
+    }, options);
+    const stop = () => { ++revision; on = false; player.stop(); updateButton(); status.textContent = 'Radio apagada.'; };
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); }, options);
+    const cleanup = () => { ++revision; lifetime.abort(); player.dispose(); };
+    document.addEventListener('astro:before-swap', cleanup, { once: true, signal: lifetime.signal });
+    window.addEventListener('pagehide', stop, options);
+  });
+</script>

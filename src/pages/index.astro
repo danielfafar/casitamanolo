@@ -5,6 +5,11 @@ import Layout from '../layouts/Layout.astro';
 
 <Layout title="Casita Manolo | Home">
 
+    <nav class="sound-corners" aria-label="Nuevos rincones de la casa">
+        <a href="/radio" class="handwritten-link">Radio Manolo<span>sintoniza una emoción</span></a>
+        <a href="/television" class="handwritten-link">La televisión<span>una escena, tres músicas</span></a>
+    </nav>
+
     <!-- CAPA VÍDEO (Modo Cine) -->
     <div class="media-layer" id="media-layer" role="dialog" aria-modal="true" aria-label="Vídeo del local">
         <video id="house-video" muted loop playsinline>
@@ -234,9 +239,9 @@ import Layout from '../layouts/Layout.astro';
         <h1>Casita Manolo</h1>
         <p class="tagline">Music House Madrid</p>
         <p class="status" id="nav-status" aria-live="polite"
-           data-idle-pointer="6 zonas interactivas — pasa el ratón o navega con Tab"
-           data-idle-touch="6 zonas interactivas — toca la que quieras">
-            6 zonas interactivas — pasa el ratón o navega con Tab
+           data-idle-pointer="Explora la casa — pasa el ratón o navega con Tab"
+           data-idle-touch="Explora la casa — toca un rincón">
+            Explora la casa — pasa el ratón o navega con Tab
         </p>
     </div>
 
@@ -246,6 +251,15 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <style>
+    .sound-corners { position: relative; z-index: 20; display: flex; justify-content: space-between; gap: 24px; padding: 22px 32px; max-width: 900px; margin: auto; box-sizing: border-box; }
+    .handwritten-link { color: var(--ink-color); font-family: 'Architects Daughter', cursive; font-size: 24px; text-decoration: underline; text-decoration-style: wavy; text-decoration-thickness: 1px; text-underline-offset: 5px; transform: rotate(-3deg); display: flex; flex-direction: column; gap: 8px; padding: 8px; }
+    .handwritten-link:last-child { transform: rotate(3deg); text-align: right; }
+    .handwritten-link span { font-family: 'Space Mono', monospace; font-size: 12px; line-height: 1.5; text-decoration: none; }
+    .handwritten-link:hover { color: var(--accent-color); }
+    .handwritten-link:focus-visible { outline: 2px dashed var(--accent-color); outline-offset: 4px; }
+    :global(body.video-mode) .sound-corners { visibility: hidden; }
+    @media (max-width: 600px) { .sound-corners { padding: 12px; gap: 12px; } .handwritten-link { font-size: 21px; } .handwritten-link span { max-width: 135px; } .branding { bottom: 20px; padding: 0 16px; box-sizing: border-box; } .branding h1 { letter-spacing: .14em; } .status { line-height: 1.6; } }
+    @media (max-height: 650px) { .stage { position: relative; top: auto; left: auto; transform: none; height: min(65vw, 440px); margin: 0 auto; } .branding { position: relative; bottom: auto; margin: 12px 0 28px; } }
     /* ========================================================
        1. MODO CINE
        ======================================================== */
