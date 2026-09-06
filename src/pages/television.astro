@@ -1,0 +1,111 @@
+---
+import ListeningRoom from '../components/ListeningRoom.astro';
+import { moods, televisionScene } from '../data/listening';
+const channels = moods.filter(mood => mood.id !== 'energia');
+---
+<ListeningRoom title="Casita Manolo | La televisión" current="television">
+  <header class="room-intro">
+    <p class="room-kicker">La tele de la casa</p>
+    <h1>La imagen no cambia.<br />Lo que sientes, sí.</h1>
+    <p>Pon la escena y cambia de música mientras sigue rodando.</p>
+  </header>
+  <section id="television" class="television" aria-label="Comparador de bandas sonoras">
+    <div class="tv-screen">
+      <video id="scene-video" src={televisionScene.source} poster="/videos/demo-flower-poster.jpg" controls muted playsinline preload="metadata" aria-describedby="scene-description"></video>
+      <span class="channel-badge" id="channel-badge">CH 01 · CALMA</span>
+    </div>
+    <div class="tv-controls">
+      <fieldset class="channel-options"><legend>La banda sonora</legend>
+        {channels.map((mood, index) => <label class="channel-choice"><input type="radio" name="tv-mood" value={mood.id} checked={index === 0} /><span>{mood.name}</span></label>)}
+        <label class="channel-choice"><input type="radio" name="tv-mood" value="silencio" /><span>Sin música</span></label>
+      </fieldset>
+      <div class="room-actions">
+        <button type="button" class="room-button" id="tv-play">Reproducir escena</button>
+        <button type="button" class="room-button secondary" id="tv-restart">Desde el principio</button>
+        <label class="volume-control">Música <input id="tv-volume" type="range" min="0" max="100" value="50" aria-label="Volumen de la música" /><output id="tv-volume-value">50 %</output></label>
+      </div>
+      <p id="tv-status" class="sound-status" role="status">Calma seleccionada. Dale al play.</p>
+    </div>
+  </section>
+  <p class="demo-note" id="scene-description">{televisionScene.description} <a href={televisionScene.creditUrl}>{televisionScene.credit}</a> Las tres músicas son bocetos de demostración, ajenos al portfolio.</p>
+  <p><a href="/radio">Seguir escuchando en Radio Manolo →</a></p>
+  <noscript><p>Activa JavaScript para comparar las bandas sonoras. El vídeo puede reproducirse con sus controles.</p></noscript>
+</ListeningRoom>
+<style>
+  .television { border: 2px solid #bda889; padding: clamp(12px, 3vw, 30px); border-radius: 16px 11px 18px 12px; background: #203a31; box-shadow: 8px 9px 0 #081a13; }
+  .tv-screen { position: relative; background: #081a13; border: 3px solid #081a13; border-radius: 12px; overflow: hidden; }
+  video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: contain; }
+  .channel-badge { position: absolute; top: 16px; left: 16px; padding: 7px 10px; background: #11231eea; color: #f4f1ec; font-size: 13px; pointer-events: none; }
+  .tv-controls { padding: 0 8px; }
+  .sound-status { margin-bottom: 0; }
+  @media (max-width: 600px) { .channel-badge { top: 8px; left: 8px; } .tv-controls { padding: 0; } }
+</style>
+<script>
+  import { moods, type MoodId } from '../data/listening';
+  import { SoundPlayer } from '../scripts/sound-player';
+  document.addEventListener('astro:page-load', () => {
+    const television = document.querySelector<HTMLElement>('#television');
+    if (!television) return;
+    const lifetime = new AbortController();
+    const options = { signal: lifetime.signal };
+    const video = television.querySelector<HTMLVideoElement>('#scene-video')!;
+    const button = television.querySelector<HTMLButtonElement>('#tv-play')!;
+    const status = television.querySelector<HTMLElement>('#tv-status')!;
+    const player = new SoundPlayer();
+    let selected: MoodId | 'silencio' = 'calma';
+    let revision = 0;
+    const name = () => selected === 'silencio' ? 'Sin música' : moods.find(mood => mood.id === selected)!.name;
+    const sync = async () => {
+      const request = ++revision;
+      if (selected === 'silencio' || video.paused || video.ended || video.seeking) {
+        player.stop(); return;
+      }
+      status.textContent = `Preparando ${name().toLowerCase()}…`;
+      try {
+        const played = await player.play(selected, () => video.currentTime, video.playbackRate);
+        if (played && request === revision) status.textContent = `${name()}. Cambia de canal para comparar.`;
+      } catch {
+        if (request === revision) {
+          player.stop();
+          status.textContent = 'No se pudo cargar la música. Selecciona un canal para reintentar.';
+        }
+      }
+    };
+    const stopAudio = () => { ++revision; player.stop(); };
+    video.addEventListener('play', () => { button.textContent = 'Pausar escena'; void sync(); }, options);
+    video.addEventListener('playing', () => { void sync(); }, options);
+    video.addEventListener('pause', () => { stopAudio(); button.textContent = 'Reproducir escena'; status.textContent = `Escena en pausa · ${name()}.`; }, options);
+    video.addEventListener('waiting', stopAudio, options);
+    video.addEventListener('seeking', stopAudio, options);
+    video.addEventListener('seeked', () => { void sync(); }, options);
+    video.addEventListener('ratechange', () => { void sync(); }, options);
+    video.addEventListener('ended', () => { stopAudio(); button.textContent = 'Volver a verla'; status.textContent = 'Fin de la escena. Prueba otra música y vuelve a verla.'; }, options);
+    video.addEventListener('error', () => { stopAudio(); status.textContent = 'No se pudo cargar el vídeo. Recarga la página para intentarlo de nuevo.'; }, options);
+    // Only the selected soundtrack is audible, including with native video controls.
+    video.addEventListener('volumechange', () => { if (!video.muted) video.muted = true; }, options);
+    button.addEventListener('click', () => {
+      if (!video.paused && !video.ended) video.pause();
+      else {
+        const play = video.play();
+        void sync(); // Resume AudioContext within the user activation.
+        play.catch(() => { stopAudio(); status.textContent = 'Pulsa el control de reproducción del vídeo para empezar.'; });
+      }
+    }, options);
+    television.querySelector('#tv-restart')!.addEventListener('click', () => { video.currentTime = 0; }, options);
+    television.querySelectorAll<HTMLInputElement>('[name="tv-mood"]').forEach(input => input.addEventListener('change', () => {
+      selected = input.value as MoodId | 'silencio';
+      const mood = moods.find(mood => mood.id === selected);
+      television.querySelector('#channel-badge')!.textContent = mood ? `CH ${mood.number} · ${mood.name.toUpperCase()}` : 'SIN MÚSICA';
+      status.textContent = video.paused ? `${name()} seleccionada. Dale al play.` : `${name()}. La escena sigue.`;
+      void sync(); // Never replace the video source or change its currentTime.
+    }, options));
+    television.querySelector<HTMLInputElement>('#tv-volume')!.addEventListener('input', event => {
+      const value = Number((event.target as HTMLInputElement).value);
+      player.setVolume(value / 100);
+      television.querySelector('#tv-volume-value')!.textContent = `${value} %`;
+    }, options);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) video.pause(); }, options);
+    window.addEventListener('pagehide', () => { video.pause(); stopAudio(); }, options);
+    document.addEventListener('astro:before-swap', () => { ++revision; lifetime.abort(); video.pause(); player.dispose(); }, { once: true, signal: lifetime.signal });
+  });
+</script>
