@@ -6,7 +6,7 @@ import RadioTV from '../components/RadioTV.astro';
 
 <Layout title="Casita Manolo | Home">
 
-    <!-- RADIO-TV: boton arriba a la derecha + panel con el dial -->
+    <!-- RADIO-TV: radio y television juntas, un solo boton arriba a la derecha -->
     <RadioTV />
 
     <!-- CAPA VÍDEO (Modo Cine) -->
@@ -242,6 +242,11 @@ import RadioTV from '../components/RadioTV.astro';
 </Layout>
 
 <style>
+    @media (max-width: 600px) { .branding { padding: 0 16px; box-sizing: border-box; } }
+    /* Pantallas bajas en horizontal. Solo en anchas: en un movil vertical
+       muy bajito chocaria con la composicion vertical de mas abajo y
+       descentraria la escena. */
+    @media (max-height: 650px) and (min-width: 561px) { .stage { position: relative; top: auto; left: auto; transform: none; height: min(65vw, 440px); margin: 0 auto; } .branding { position: relative; bottom: auto; margin: 12px 0 28px; } }
     /* ========================================================
        1. MODO CINE
        ======================================================== */

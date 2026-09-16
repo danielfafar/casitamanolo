@@ -53,29 +53,33 @@ import Layout from '../layouts/Layout.astro';
                 <div class="ticket-form-section">
                     <p class="form-instructions">>> A RELLENAR POR EL CLIENTE:</p>
                     
-                    <form id="contact-form" class="ticket-form">
+                    <form id="contact-form" class="ticket-form" action="https://formsubmit.co/infocasitamanolo@gmail.com" method="POST" data-astro-reload>
+                        <input type="hidden" name="_subject" value="Nuevo ticket | Casita Manolo" />
+                        <input type="hidden" name="_template" value="table" />
+                        <input type="hidden" name="Fecha_UTC" id="submission-date" value="" />
                         <div class="form-row">
                             <label for="name">NOMBRE:</label>
-                            <input type="text" id="name" required autocomplete="off" />
+                            <input type="text" id="name" name="nombre" required autocomplete="name" maxlength="150" />
                         </div>
                         
                         <div class="form-row">
                             <label for="email">E-MAIL:</label>
-                            <input type="email" id="email" required autocomplete="off" />
+                            <input type="email" id="email" name="email" required autocomplete="email" maxlength="254" />
                         </div>
                         
                         <div class="form-row-col">
                             <label for="message">EL ENCARGO:</label>
-                            <textarea id="message" rows="3" required></textarea>
+                            <textarea id="message" name="encargo" rows="3" required maxlength="10000"></textarea>
                         </div>
 
                         <!-- El Botón es un Sello de Caucho Rojo -->
                         <div class="stamp-container">
                             <button type="submit" class="stamp-btn" id="submit-btn">
-                                PEDIR LA CUENTA
+                                ENVIAR EL TICKET
                             </button>
                         </div>
                     </form>
+                    <p class="contact-direct">También puedes escribirnos a <a href="mailto:infocasitamanolo@gmail.com">infocasitamanolo@gmail.com</a>.</p>
                 </div>
 
                 <div class="divider"></div>
@@ -90,10 +94,8 @@ import Layout from '../layouts/Layout.astro';
             </article>
         </div>
 
-        <!-- Notificación de envío -->
-        <div id="system-toast" class="system-toast">
-            [ OK ] COMANDA ENVIADA AL ESTUDIO.
-        </div>
+        <!-- Only the provider can confirm a submission; do not simulate success. -->
+        <div id="system-toast" class="system-toast" role="status" aria-live="polite"></div>
 
     </main>
 </Layout>
@@ -347,6 +349,10 @@ import Layout from '../layouts/Layout.astro';
         transform: scale(0.95) rotate(-2deg);
     }
 
+    .stamp-btn:disabled { opacity: 0.5; cursor: wait; }
+    .contact-direct { margin-top: 20px; font-size: 0.8rem; line-height: 1.7; text-align: center; overflow-wrap: anywhere; }
+    .contact-direct a { color: inherit; text-underline-offset: 3px; }
+
     /* ========================================================
        5. PIE DEL TICKET
        ======================================================== */
@@ -384,6 +390,8 @@ import Layout from '../layouts/Layout.astro';
         pointer-events: none;
         transition: all 0.4s var(--ease-out);
         z-index: 100;
+        max-width: calc(100vw - 32px);
+        text-align: center;
     }
 
     .system-toast.active {
@@ -405,32 +413,32 @@ import Layout from '../layouts/Layout.astro';
 
         const form = document.getElementById('contact-form') as HTMLFormElement;
         const toast = document.getElementById('system-toast');
-        const submitBtn = document.getElementById('submit-btn');
-        let toastTimer;
+        const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement | null;
+        const submissionDate = document.getElementById('submission-date') as HTMLInputElement | null;
 
         if (form && toast && submitBtn) {
-            form.addEventListener('submit', (e) => {
-                e.preventDefault(); 
-                
-                const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'PROCESANDO...';
-                submitBtn.style.opacity = '0.5';
-                
-                setTimeout(() => {
-                    form.reset();
-                    
-                    submitBtn.textContent = originalText;
-                    submitBtn.style.opacity = '0.8';
-
-                    toast.classList.add('active');
-                    
-                    clearTimeout(toastTimer);
-                    toastTimer = setTimeout(() => {
-                        toast.classList.remove('active');
-                    }, 4000);
-                    
-                }, 1500);
-            });
+            const lifetime = new AbortController();
+            const options = { signal: lifetime.signal };
+            const resetSubmit = () => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'ENVIAR EL TICKET';
+                toast.classList.remove('active');
+                toast.textContent = '';
+            };
+            resetSubmit();
+            form.addEventListener('submit', (event) => {
+                if (submitBtn.disabled) { event.preventDefault(); return; }
+                if (submissionDate) submissionDate.value = new Date().toISOString();
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'CONTINUANDO...';
+                toast.textContent = 'Continúa en la página de envío para completar el ticket.';
+                toast.classList.add('active');
+                // Native POST works without JavaScript, keeps FormSubmit's CAPTCHA,
+                // and lets the provider handle activation, errors and confirmation.
+                // Keep the user's fields intact when returning to this page.
+            }, options);
+            window.addEventListener('pageshow', resetSubmit, options);
+            document.addEventListener('astro:before-swap', () => lifetime.abort(), { once: true, signal: lifetime.signal });
         }
     });
 </script>
