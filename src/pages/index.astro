@@ -1,9 +1,13 @@
 ---
 // src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
+import RadioTV from '../components/RadioTV.astro';
 ---
 
 <Layout title="Casita Manolo | Home">
+
+    <!-- RADIO-TV: boton arriba a la derecha + panel con el dial -->
+    <RadioTV />
 
     <!-- CAPA VÍDEO (Modo Cine) -->
     <div class="media-layer" id="media-layer" role="dialog" aria-modal="true" aria-label="Vídeo del local">
@@ -54,11 +58,11 @@ import Layout from '../layouts/Layout.astro';
                 <g transform="translate(255, 470)"><g class="hint">
                     <rect class="hint-bg" x="-52" y="-14" width="104" height="28" rx="14" />
                     <text class="hint-text" x="0" y="4">LA CARTA</text>
-                    <text class="hint-sub" x="0" y="26">servicios</text>
                 </g></g>
             </a>
 
-            <!-- 2. MESA (decorativa) -->
+            <!-- 2. MESA + VINILOS (se mueven juntos en movil) -->
+            <g class="grupo-mesa">
             <g class="house-parts deco">
                 <ellipse cx="680" cy="350" rx="60" ry="12" class="line-art fill-bg" />
                 <line x1="640" y1="360" x2="630" y2="420" class="line-art" />
@@ -99,9 +103,9 @@ import Layout from '../layouts/Layout.astro';
                 <g transform="translate(680, 258)"><g class="hint hint-above">
                     <rect class="hint-bg" x="-78" y="-14" width="156" height="28" rx="14" />
                     <text class="hint-text" x="0" y="4">ARCHIVO MUSICAL</text>
-                    <text class="hint-sub" x="0" y="-22">portfolio</text>
                 </g></g>
             </a>
+            </g><!-- /grupo-mesa -->
 
             <!-- ============================================================
                  4. TABURETE  ->  /contacto
@@ -129,7 +133,6 @@ import Layout from '../layouts/Layout.astro';
                 <g transform="translate(800, 470)"><g class="hint">
                     <rect class="hint-bg" x="-56" y="-14" width="112" height="28" rx="14" />
                     <text class="hint-text" x="0" y="4">EL TICKET</text>
-                    <text class="hint-sub" x="0" y="26">contacto</text>
                 </g></g>
             </a>
 
@@ -160,7 +163,6 @@ import Layout from '../layouts/Layout.astro';
                 <g transform="translate(600, 470)"><g class="hint">
                     <rect class="hint-bg" x="-52" y="-14" width="104" height="28" rx="14" />
                     <text class="hint-text" x="0" y="4">GALERÍA</text>
-                    <text class="hint-sub" x="0" y="26">mesas y montajes</text>
                 </g></g>
             </a>
 
@@ -187,7 +189,6 @@ import Layout from '../layouts/Layout.astro';
                 <g transform="translate(400, 470)"><g class="hint">
                     <rect class="hint-bg" x="-58" y="-14" width="116" height="28" rx="14" />
                     <text class="hint-text" x="0" y="4">MODO CINE</text>
-                    <text class="hint-sub" x="0" y="26">vídeo del local</text>
                 </g></g>
             </g>
 
@@ -220,12 +221,11 @@ import Layout from '../layouts/Layout.astro';
                 <g transform="translate(410, 95)"><g class="hint hint-above">
                     <rect class="hint-bg" x="-88" y="-14" width="176" height="28" rx="14" />
                     <text class="hint-text" x="0" y="4">CLIENTES Y MARCAS</text>
-                    <text class="hint-sub" x="0" y="-22">quién ha pasado por aquí</text>
                 </g></g>
             </a>
 
             <!-- LÍNEA DE SUELO -->
-            <line x1="150" y1="420" x2="850" y2="420" stroke="var(--ink-color)" stroke-width="2" stroke-dasharray="8 12" opacity="0.2" stroke-linecap="round" class="deco" />
+            <line x1="150" y1="420" x2="850" y2="420" stroke="var(--ink-color)" stroke-width="2" stroke-dasharray="8 12" opacity="0.2" stroke-linecap="round" class="deco suelo" />
         </svg>
     </div>
 
@@ -233,11 +233,7 @@ import Layout from '../layouts/Layout.astro';
     <div class="branding fade-in-up" style="animation-delay: 0.3s;">
         <h1>Casita Manolo</h1>
         <p class="tagline">Music House Madrid</p>
-        <p class="status" id="nav-status" aria-live="polite"
-           data-idle-pointer="6 zonas interactivas — pasa el ratón o navega con Tab"
-           data-idle-touch="6 zonas interactivas — toca la que quieras">
-            6 zonas interactivas — pasa el ratón o navega con Tab
-        </p>
+        <p class="status" id="nav-status" aria-live="polite"></p>
     </div>
 
     <!-- TOAST NOTIFICATION -->
@@ -305,7 +301,6 @@ import Layout from '../layouts/Layout.astro';
     .hint { transition: transform 0.35s var(--ease-spring); }
     .hint-bg { fill: var(--bg-color); stroke: var(--ink-color); stroke-width: 1.5px; opacity: 0.35; transition: fill 0.3s var(--ease-out), stroke 0.3s var(--ease-out), opacity 0.3s var(--ease-out); }
     .hint-text { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-anchor: middle; fill: var(--ink-color); opacity: 0.6; transition: fill 0.3s var(--ease-out), opacity 0.3s var(--ease-out); pointer-events: none; }
-    .hint-sub { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; text-anchor: middle; fill: var(--ink-color); opacity: 0.35; transition: fill 0.3s var(--ease-out), opacity 0.3s var(--ease-out); pointer-events: none; }
 
     .item:hover .hint,
     .item:focus-visible .hint { transform: translateY(-3px); }
@@ -315,8 +310,6 @@ import Layout from '../layouts/Layout.astro';
     .item:focus-visible .hint-bg { fill: var(--accent-color); stroke: var(--accent-color); opacity: 1; }
     .item:hover .hint-text,
     .item:focus-visible .hint-text { fill: var(--bg-color); opacity: 1; }
-    .item:hover .hint-sub,
-    .item:focus-visible .hint-sub { fill: var(--accent-color); opacity: 1; }
     .item:hover .leader,
     .item:focus-visible .leader { stroke: var(--accent-color); opacity: 0.9; }
 
@@ -398,26 +391,71 @@ import Layout from '../layouts/Layout.astro';
     .branding h1 { font-size: clamp(1.6rem, 4.5vw, 3.2rem); font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; line-height: 1.2; margin-bottom: 0.4rem; }
     .tagline { font-size: 0.75rem; letter-spacing: 0.4em; text-transform: uppercase; opacity: 0.55; margin: 0 0 0.9rem; }
 
-    .status { display: inline-block; margin: 0; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; padding: 7px 16px; border-radius: 30px; border: 1px solid rgba(17, 35, 30, 0.15); opacity: 0.6; transition: opacity 0.3s var(--ease-out), color 0.3s var(--ease-out), border-color 0.3s var(--ease-out), background 0.3s var(--ease-out); }
+    .status:empty { border-color: transparent; padding: 7px 0; }
+    .status { display: inline-block; margin: 0; min-height: 1em; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; padding: 7px 16px; border-radius: 30px; border: 1px solid rgba(17, 35, 30, 0.15); opacity: 0.6; transition: opacity 0.3s var(--ease-out), color 0.3s var(--ease-out), border-color 0.3s var(--ease-out), background 0.3s var(--ease-out); }
     .status.active { opacity: 1; color: var(--bg-color); background: var(--ink-color); border-color: var(--ink-color); }
 
     .toast { position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%); background: var(--ink-color); color: var(--bg-color); padding: 12px 24px; border-radius: 30px; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0; transition: all 0.4s var(--ease-out); z-index: 100; pointer-events: none; }
     .toast.show { bottom: 40px; opacity: 1; }
 
     /* ========================================================
-       7. TACTIL: sin hover, todo tiene que verse ya
+       7. MOVIL: composicion vertical
+       El dibujo es 900x600 apaisado; en un movil eso deja dos tercios
+       de pantalla vacios y los objetos salen a 30px. Aqui recortamos el
+       viewBox a la casa (lo hace el script) y bajamos los muebles a una
+       fila debajo, sin escalar nada: al recortar, todo crece solo.
+       ======================================================== */
+    @media (max-width: 560px) {
+        /* La escena se ancla arriba y deja el pie para la marca */
+        .stage { top: 0; transform: translateX(-50%); height: 74dvh; max-width: none; }
+
+        /* El humo se sale del recorte y no aporta en pantalla pequena */
+        .smoke { display: none; }
+
+        /* Las lineas guia estorban cuando todo esta mas junto */
+        .leader { display: none; }
+
+        /* Muebles: del lateral a una fila bajo la casa */
+        #wine-group { transform: translate(55px, 210px); }
+        .grupo-mesa { transform: translate(-200px, 200px); }
+        #stool-group { transform: translate(-180px, 235px); }
+
+        /* Suelo: se acorta y se pega a la base de la casa */
+        .suelo { transform: translate(-50px, 15px) scaleX(0.514); transform-origin: 500px 420px; }
+
+        /* Etiquetas: en movil la pared queda grande y vacia, asi que las
+           de la puerta y la ventana se colocan encima de ella en vez de
+           amontonarse en la banda de abajo con la de los vinilos. */
+        #door-group .hint { transform: translate(5px, -180px); }
+        #window-group .hint { transform: translate(-105px, -75px); }
+        #stool-group .hint { transform: translate(-60px, -30px); }
+
+        /* En tactil no hay hover: la etiqueta del tejado no debe saltar */
+        #roof-clients-link:hover .hint,
+        #roof-clients-link:focus-visible .hint { transform: none; }
+
+        .hint-text { font-size: 13px; }
+        .hint-bg { opacity: 0.55; }
+
+        /* La marca, mas contenida para no competir con la casa */
+        .branding { bottom: 22px; }
+        .branding h1 { font-size: 1.45rem; letter-spacing: 0.22em; }
+        .tagline { font-size: 0.6rem; letter-spacing: 0.3em; }
+    }
+
+    /* ========================================================
+       8. TACTIL: sin hover, todo tiene que verse ya
        ======================================================== */
     @media (hover: none) {
         .hint-bg { opacity: 0.6; }
         .hint-text { opacity: 0.85; }
-        .hint-sub { opacity: 0.6; }
         .leader { opacity: 0.35; }
         .item:active .hint-bg { fill: var(--accent-color); stroke: var(--accent-color); opacity: 1; }
         .item:active .hint-text { fill: var(--bg-color); opacity: 1; }
     }
 
     /* ========================================================
-       8. MOVIMIENTO REDUCIDO
+       9. MOVIMIENTO REDUCIDO
        ======================================================== */
     @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after {
@@ -429,7 +467,6 @@ import Layout from '../layouts/Layout.astro';
         .fade-in-up { opacity: 1; transform: none; }
         .hint-bg { opacity: 0.6; }
         .hint-text { opacity: 0.9; }
-        .hint-sub { opacity: 0.6; }
     }
 </style>
 
@@ -442,23 +479,36 @@ import Layout from '../layouts/Layout.astro';
         const backdrop = document.getElementById('media-backdrop');
         const toast = document.getElementById('toast');
         const status = document.getElementById('nav-status');
-        // El mensaje en reposo cambia segun el dispositivo: el raton y el Tab
-        // no existen en tactil.
-        const isTouch = window.matchMedia('(hover: none)').matches;
-        const idleStatus =
-            (isTouch ? status?.dataset.idleTouch : status?.dataset.idlePointer) ?? '';
+        // En reposo la barra se queda vacia: solo habla cuando señalas una zona.
         let toastTimeout: ReturnType<typeof setTimeout>;
+
+        /* --------------------------------------------------
+           Recorte del lienzo en movil
+           El SVG es apaisado (900x600). En vertical lo recortamos a la
+           casa para que el dibujo llene la pantalla y las zonas crezcan;
+           el CSS de arriba baja los muebles dentro de ese recorte.
+           -------------------------------------------------- */
+        const svg = document.querySelector('.svg-layer');
+        const enMovil = window.matchMedia('(max-width: 560px)');
+
+        const ajustarLienzo = () => {
+            if (!svg) return;
+            svg.setAttribute(
+                'viewBox',
+                enMovil.matches ? '250 60 400 640' : '0 0 900 600'
+            );
+        };
+        ajustarLienzo();
+        enMovil.addEventListener('change', ajustarLienzo);
 
         /* --------------------------------------------------
            Barra de estado: dice a donde lleva lo que senalas
            -------------------------------------------------- */
         const setStatus = (text?: string) => {
             if (!status) return;
-            status.textContent = text ?? idleStatus;
+            status.textContent = text ?? '';
             status.classList.toggle('active', Boolean(text));
         };
-
-        setStatus(); // en tactil el texto por defecto del HTML no aplica
 
         document.querySelectorAll<SVGElement>('.item').forEach((item) => {
             const label = item.dataset.label ?? '';
