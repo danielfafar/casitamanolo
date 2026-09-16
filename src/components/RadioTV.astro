@@ -1,24 +1,22 @@
 ---
 // src/components/RadioTV.astro
 //
-// Televisor viejo con dial de emisoras. Cada posición del dial es un estilo
-// musical y suena de verdad: el dial cambia el src del <audio>.
+// Radio y televisión juntas: un televisor viejo cuya pantalla pone una escena
+// y cuyo dial cambia la música que suena sobre ella. Cada posición del dial es
+// una de las emociones de Radio Manolo.
 //
-// Las pistas van en /public/audio con el nombre de cada emisora. Mientras no
-// estén, la tele lo dice en pantalla ("SIN SEÑAL") en vez de quedarse muda sin
-// explicar por qué.
+// Pistas y escena salen de src/data/listening.ts, la misma fuente que usan
+// /radio y /television, así que para cambiar la música basta con tocar ahí.
+import { moods, televisionScene } from '../data/listening';
 
-const emisoras = [
-    { id: 'orquesta',    nombre: 'ORQUESTA',    dial: '88.2' },
-    { id: 'electronica', nombre: 'ELECTRÓNICA', dial: '91.7' },
-    { id: 'jazz',        nombre: 'JAZZ',        dial: '95.4' },
-    { id: 'folk',        nombre: 'FOLK',        dial: '99.1' },
-    { id: 'rock',        nombre: 'ROCK',        dial: '102.6' },
-    { id: 'ambient',     nombre: 'AMBIENT',     dial: '106.3' },
-];
+const emisoras = moods.map((m) => ({
+    nombre: m.name.toUpperCase(),
+    titulo: m.title,
+    src: m.source,
+}));
 
-// El dial recorre 240º repartidos entre todas las emisoras
-const ARCO = 240;
+// El dial recorre 270º repartidos entre las emisoras
+const ARCO = 270;
 const paso = ARCO / (emisoras.length - 1);
 ---
 
@@ -34,31 +32,52 @@ const paso = ARCO / (emisoras.length - 1);
 <!-- Panel del televisor -->
 <div class="tv-backdrop" id="tv-backdrop"></div>
 
-<section class="tv-panel" id="tv-panel" role="dialog" aria-modal="true" aria-label="Radio de la casa" hidden>
-
+<section
+    class="tv-panel"
+    id="tv-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Radio y televisión de la casa"
+    data-emisoras={JSON.stringify(emisoras)}
+    data-arco={ARCO}
+    hidden
+>
     <div class="tv-set">
-        <!-- Pantalla -->
+        <!-- Pantalla: la escena de fondo y el canal encima -->
         <div class="tv-screen-frame">
             <div class="tv-screen" id="tv-screen">
-                <div class="tv-static"></div>
-                <div class="tv-content">
-                    <p class="tv-station" id="tv-station">ORQUESTA</p>
-                    <p class="tv-freq" id="tv-freq">88.2 MHz</p>
-                    <div class="tv-eq" id="tv-eq" aria-hidden="true">
+                <video
+                    class="tv-video"
+                    id="tv-video"
+                    src={televisionScene.source}
+                    poster="/videos/demo-flower-poster.jpg"
+                    muted
+                    loop
+                    playsinline
+                    preload="none"
+                    aria-label={televisionScene.description}
+                ></video>
+                <div class="tv-static" aria-hidden="true"></div>
+
+                <div class="tv-osd">
+                    <p class="tv-station" id="tv-station">{emisoras[0].nombre}</p>
+                    <p class="tv-title" id="tv-title">{emisoras[0].titulo}</p>
+                    <div class="tv-eq" aria-hidden="true">
                         <span></span><span></span><span></span><span></span><span></span>
                     </div>
-                    <p class="tv-status" id="tv-status">APAGADA</p>
                 </div>
+
+                <p class="tv-status" id="tv-status">APAGADA</p>
                 <div class="tv-scanlines" aria-hidden="true"></div>
             </div>
         </div>
 
-        <!-- Consola inferior: dial + mando -->
+        <!-- Consola: dial + mandos -->
         <div class="tv-console">
             <div class="tv-dial-zone">
                 <div class="tv-dial">
                     <div class="tv-ticks" aria-hidden="true">
-                        {emisoras.map((e, i) => (
+                        {emisoras.map((_, i) => (
                             <span class="tv-tick" style={`--angle:${-ARCO / 2 + i * paso}deg`}></span>
                         ))}
                     </div>
@@ -71,7 +90,7 @@ const paso = ARCO / (emisoras.length - 1);
                         aria-valuemin="1"
                         aria-valuemax={emisoras.length}
                         aria-valuenow="1"
-                        aria-valuetext="Orquesta"
+                        aria-valuetext={emisoras[0].nombre}
                     >
                         <span class="tv-knob-mark"></span>
                     </div>
@@ -84,7 +103,7 @@ const paso = ARCO / (emisoras.length - 1);
                     <span class="tv-led" aria-hidden="true"></span>
                     <span id="tv-power-label">ENCENDER</span>
                 </button>
-                <ul class="tv-presets" id="tv-presets">
+                <ul class="tv-presets">
                     {emisoras.map((e, i) => (
                         <li>
                             <button class="tv-preset" data-index={i} aria-pressed={i === 0 ? 'true' : 'false'}>
@@ -97,110 +116,125 @@ const paso = ARCO / (emisoras.length - 1);
         </div>
     </div>
 
+    <p class="tv-credit"><a href={televisionScene.creditUrl}>{televisionScene.credit}</a></p>
+
     <button class="tv-close" id="tv-close" aria-label="Cerrar la radio">✕ <span class="tv-kbd">ESC</span></button>
 
     <audio id="tv-audio" loop preload="none"></audio>
 </section>
 
-<script define:vars={{ emisoras, ARCO, paso }}>
+<script>
+    // Script empaquetado: Astro lo ejecuta una sola vez aunque se navegue
+    // varias veces al home. Con define:vars iria en linea y se volveria a
+    // ejecutar en cada visita, duplicando los listeners hasta que el boton
+    // abria y cerraba a la vez. Por eso los datos llegan en data-emisoras.
+
+    type Emisora = { nombre: string; titulo: string; src: string };
+
     document.addEventListener('astro:page-load', () => {
-        const trigger = document.getElementById('tv-trigger');
         const panel = document.getElementById('tv-panel');
+        const trigger = document.getElementById('tv-trigger');
+        const knob = document.getElementById('tv-knob');
+        const audio = document.getElementById('tv-audio') as HTMLAudioElement | null;
+        const video = document.getElementById('tv-video') as HTMLVideoElement | null;
+        if (!panel || !trigger || !knob || !audio || !video) return;
+
+        const emisoras: Emisora[] = JSON.parse(panel.dataset.emisoras ?? '[]');
+        const ARCO = Number(panel.dataset.arco ?? 270);
+        const paso = ARCO / Math.max(emisoras.length - 1, 1);
+        if (!emisoras.length) return;
+
         const backdrop = document.getElementById('tv-backdrop');
         const closeBtn = document.getElementById('tv-close');
-        const knob = document.getElementById('tv-knob');
-        const dial = knob?.parentElement;
-        const audio = document.getElementById('tv-audio');
-        const powerBtn = document.getElementById('tv-power');
-        const powerLabel = document.getElementById('tv-power-label');
-        const screen = document.getElementById('tv-screen');
-        const nombreEl = document.getElementById('tv-station');
-        const freqEl = document.getElementById('tv-freq');
-        const statusEl = document.getElementById('tv-status');
-        const presets = [...document.querySelectorAll('.tv-preset')];
+        const dial = knob.parentElement as HTMLElement;
+        const powerBtn = document.getElementById('tv-power') as HTMLButtonElement;
+        const powerLabel = document.getElementById('tv-power-label') as HTMLElement;
+        const screen = document.getElementById('tv-screen') as HTMLElement;
+        const nombreEl = document.getElementById('tv-station') as HTMLElement;
+        const tituloEl = document.getElementById('tv-title') as HTMLElement;
+        const statusEl = document.getElementById('tv-status') as HTMLElement;
+        const presets = [...panel.querySelectorAll<HTMLButtonElement>('.tv-preset')];
 
-        if (!trigger || !panel || !knob || !audio) return;
+        // Todo lo que se engancha a document/window se suelta al salir de la
+        // pagina, para no dejar listeners huerfanos entre navegaciones.
+        const limpieza = new AbortController();
+        const { signal } = limpieza;
 
         let indice = 0;
         let encendida = false;
 
-        /* ----------------------------------------------------------
-           Sintonizar: mueve el dial y carga la pista de esa emisora
-           ---------------------------------------------------------- */
-        const anguloDe = (i) => -ARCO / 2 + i * paso;
-
-        function pintarEmisora() {
-            const e = emisoras[indice];
-            knob.style.transform = `rotate(${anguloDe(indice)}deg)`;
-            knob.setAttribute('aria-valuenow', String(indice + 1));
-            knob.setAttribute('aria-valuetext', e.nombre);
-            nombreEl.textContent = e.nombre;
-            freqEl.textContent = `${e.dial} MHz`;
-            presets.forEach((b, i) =>
-                b.setAttribute('aria-pressed', i === indice ? 'true' : 'false')
-            );
-        }
-
-        function estado(texto, clase) {
+        /* ------------------------------------------------------------------
+           Pantalla
+           ------------------------------------------------------------------ */
+        function estado(texto: string, clase: 'is-playing' | 'is-loading' | 'is-nosignal' | null) {
             statusEl.textContent = texto;
-            screen.classList.remove('is-playing', 'is-nosignal', 'is-loading');
+            screen.classList.remove('is-playing', 'is-loading', 'is-nosignal');
             if (clase) screen.classList.add(clase);
         }
 
-        function sintonizar(nuevo, reproducir = true) {
+        function pintarEmisora() {
+            const e = emisoras[indice];
+            knob.style.transform = `rotate(${-ARCO / 2 + indice * paso}deg)`;
+            knob.setAttribute('aria-valuenow', String(indice + 1));
+            knob.setAttribute('aria-valuetext', e.nombre);
+            nombreEl.textContent = e.nombre;
+            tituloEl.textContent = e.titulo;
+            presets.forEach((b, i) => b.setAttribute('aria-pressed', i === indice ? 'true' : 'false'));
+        }
+
+        /* ------------------------------------------------------------------
+           Sintonizar: mueve el dial y cambia la musica
+           ------------------------------------------------------------------ */
+        function sintonizar(nuevo: number) {
             indice = (nuevo + emisoras.length) % emisoras.length;
             pintarEmisora();
+            if (!encendida) return;
 
-            if (!encendida) {
-                estado('APAGADA', null);
-                return;
-            }
-
-            audio.src = `/audio/${emisoras[indice].id}.mp3`;
+            audio.src = emisoras[indice].src;
             estado('SINTONIZANDO', 'is-loading');
-
-            if (!reproducir) return;
             audio.play().catch(() => {
-                // Puede fallar por autoplay o porque el archivo no existe;
-                // el listener de 'error' ya cuenta el segundo caso.
+                // Si el archivo no existe, el listener de 'error' lo cuenta
             });
         }
 
         audio.addEventListener('playing', () => estado('EN ANTENA', 'is-playing'));
-        audio.addEventListener('waiting', () => estado('SINTONIZANDO', 'is-loading'));
+        audio.addEventListener('waiting', () => {
+            if (encendida) estado('SINTONIZANDO', 'is-loading');
+        });
         audio.addEventListener('error', () => {
-            if (encendida) estado('SIN SEÑAL · PISTA PENDIENTE', 'is-nosignal');
+            if (encendida) estado('SIN SEÑAL', 'is-nosignal');
         });
 
-        /* ----------------------------------------------------------
-           Encendido
-           ---------------------------------------------------------- */
+        /* ------------------------------------------------------------------
+           Encendido: la escena y la musica arrancan juntas
+           ------------------------------------------------------------------ */
         function alternarEncendido() {
             encendida = !encendida;
             powerBtn.setAttribute('aria-pressed', String(encendida));
             powerLabel.textContent = encendida ? 'APAGAR' : 'ENCENDER';
-            panel.classList.toggle('tv-on', encendida);
+            screen.classList.toggle('is-on', encendida);
 
             if (encendida) {
+                video.play().catch(() => {});
                 sintonizar(indice);
             } else {
                 audio.pause();
+                video.pause();
                 estado('APAGADA', null);
             }
         }
+        powerBtn.addEventListener('click', alternarEncendido);
 
-        powerBtn?.addEventListener('click', alternarEncendido);
-
-        /* ----------------------------------------------------------
+        /* ------------------------------------------------------------------
            Girar el dial: arrastre, teclado y presets
-           ---------------------------------------------------------- */
+           ------------------------------------------------------------------ */
         let arrastrando = false;
 
-        function indiceDesdeAngulo(ev) {
+        function indiceDesdePuntero(ev: PointerEvent) {
             const r = dial.getBoundingClientRect();
             const cx = r.left + r.width / 2;
             const cy = r.top + r.height / 2;
-            // 0º = arriba, positivo en sentido horario
+            // 0º arriba, positivo en sentido horario
             let ang = (Math.atan2(ev.clientX - cx, cy - ev.clientY) * 180) / Math.PI;
             ang = Math.max(-ARCO / 2, Math.min(ARCO / 2, ang));
             return Math.round((ang + ARCO / 2) / paso);
@@ -211,84 +245,97 @@ const paso = ARCO / (emisoras.length - 1);
             knob.setPointerCapture(ev.pointerId);
             knob.classList.add('is-grabbing');
         });
-
         knob.addEventListener('pointermove', (ev) => {
             if (!arrastrando) return;
-            const nuevo = indiceDesdeAngulo(ev);
+            const nuevo = indiceDesdePuntero(ev);
             if (nuevo !== indice) sintonizar(nuevo);
         });
-
-        const soltar = (ev) => {
+        const soltar = (ev: PointerEvent) => {
             if (!arrastrando) return;
             arrastrando = false;
             knob.classList.remove('is-grabbing');
-            if (ev.pointerId !== undefined && knob.hasPointerCapture?.(ev.pointerId)) {
-                knob.releasePointerCapture(ev.pointerId);
-            }
+            if (knob.hasPointerCapture(ev.pointerId)) knob.releasePointerCapture(ev.pointerId);
         };
         knob.addEventListener('pointerup', soltar);
         knob.addEventListener('pointercancel', soltar);
 
         knob.addEventListener('keydown', (ev) => {
-            if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') {
-                ev.preventDefault();
-                sintonizar(indice + 1);
-            } else if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') {
-                ev.preventDefault();
-                sintonizar(indice - 1);
-            } else if (ev.key === 'Home') {
-                ev.preventDefault();
-                sintonizar(0);
-            } else if (ev.key === 'End') {
-                ev.preventDefault();
-                sintonizar(emisoras.length - 1);
-            }
+            const teclas: Record<string, number> = {
+                ArrowRight: indice + 1,
+                ArrowUp: indice + 1,
+                ArrowLeft: indice - 1,
+                ArrowDown: indice - 1,
+                Home: 0,
+                End: emisoras.length - 1,
+            };
+            if (!(ev.key in teclas)) return;
+            ev.preventDefault();
+            sintonizar(teclas[ev.key]);
         });
 
-        presets.forEach((b) =>
-            b.addEventListener('click', () => sintonizar(Number(b.dataset.index)))
-        );
+        presets.forEach((b) => b.addEventListener('click', () => sintonizar(Number(b.dataset.index))));
 
-        /* ----------------------------------------------------------
+        /* ------------------------------------------------------------------
            Abrir y cerrar el panel
-           ---------------------------------------------------------- */
+           ------------------------------------------------------------------ */
         function abrir() {
             panel.hidden = false;
             // Forzamos el calculo de estilo para que la transicion arranque
             // desde el estado cerrado. Con requestAnimationFrame el panel se
-            // quedaba a medias si la pestana no estaba visible, porque el
-            // navegador no ejecuta esos callbacks en segundo plano.
+            // quedaba a medias si la pestana no estaba visible.
             void panel.offsetHeight;
             panel.classList.add('is-open');
             backdrop?.classList.add('is-open');
             trigger.setAttribute('aria-expanded', 'true');
-            document.body.classList.add('tv-abierta');
-            powerBtn?.focus();
+            if (encendida) video.play().catch(() => {});
+            powerBtn.focus();
         }
 
         function cerrar() {
             panel.classList.remove('is-open');
             backdrop?.classList.remove('is-open');
             trigger.setAttribute('aria-expanded', 'false');
-            document.body.classList.remove('tv-abierta');
+            // La musica sigue sonando; la escena no hace falta si no se ve
+            video.pause();
             trigger.focus();
-            // la música sigue sonando aunque cierres el panel
             setTimeout(() => {
                 if (!panel.classList.contains('is-open')) panel.hidden = true;
             }, 400);
         }
 
-        trigger.addEventListener('click', () => {
-            panel.classList.contains('is-open') ? cerrar() : abrir();
-        });
+        trigger.addEventListener('click', () => (panel.classList.contains('is-open') ? cerrar() : abrir()));
         closeBtn?.addEventListener('click', cerrar);
         backdrop?.addEventListener('click', cerrar);
-        document.addEventListener('keydown', (ev) => {
-            if (ev.key === 'Escape' && panel.classList.contains('is-open')) cerrar();
-        });
+        document.addEventListener(
+            'keydown',
+            (ev) => {
+                if (ev.key === 'Escape' && panel.classList.contains('is-open')) cerrar();
+            },
+            { signal }
+        );
 
-        // Si navegas a otra página, la radio se calla
-        document.addEventListener('astro:before-swap', () => audio.pause(), { once: true });
+        // Chrome pausa los videos silenciados de las pestanas ocultas. La
+        // musica sigue, pero al volver la escena se quedaba congelada.
+        document.addEventListener(
+            'visibilitychange',
+            () => {
+                if (document.visibilityState === 'visible' && encendida && panel.classList.contains('is-open')) {
+                    video.play().catch(() => {});
+                }
+            },
+            { signal }
+        );
+
+        // Al irse a otra pagina: silencio y fuera listeners
+        document.addEventListener(
+            'astro:before-swap',
+            () => {
+                audio.pause();
+                video.pause();
+                limpieza.abort();
+            },
+            { once: true, signal }
+        );
 
         pintarEmisora();
         estado('APAGADA', null);
@@ -337,8 +384,6 @@ const paso = ARCO / (emisoras.length - 1);
         transform: scale(1.04);
     }
     .tv-trigger:active { transform: scale(0.96); }
-
-    /* El botón late despacio mientras la radio suena */
     .tv-trigger[aria-expanded='true'] { background: var(--ink-color, #11231E); border-color: var(--ink-color, #11231E); color: #F4F1EC; }
 
     /* ========================================================
@@ -393,85 +438,94 @@ const paso = ARCO / (emisoras.length - 1);
         border-radius: 10px / 14px;
         overflow: hidden;
         background: radial-gradient(ellipse at 50% 45%, #14302a 0%, #08150f 75%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        color: #8ee4b8;
+        color: #F4F1EC;
     }
 
-    .tv-content { position: relative; z-index: 2; padding: 0 12px; }
+    /* La escena solo se ve con la tele encendida */
+    .tv-video {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        filter: saturate(0.85) contrast(1.05);
+        transition: opacity 0.6s ease;
+    }
+    .tv-screen.is-on .tv-video { opacity: 1; }
+
+    /* Rótulo del canal, abajo a la izquierda como en una tele */
+    .tv-osd {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 2;
+        padding: 30px 16px 14px;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.65));
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+    .tv-screen.is-on .tv-osd { opacity: 1; }
 
     .tv-station {
         margin: 0;
-        font-size: clamp(1.1rem, 5vw, 1.7rem);
+        font-size: clamp(1rem, 4.5vw, 1.4rem);
         font-weight: 700;
         letter-spacing: 0.16em;
-        opacity: 0.25;
-        transition: opacity 0.3s ease, text-shadow 0.3s ease;
+        text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
     }
-    .tv-freq {
-        margin: 4px 0 0;
+    .tv-title {
+        margin: 2px 0 0;
         font-size: 0.65rem;
-        letter-spacing: 0.3em;
-        opacity: 0.15;
-        transition: opacity 0.3s ease;
-    }
-    .tv-status {
-        margin: 12px 0 0;
-        font-size: 0.55rem;
-        letter-spacing: 0.25em;
-        opacity: 0.5;
+        letter-spacing: 0.12em;
+        opacity: 0.8;
     }
 
-    /* Con la tele encendida la pantalla se ilumina */
-    .tv-screen.is-playing .tv-station,
-    .tv-screen.is-loading .tv-station,
-    .tv-screen.is-nosignal .tv-station { opacity: 1; text-shadow: 0 0 14px rgba(142, 228, 184, 0.55); }
-    .tv-screen.is-playing .tv-freq,
-    .tv-screen.is-loading .tv-freq,
-    .tv-screen.is-nosignal .tv-freq { opacity: 0.6; }
-    .tv-screen.is-nosignal { color: #e8b059; }
-
-    /* Ecualizador: solo se mueve cuando suena de verdad */
     .tv-eq {
+        position: absolute;
+        right: 16px;
+        bottom: 16px;
         display: flex;
-        justify-content: center;
         align-items: flex-end;
-        gap: 4px;
-        height: 22px;
-        margin-top: 10px;
+        gap: 3px;
+        height: 18px;
         opacity: 0;
         transition: opacity 0.3s ease;
     }
-    .tv-eq span {
-        width: 4px;
-        height: 4px;
-        border-radius: 1px;
-        background: currentColor;
-    }
+    .tv-eq span { width: 3px; height: 4px; border-radius: 1px; background: #F4F1EC; }
     .tv-screen.is-playing .tv-eq { opacity: 0.9; }
     .tv-screen.is-playing .tv-eq span { animation: eq 0.9s ease-in-out infinite alternate; }
     .tv-screen.is-playing .tv-eq span:nth-child(2) { animation-delay: -0.2s; }
     .tv-screen.is-playing .tv-eq span:nth-child(3) { animation-delay: -0.5s; }
     .tv-screen.is-playing .tv-eq span:nth-child(4) { animation-delay: -0.3s; }
     .tv-screen.is-playing .tv-eq span:nth-child(5) { animation-delay: -0.7s; }
-    @keyframes eq { from { height: 4px; } to { height: 20px; } }
+    @keyframes eq { from { height: 4px; } to { height: 16px; } }
 
-    /* Nieve: solo cuando no hay pista */
+    /* Estado: centrado cuando está apagada, discreto arriba cuando suena */
+    .tv-status {
+        position: absolute;
+        z-index: 2;
+        inset: 0;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        font-size: 0.6rem;
+        letter-spacing: 0.3em;
+        color: #8ee4b8;
+        opacity: 0.45;
+        transition: opacity 0.3s ease;
+    }
+    .tv-screen.is-on .tv-status { inset: 12px 14px auto auto; display: block; font-size: 0.5rem; opacity: 0.75; }
+    .tv-screen.is-nosignal .tv-status { color: #e8b059; }
+
     .tv-static {
         position: absolute;
         inset: 0;
         z-index: 1;
         opacity: 0;
         transition: opacity 0.3s ease;
-        background-image: repeating-linear-gradient(
-            0deg,
-            rgba(255, 255, 255, 0.07) 0px,
-            rgba(255, 255, 255, 0.07) 1px,
-            transparent 1px,
-            transparent 3px
-        );
+        background-image: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.09) 0px, rgba(255, 255, 255, 0.09) 1px, transparent 1px, transparent 3px);
     }
     .tv-screen.is-nosignal .tv-static { opacity: 1; animation: nieve 0.35s steps(2) infinite; }
     @keyframes nieve { to { transform: translateY(3px); } }
@@ -481,13 +535,7 @@ const paso = ARCO / (emisoras.length - 1);
         inset: 0;
         z-index: 3;
         pointer-events: none;
-        background-image: repeating-linear-gradient(
-            0deg,
-            rgba(0, 0, 0, 0.22) 0px,
-            rgba(0, 0, 0, 0.22) 1px,
-            transparent 1px,
-            transparent 3px
-        );
+        background-image: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0px, rgba(0, 0, 0, 0.2) 1px, transparent 1px, transparent 3px);
     }
 
     /* ========================================================
@@ -596,29 +644,35 @@ const paso = ARCO / (emisoras.length - 1);
         margin: 10px 0 0;
         padding: 0;
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         gap: 5px;
     }
     .tv-preset {
         width: 100%;
-        padding: 7px 2px;
+        padding: 8px 2px;
         border-radius: 4px;
         border: 1px solid rgba(244, 241, 236, 0.14);
         background: rgba(0, 0, 0, 0.22);
         color: rgba(244, 241, 236, 0.6);
         font-family: inherit;
-        font-size: 0.45rem;
+        font-size: 0.5rem;
         font-weight: 700;
         letter-spacing: 0.1em;
         cursor: pointer;
         transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
     }
     .tv-preset:hover { color: #F4F1EC; border-color: rgba(244, 241, 236, 0.4); }
-    .tv-preset[aria-pressed='true'] {
-        background: #D74F42;
-        border-color: #D74F42;
-        color: #F4F1EC;
+    .tv-preset[aria-pressed='true'] { background: #D74F42; border-color: #D74F42; color: #F4F1EC; }
+
+    .tv-credit {
+        margin: 10px 0 0;
+        text-align: center;
+        font-family: 'Space Mono', monospace;
+        font-size: 0.5rem;
+        letter-spacing: 0.05em;
     }
+    .tv-credit a { color: rgba(244, 241, 236, 0.4); }
+    .tv-credit a:hover { color: rgba(244, 241, 236, 0.8); }
 
     /* ========================================================
        CERRAR
@@ -644,10 +698,9 @@ const paso = ARCO / (emisoras.length - 1);
     .tv-kbd { font-size: 0.55rem; border: 1px solid currentColor; border-radius: 3px; padding: 1px 4px; opacity: 0.7; }
 
     /* ========================================================
-       MÓVIL
+       MÓVIL: todo lo que se toca pasa de 44px de alto
        ======================================================== */
     @media (max-width: 560px) {
-        /* Todo lo que se toca pasa de 44px de alto */
         .tv-trigger { top: 14px; right: 14px; padding: 13px 16px; }
         .tv-set { padding: 16px 16px 14px; }
         .tv-console { flex-direction: column; gap: 14px; }
@@ -656,7 +709,7 @@ const paso = ARCO / (emisoras.length - 1);
         .tv-knob { width: 76px; height: 76px; }
         .tv-buttons { width: 100%; }
         .tv-power { padding: 14px 12px; font-size: 0.65rem; }
-        .tv-preset { padding: 15px 2px; font-size: 0.52rem; }
+        .tv-preset { padding: 15px 2px; font-size: 0.56rem; }
         .tv-close { top: -52px; padding: 12px 16px; min-height: 44px; }
     }
 
