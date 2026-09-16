@@ -7,6 +7,9 @@
 //
 // Pistas y escena salen de src/data/listening.ts, la misma fuente que usan
 // /radio y /television, así que para cambiar la música basta con tocar ahí.
+//
+// El componente no trae botón propio: el panel se abre desde cualquier
+// elemento con data-radio-trigger (en el home, el satélite de la escena).
 import { moods, televisionScene } from '../data/listening';
 
 const emisoras = moods.map((m) => ({
@@ -19,15 +22,6 @@ const emisoras = moods.map((m) => ({
 const ARCO = 270;
 const paso = ARCO / (emisoras.length - 1);
 ---
-
-<!-- Botón de encendido, arriba a la derecha -->
-<button class="tv-trigger" id="tv-trigger" aria-expanded="false" aria-controls="tv-panel">
-    <svg viewBox="0 0 24 20" aria-hidden="true">
-        <rect x="1.5" y="5.5" width="21" height="13" rx="2" />
-        <path d="M7 1.5 L12 5.5 L17 1.5" />
-    </svg>
-    <span>RADIO</span>
-</button>
 
 <!-- Panel del televisor -->
 <div class="tv-backdrop" id="tv-backdrop"></div>
@@ -133,11 +127,14 @@ const paso = ARCO / (emisoras.length - 1);
 
     document.addEventListener('astro:page-load', () => {
         const panel = document.getElementById('tv-panel');
-        const trigger = document.getElementById('tv-trigger');
         const knob = document.getElementById('tv-knob');
         const audio = document.getElementById('tv-audio') as HTMLAudioElement | null;
         const video = document.getElementById('tv-video') as HTMLVideoElement | null;
-        if (!panel || !trigger || !knob || !audio || !video) return;
+        if (!panel || !knob || !audio || !video) return;
+
+        // Lo que abre el panel: cualquier elemento con data-radio-trigger
+        const disparadores = [...document.querySelectorAll<HTMLElement | SVGElement>('[data-radio-trigger]')];
+        let origen: HTMLElement | SVGElement | null = null;
 
         const emisoras: Emisora[] = JSON.parse(panel.dataset.emisoras ?? '[]');
         const ARCO = Number(panel.dataset.arco ?? 270);
@@ -278,7 +275,8 @@ const paso = ARCO / (emisoras.length - 1);
         /* ------------------------------------------------------------------
            Abrir y cerrar el panel
            ------------------------------------------------------------------ */
-        function abrir() {
+        function abrir(desde: HTMLElement | SVGElement | null) {
+            origen = desde;
             panel.hidden = false;
             // Forzamos el calculo de estilo para que la transicion arranque
             // desde el estado cerrado. Con requestAnimationFrame el panel se
@@ -286,7 +284,7 @@ const paso = ARCO / (emisoras.length - 1);
             void panel.offsetHeight;
             panel.classList.add('is-open');
             backdrop?.classList.add('is-open');
-            trigger.setAttribute('aria-expanded', 'true');
+            disparadores.forEach((d) => d.setAttribute('aria-expanded', 'true'));
             if (encendida) video.play().catch(() => {});
             powerBtn.focus();
         }
@@ -294,16 +292,28 @@ const paso = ARCO / (emisoras.length - 1);
         function cerrar() {
             panel.classList.remove('is-open');
             backdrop?.classList.remove('is-open');
-            trigger.setAttribute('aria-expanded', 'false');
+            disparadores.forEach((d) => d.setAttribute('aria-expanded', 'false'));
             // La musica sigue sonando; la escena no hace falta si no se ve
             video.pause();
-            trigger.focus();
+            origen?.focus();
             setTimeout(() => {
                 if (!panel.classList.contains('is-open')) panel.hidden = true;
             }, 400);
         }
 
-        trigger.addEventListener('click', () => (panel.classList.contains('is-open') ? cerrar() : abrir()));
+        const alternar = (d: HTMLElement | SVGElement) => (panel.classList.contains('is-open') ? cerrar() : abrir(d));
+        disparadores.forEach((d) => {
+            d.addEventListener('click', () => alternar(d));
+            // Un <g role="button"> no responde al teclado por si solo
+            if (d.tagName.toLowerCase() !== 'button') {
+                d.addEventListener('keydown', (ev) => {
+                    const tecla = (ev as KeyboardEvent).key;
+                    if (tecla !== 'Enter' && tecla !== ' ') return;
+                    ev.preventDefault();
+                    alternar(d);
+                });
+            }
+        });
         closeBtn?.addEventListener('click', cerrar);
         backdrop?.addEventListener('click', cerrar);
         document.addEventListener(
@@ -343,49 +353,6 @@ const paso = ARCO / (emisoras.length - 1);
 </script>
 
 <style>
-    /* ========================================================
-       BOTÓN DE ARRIBA
-       ======================================================== */
-    .tv-trigger {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 60;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 9px 16px;
-        border-radius: 30px;
-        border: 1px solid rgba(17, 35, 30, 0.25);
-        background: rgba(244, 241, 236, 0.75);
-        backdrop-filter: blur(6px);
-        color: var(--ink-color, #11231E);
-        font-family: 'Space Mono', monospace;
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 0.18em;
-        cursor: pointer;
-        transition: transform 0.25s var(--ease-spring, ease), background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
-    }
-    .tv-trigger svg {
-        width: 17px;
-        height: auto;
-        fill: none;
-        stroke: currentColor;
-        stroke-width: 1.8;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-    }
-    .tv-trigger:hover,
-    .tv-trigger:focus-visible {
-        background: var(--accent-color, #D74F42);
-        border-color: var(--accent-color, #D74F42);
-        color: #F4F1EC;
-        transform: scale(1.04);
-    }
-    .tv-trigger:active { transform: scale(0.96); }
-    .tv-trigger[aria-expanded='true'] { background: var(--ink-color, #11231E); border-color: var(--ink-color, #11231E); color: #F4F1EC; }
-
     /* ========================================================
        PANEL
        ======================================================== */
@@ -701,7 +668,6 @@ const paso = ARCO / (emisoras.length - 1);
        MÓVIL: todo lo que se toca pasa de 44px de alto
        ======================================================== */
     @media (max-width: 560px) {
-        .tv-trigger { top: 14px; right: 14px; padding: 13px 16px; }
         .tv-set { padding: 16px 16px 14px; }
         .tv-console { flex-direction: column; gap: 14px; }
         .tv-dial { width: 118px; height: 118px; }

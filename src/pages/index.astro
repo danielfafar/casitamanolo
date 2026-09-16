@@ -23,11 +23,88 @@ import RadioTV from '../components/RadioTV.astro';
     <div class="stage">
         <svg class="svg-layer fade-in-up" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" role="navigation" aria-label="Mapa interactivo de la casa">
 
-            <!-- CHIMENEA Y HUMO -->
+            <!-- CHIMENEA: en vez de humo salen notas -->
             <g class="house-parts deco">
                 <rect x="520" y="160" width="30" height="40" class="line-art fill-bg" />
-                <path d="M 535,150 Q 520,120 540,90 T 530,40" class="smoke" />
-                <path d="M 545,130 Q 560,100 550,70 T 560,20" class="smoke smoke-2" />
+                <g transform="translate(535, 152)" aria-hidden="true">
+                    <!-- corchea -->
+                    <g class="nota nota-1">
+                        <ellipse cx="0" cy="0" rx="6" ry="4.5" transform="rotate(-20)" class="nota-cabeza" />
+                        <line x1="5.2" y1="-1.8" x2="5.2" y2="-24" class="nota-trazo" />
+                        <path d="M 5.2,-24 Q 14,-19 12.5,-9" class="nota-trazo" />
+                    </g>
+                    <!-- dos corcheas unidas -->
+                    <g class="nota nota-2">
+                        <ellipse cx="0" cy="0" rx="6" ry="4.5" transform="rotate(-20)" class="nota-cabeza" />
+                        <ellipse cx="15" cy="-4" rx="6" ry="4.5" transform="rotate(-20 15 -4)" class="nota-cabeza" />
+                        <line x1="5.2" y1="-1.8" x2="5.2" y2="-24" class="nota-trazo" />
+                        <line x1="20.2" y1="-5.8" x2="20.2" y2="-28" class="nota-trazo" />
+                        <line x1="5.2" y1="-24" x2="20.2" y2="-28" class="nota-barra" />
+                    </g>
+                    <!-- negra -->
+                    <g class="nota nota-3">
+                        <ellipse cx="0" cy="0" rx="6" ry="4.5" transform="rotate(-20)" class="nota-cabeza" />
+                        <line x1="5.2" y1="-1.8" x2="5.2" y2="-24" class="nota-trazo" />
+                    </g>
+                </g>
+            </g>
+
+            <!-- ============================================================
+                 0. SATELITE  ->  abre la radio-TV (no navega)
+                 Flota en el cielo y emite ondas hacia la casa. Sustituye al
+                 boton de la esquina, que casi no se veia.
+                 ============================================================ -->
+            <g class="item" id="satellite-group" role="button" tabindex="0"
+               data-radio-trigger aria-controls="tv-panel" aria-expanded="false"
+               aria-label="Radio: abrir la radio y la televisión de la casa"
+               data-label="Radio" data-desc="Sintoniza la radio y la televisión de la casa">
+                <title>Radio — radio y televisión de la casa</title>
+                <rect x="176" y="48" width="122" height="138" fill="transparent" />
+                <rect class="focus-ring" x="176" y="48" width="122" height="138" rx="14" />
+
+                <g transform="translate(240, 96)">
+                    <g class="satelite-hover">
+                        <g class="satelite">
+                            <!-- ondas hacia la casa -->
+                            <path class="onda onda-1" d="M 23.5,22.3 A 12 12 0 0 1 13.6,29.2" />
+                            <path class="onda onda-2" d="M 30.7,25.7 A 20 20 0 0 1 14.3,37.1" />
+                            <path class="onda onda-3" d="M 38.0,29.0 A 28 28 0 0 1 15.0,45.1" />
+
+                            <!-- antena -->
+                            <line x1="0" y1="-12" x2="0" y2="-23" class="line-art sat-fino" />
+                            <circle cx="0" cy="-26" r="3.5" class="sat-luz" />
+
+                            <!-- paneles solares -->
+                            <line x1="-18" y1="0" x2="-12" y2="0" class="line-art sat-fino" />
+                            <line x1="12" y1="0" x2="18" y2="0" class="line-art sat-fino" />
+                            <rect x="-46" y="-9" width="28" height="18" rx="2" class="sat-panel" />
+                            <rect x="18" y="-9" width="28" height="18" rx="2" class="sat-panel" />
+                            <line x1="-36.7" y1="-9" x2="-36.7" y2="9" class="sat-rejilla" />
+                            <line x1="-27.3" y1="-9" x2="-27.3" y2="9" class="sat-rejilla" />
+                            <line x1="27.3" y1="-9" x2="27.3" y2="9" class="sat-rejilla" />
+                            <line x1="36.7" y1="-9" x2="36.7" y2="9" class="sat-rejilla" />
+
+                            <!-- cuerpo -->
+                            <rect x="-12" y="-12" width="24" height="24" rx="4" class="line-art fill-bg" />
+
+                            <!-- plato, orientado hacia la casa -->
+                            <g transform="rotate(-35)">
+                                <line x1="0" y1="12" x2="0" y2="16" class="line-art sat-fino" />
+                                <path d="M -10,22 A 11 6 0 0 1 10,22" class="line-art fill-bg sat-fino" />
+                                <circle cx="0" cy="27" r="1.8" class="nota-cabeza" />
+                            </g>
+                        </g>
+                    </g>
+                </g>
+
+                <g transform="translate(296, 66)"><g class="pulse" style="--delay: -0.9s">
+                    <circle class="pulse-ring" r="7" /><circle class="pulse-dot" r="4.5" />
+                </g></g>
+
+                <g transform="translate(240, 172)"><g class="hint">
+                    <rect class="hint-bg" x="-42" y="-14" width="84" height="28" rx="14" />
+                    <text class="hint-text" x="0" y="4">RADIO</text>
+                </g></g>
             </g>
 
             <!-- ============================================================
@@ -232,7 +309,7 @@ import RadioTV from '../components/RadioTV.astro';
     <!-- BRANDING + BARRA DE ESTADO -->
     <div class="branding fade-in-up" style="animation-delay: 0.3s;">
         <h1>Casita Manolo</h1>
-        <p class="tagline">Music House Madrid</p>
+        <p class="tagline">Music House Madrid - NY</p>
         <p class="status" id="nav-status" aria-live="polite"></p>
     </div>
 
@@ -379,9 +456,56 @@ import RadioTV from '../components/RadioTV.astro';
     #roof-clients-link:hover .leader,
     #roof-clients-link:focus-visible .leader { opacity: 0; }
 
-    .smoke { stroke: var(--ink-color); stroke-width: 4px; stroke-linecap: round; fill: none; opacity: 0; animation: float 4s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center bottom; }
-    .smoke-2 { animation-delay: -1.5s; }
-    @keyframes float { 0% { transform: translateY(0) skewX(0deg); opacity: 0.8; } 100% { transform: translateY(-15px) skewX(5deg); opacity: 0.2; } }
+    /* Notas que salen de la chimenea: nacen pequenas, suben meciendose
+       y se desvanecen. Tres a destiempo para que siempre haya alguna. */
+    .nota-cabeza { fill: var(--ink-color); }
+    .nota-trazo { stroke: var(--ink-color); stroke-width: 2.5px; stroke-linecap: round; fill: none; }
+    .nota-barra { stroke: var(--ink-color); stroke-width: 4.5px; stroke-linecap: round; }
+    .nota { opacity: 0; transform-box: fill-box; transform-origin: center; animation: notaSube 5.4s ease-in-out infinite; }
+    .nota-2 { animation-name: notaSubeB; animation-delay: -1.8s; }
+    .nota-3 { animation-delay: -3.6s; }
+    @keyframes notaSube {
+        0%   { transform: translate(0, 0) rotate(-6deg) scale(0.55); opacity: 0; }
+        12%  { opacity: 0.9; }
+        50%  { transform: translate(-10px, -52px) rotate(8deg) scale(0.85); }
+        80%  { opacity: 0.35; }
+        100% { transform: translate(4px, -104px) rotate(-4deg) scale(1); opacity: 0; }
+    }
+    @keyframes notaSubeB {
+        0%   { transform: translate(0, 0) rotate(6deg) scale(0.55); opacity: 0; }
+        12%  { opacity: 0.9; }
+        50%  { transform: translate(12px, -50px) rotate(-8deg) scale(0.85); }
+        80%  { opacity: 0.35; }
+        100% { transform: translate(-2px, -100px) rotate(5deg) scale(1); opacity: 0; }
+    }
+
+    /* Satelite: flota en bucle y emite ondas hacia la casa */
+    .sat-fino { stroke-width: 3px; }
+    .sat-panel { fill: var(--ink-color); stroke: var(--ink-color); stroke-width: 2px; }
+    .sat-rejilla { stroke: var(--bg-color); stroke-width: 1.5px; opacity: 0.55; }
+    .sat-luz { fill: var(--accent-color); }
+
+    .satelite { transform-box: fill-box; transform-origin: center; animation: orbita 6s ease-in-out infinite; }
+    @keyframes orbita {
+        0%, 100% { transform: translate(0, 0) rotate(-4deg); }
+        50%      { transform: translate(3px, -8px) rotate(5deg); }
+    }
+
+    .satelite-hover { transform-box: fill-box; transform-origin: center; transition: transform 0.4s var(--ease-spring); }
+    #satellite-group:hover .satelite-hover,
+    #satellite-group:focus-visible .satelite-hover { transform: scale(1.14); }
+
+    .onda { fill: none; stroke: var(--accent-color); stroke-width: 2.5px; stroke-linecap: round; opacity: 0; animation: onda 2.4s ease-out infinite; }
+    .onda-2 { animation-delay: 0.35s; }
+    .onda-3 { animation-delay: 0.7s; }
+    @keyframes onda {
+        0%       { opacity: 0; }
+        25%      { opacity: 0.85; }
+        60%, 100% { opacity: 0; }
+    }
+    /* Al señalarlo, la señal se acelera */
+    #satellite-group:hover .onda,
+    #satellite-group:focus-visible .onda { animation-duration: 1.1s; }
 
     /* ========================================================
        5. ENTRADA
@@ -414,9 +538,6 @@ import RadioTV from '../components/RadioTV.astro';
         /* La escena se ancla arriba y deja el pie para la marca */
         .stage { top: 0; transform: translateX(-50%); height: 74dvh; max-width: none; }
 
-        /* El humo se sale del recorte y no aporta en pantalla pequena */
-        .smoke { display: none; }
-
         /* Las lineas guia estorban cuando todo esta mas junto */
         .leader { display: none; }
 
@@ -435,9 +556,13 @@ import RadioTV from '../components/RadioTV.astro';
         #window-group .hint { transform: translate(-105px, -75px); }
         #stool-group .hint { transform: translate(-60px, -30px); }
 
-        /* En tactil no hay hover: la etiqueta del tejado no debe saltar */
+        /* El satelite entra por la izquierda del recorte. Para dejarle
+           sitio arriba, la etiqueta del tejado baja al propio tejado; y en
+           tactil no hay hover, asi que tampoco debe saltar al tocarla. */
+        #satellite-group { transform: translate(88px, 10px); }
+        #roof-clients-link .hint,
         #roof-clients-link:hover .hint,
-        #roof-clients-link:focus-visible .hint { transform: none; }
+        #roof-clients-link:focus-visible .hint { transform: translate(40px, 125px); }
 
         .hint-text { font-size: 13px; }
         .hint-bg { opacity: 0.55; }
@@ -472,6 +597,15 @@ import RadioTV from '../components/RadioTV.astro';
         .fade-in-up { opacity: 1; transform: none; }
         .hint-bg { opacity: 0.6; }
         .hint-text { opacity: 0.9; }
+
+        /* Sin animacion las notas se quedan quietas en el aire en vez de
+           desaparecer (la animacion termina en opacidad 0) */
+        .nota { animation: none; opacity: 0.7; }
+        .nota-1 { transform: translate(-8px, -38px) scale(0.8); }
+        .nota-2 { transform: translate(10px, -72px) scale(0.9); }
+        .nota-3 { transform: translate(-4px, -104px) scale(0.75); opacity: 0.45; }
+        .satelite { animation: none; }
+        .onda { animation: none; opacity: 0.5; }
     }
 </style>
 
@@ -527,7 +661,8 @@ import RadioTV from '../components/RadioTV.astro';
             item.addEventListener('blur', clear);
 
             item.addEventListener('click', () => {
-                if (item.id === 'door-group') return; // la puerta no navega
+                // Puerta y satelite abren paneles, no navegan
+                if (item.getAttribute('role') === 'button') return;
                 if (!toast) return;
                 toast.textContent = `Abriendo: ${label}`;
                 toast.classList.add('show');
