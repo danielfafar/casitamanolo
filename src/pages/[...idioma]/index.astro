@@ -4,7 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 import RadioTV from '../../components/RadioTV.astro';
 import { rutasDeIdioma, enlace, t, type Idioma } from '../../i18n/config';
 import { textos } from '../../i18n/textos';
-import Tiradores from '../../components/Tiradores.astro';
+import Idiomas from '../../components/Idiomas.astro';
 
 export function getStaticPaths() { return rutasDeIdioma(); }
 const { idioma } = Astro.props as { idioma: Idioma };
@@ -21,7 +21,7 @@ const Z = T.home.zonas;
     <RadioTV idioma={idioma} />
 
     <!-- Los tiradores de la barra: el idioma de la casa -->
-    <Tiradores idioma={idioma} destino="/" />
+    <Idiomas idioma={idioma} destino="/" />
 
     <!-- CAPA VÍDEO (Modo Cine) -->
     <div class="media-layer" id="media-layer" role="dialog" aria-modal="true" aria-label={T.home.videoLocal}>

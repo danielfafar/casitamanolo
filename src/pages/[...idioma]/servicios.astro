@@ -5,7 +5,7 @@ import { rutasDeIdioma, enlace, t, type Idioma } from '../../i18n/config';
 import { textos } from '../../i18n/textos';
 import { alternativas } from '../../i18n/config';
 import { platos } from '../../data/carta';
-import Tiradores from '../../components/Tiradores.astro';
+import Idiomas from '../../components/Idiomas.astro';
 
 export function getStaticPaths() { return rutasDeIdioma(); }
 const { idioma } = Astro.props as { idioma: Idioma };
@@ -84,7 +84,7 @@ const cursos = ['primeros', 'segundos', 'postres'] as const;
             justify-content: center;
             align-items: center;
             /* Arriba, sitio para los grifos de la barra */
-            padding: 110px 40px 40px;
+            padding: 68px 40px 40px;
         }
 
         @media (max-width: 680px) {
@@ -275,7 +275,7 @@ const cursos = ['primeros', 'segundos', 'postres'] as const;
 
     <a href={enlace('/', idioma)} class="btn-volver">{T.comun.volverBar}</a>
 
-    <Tiradores idioma={idioma} destino="/servicios" />
+    <Idiomas idioma={idioma} destino="/servicios" />
 
     <main class="chalkboard-scene">
         

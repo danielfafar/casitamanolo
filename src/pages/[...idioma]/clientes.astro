@@ -3,7 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import { clients } from '../../data/clients';
 import { rutasDeIdioma, enlace, t, type Idioma } from '../../i18n/config';
 import { textos } from '../../i18n/textos';
-import Tiradores from '../../components/Tiradores.astro';
+import Idiomas from '../../components/Idiomas.astro';
 
 export function getStaticPaths() { return rutasDeIdioma(); }
 const { idioma } = Astro.props as { idioma: Idioma };
@@ -32,7 +32,7 @@ const T = textos[idioma];
     </div>
     <p class="table-note">{T.clientes.nota}</p>
 
-    <Tiradores idioma={idioma} destino="/clientes" />
+    <Idiomas idioma={idioma} destino="/clientes" />
   </main>
   {clients.map(client => (
     <dialog id={`project-${client.id}`} class="project-dialog" aria-labelledby={`title-${client.id}`}>
@@ -51,7 +51,7 @@ const T = textos[idioma];
 </Layout>
 <style>
   /* El hueco de arriba es para los grifos de la barra */
-  .bar-counter { min-height: 100svh; padding: 108px clamp(18px, 4vw, 60px) 16px; color: #f4f1ec; background: repeating-linear-gradient(90deg, #00000010 0 1px, transparent 1px 44px), #361f10; box-shadow: inset 0 0 100px #00000070; font-family: 'Space Mono', monospace; box-sizing: border-box; }
+  .bar-counter { min-height: 100svh; padding: 64px clamp(18px, 4vw, 60px) 16px; color: #f4f1ec; background: repeating-linear-gradient(90deg, #00000010 0 1px, transparent 1px 44px), #361f10; box-shadow: inset 0 0 100px #00000070; font-family: 'Space Mono', monospace; box-sizing: border-box; }
   .bar-counter *, .project-dialog * { box-sizing: border-box; }
   .header-ui { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap; max-width: 1200px; margin: auto; }
   .btn-volver { display: inline-flex; align-items: center; min-height: 44px; color: #f4f1ec; font-size: 14px; text-decoration: none; }
