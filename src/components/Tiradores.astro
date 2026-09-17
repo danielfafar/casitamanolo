@@ -19,6 +19,7 @@ interface Props {
 const { idioma, destino } = Astro.props;
 const T = textos[idioma];
 const otros = idiomas.filter((otro) => otro !== idioma);
+const puesto = (cual: Idioma) => idiomas.indexOf(cual);
 ---
 
 <div class="tiradores" id="tiradores">
@@ -30,6 +31,8 @@ const otros = idiomas.filter((otro) => otro !== idioma);
         aria-expanded="false"
         aria-controls="tiradores-lista"
         aria-label={`${T.comun.idioma}: ${cervezas[idioma].idioma}`}
+        aria-current="true"
+        style={`order: ${puesto(idioma)}`}
     >
         <span class="tirador-dibujo">
             <svg viewBox="0 0 58 108" aria-hidden="true">
@@ -57,7 +60,7 @@ const otros = idiomas.filter((otro) => otro !== idioma);
     <!-- Los otros idiomas, cada uno con su cerveza -->
     <ul class="tiradores-lista" id="tiradores-lista">
         {otros.map((otro) => (
-            <li>
+            <li style={`order: ${puesto(otro)}`}>
                 <a
                     class="tirador"
                     href={enlace(destino, otro)}
@@ -96,36 +99,27 @@ const otros = idiomas.filter((otro) => otro !== idioma);
 </div>
 
 <style>
+    /* En el ordenador los grifos van arriba, en el centro, apoyados en el
+       canto de la barra. La esquina de abajo a la derecha esta ocupada por
+       el distintivo de Netlify y ahi se peleaban. */
     .tiradores {
         position: fixed;
-        right: 14px;
-        bottom: 14px;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
         z-index: 200;
         display: flex;
-        flex-direction: row-reverse;
         align-items: flex-end;
-        gap: 2px;
+        gap: 3px;
     }
 
     .tiradores-lista {
         display: flex;
-        flex-direction: row-reverse;
         align-items: flex-end;
-        gap: 2px;
+        gap: 3px;
         margin: 0;
         padding: 0;
         list-style: none;
-        /* Cerrados ocupan cero: solo se ve el tirador del idioma puesto */
-        max-width: 0;
-        opacity: 0;
-        overflow: hidden;
-        transition: max-width 0.45s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
-    }
-
-    .tiradores.is-abierto .tiradores-lista { max-width: 260px; opacity: 1; }
-    @media (hover: hover) {
-        .tiradores:hover .tiradores-lista,
-        .tiradores:focus-within .tiradores-lista { max-width: 260px; opacity: 1; }
     }
 
     .tirador {
@@ -140,8 +134,9 @@ const otros = idiomas.filter((otro) => otro !== idioma);
 
     .tirador-dibujo {
         display: block;
-        width: 58px;
-        filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
+        width: 52px;
+        /* Sombra corta y suave: la de antes era un borron sobre el papel */
+        filter: drop-shadow(0 2px 3px rgba(17, 35, 30, 0.22));
     }
     .tirador svg { display: block; width: 100%; height: auto; }
 
@@ -155,23 +150,46 @@ const otros = idiomas.filter((otro) => otro !== idioma);
     .tirador:not(.tirador--puesto):hover .tirador-asa,
     .tirador:not(.tirador--puesto):focus-visible .tirador-asa { transform: rotate(10deg); }
 
-    .tirador:focus-visible { outline: 3px solid #E8B059; outline-offset: 4px; border-radius: 6px; }
+    .tirador:focus-visible { outline: 3px solid #E8B059; outline-offset: 3px; border-radius: 6px; }
 
+    /* El canto de la barra donde se apoyan */
     .tiradores-barra {
         position: absolute;
-        left: -8px;
-        right: -8px;
-        bottom: -6px;
-        height: 8px;
-        border-radius: 3px;
-        background: linear-gradient(#5a381f, #2a170c);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        left: -10px;
+        right: -10px;
+        bottom: -5px;
+        height: 7px;
+        border-radius: 0 0 4px 4px;
+        background: linear-gradient(#5a381f, #35200f);
+        box-shadow: 0 2px 4px rgba(17, 35, 30, 0.2);
         z-index: -1;
     }
 
+    /* En el movil no hay sitio arriba (ahi van el volver y el indicador), asi
+       que bajan a la esquina de la izquierda, lejos de las flechas y del
+       distintivo de Netlify. Se ve solo el idioma puesto y los demas salen
+       al tocarlo. */
     @media (max-width: 680px) {
-        .tiradores { right: 10px; bottom: 12px; }
+        .tiradores {
+            top: auto;
+            bottom: 12px;
+            left: 10px;
+            transform: none;
+        }
+
         .tirador-dibujo { width: 46px; }
+
+        /* Los demas salen hacia arriba, no hacia el lado: asi no se ponen
+           encima de la flecha de cambiar de mesa o de estacion */
+        .tiradores, .tiradores-lista { flex-direction: column-reverse; align-items: flex-start; }
+
+        .tiradores-lista {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.45s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+        }
+        .tiradores.is-abierto .tiradores-lista { max-height: 320px; opacity: 1; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -191,14 +209,25 @@ const otros = idiomas.filter((otro) => otro !== idioma);
         const { signal } = limpieza;
         document.addEventListener('astro:before-swap', () => limpieza.abort(), { once: true });
 
+        // Arriba se ven todos a la vez: ahi el boton no despliega nada
+        const plegados = window.matchMedia('(max-width: 680px)');
+
+        const ajustarBoton = () => {
+            if (plegados.matches) abrir.setAttribute('aria-expanded', String(caja.classList.contains('is-abierto')));
+            else abrir.removeAttribute('aria-expanded');
+        };
+        ajustarBoton();
+        plegados.addEventListener('change', ajustarBoton, { signal });
+
         const cerrar = () => {
             caja.classList.remove('is-abierto');
-            abrir.setAttribute('aria-expanded', 'false');
+            ajustarBoton();
         };
 
         abrir.addEventListener('click', () => {
-            const abierto = caja.classList.toggle('is-abierto');
-            abrir.setAttribute('aria-expanded', String(abierto));
+            if (!plegados.matches) return;
+            caja.classList.toggle('is-abierto');
+            ajustarBoton();
         }, { signal });
 
         document.addEventListener('click', (ev) => {

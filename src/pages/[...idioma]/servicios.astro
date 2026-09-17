@@ -83,7 +83,12 @@ const cursos = ['primeros', 'segundos', 'postres'] as const;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 40px;
+            /* Arriba, sitio para los grifos de la barra */
+            padding: 110px 40px 40px;
+        }
+
+        @media (max-width: 680px) {
+            .chalkboard-scene { padding: 40px 20px; }
         }
 
         .chalkboard-frame {

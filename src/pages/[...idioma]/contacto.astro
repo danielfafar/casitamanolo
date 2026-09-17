@@ -145,7 +145,8 @@ const T = textos[idioma];
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 60px 20px;
+        /* El ticket sale un poco mas abajo: arriba estan los grifos */
+        padding: 150px 20px 60px;
         overflow-y: auto;
         overflow-x: hidden;
     }
@@ -204,7 +205,7 @@ const T = textos[idioma];
        ======================================================== */
     .printer-slot {
         position: absolute;
-        top: 0;
+        top: 90px;
         width: 380px;
         height: 20px;
         background: #08110e;
@@ -449,6 +450,10 @@ const T = textos[idioma];
        a la izquierda y el papel sale un poco más abajo de la ranura para que
        no le tape la cabecera. */
     @media (max-width: 680px) {
+        /* En el movil los grifos van abajo, asi que el ticket recupera su sitio */
+        .printer-room { padding-top: 60px; }
+        .printer-slot { top: 0; }
+
         .btn-volver {
             top: 16px;
             left: 16px;
