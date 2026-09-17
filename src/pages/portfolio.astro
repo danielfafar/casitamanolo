@@ -84,8 +84,8 @@ const total = estaciones.length;
 
         /* ========================================================
            3. EL MONITOR
-           Enseña el vídeo del proyecto, su Vimeo o, si solo es audio o
-           no hay vídeo, la portada. Nunca se queda en negro.
+           Solo se enciende con vídeo (propio o de Vimeo). Los discos de
+           audio suenan sin reproductor: el disco gira y el brazo baja.
            ======================================================== */
         .video-presentation {
             position: absolute; left: 5%; width: 45vw; aspect-ratio: 16/9;
@@ -96,8 +96,7 @@ const total = estaciones.length;
             z-index: 40;
         }
         .video-presentation video,
-        .video-presentation iframe,
-        .video-presentation img { width: 100%; height: 100%; border: 0; object-fit: contain; display: block; }
+        .video-presentation iframe { width: 100%; height: 100%; border: 0; object-fit: contain; display: block; }
         .video-presentation [hidden] { display: none; }
 
         body.video-active .video-presentation { opacity: 1; transform: translateX(0) scale(1); pointer-events: auto; }
@@ -386,7 +385,6 @@ const total = estaciones.length;
         <div class="video-presentation" aria-live="polite">
             <video id="project-video" playsinline loop preload="none" hidden></video>
             <iframe id="project-vimeo" title="Vídeo del proyecto" src="about:blank" allow="autoplay; fullscreen; picture-in-picture" hidden></iframe>
-            <img id="project-still" alt="" hidden />
         </div>
 
         <audio id="player-audio" loop preload="none"></audio>
@@ -473,9 +471,8 @@ const total = estaciones.length;
             const audioPlayer = document.getElementById('player-audio') as HTMLAudioElement;
             const videoPlayer = document.getElementById('project-video') as HTMLVideoElement;
             const vimeoPlayer = document.getElementById('project-vimeo') as HTMLIFrameElement;
-            const stillImage = document.getElementById('project-still') as HTMLImageElement;
 
-            if (!track || !btnPrev || !btnNext || !audioPlayer || !videoPlayer || !vimeoPlayer || !stillImage) return;
+            if (!track || !btnPrev || !btnNext || !audioPlayer || !videoPlayer || !vimeoPlayer) return;
 
             // --- CARRUSEL ---
             const stations = track.querySelectorAll<HTMLElement>('.station');
@@ -697,10 +694,23 @@ const total = estaciones.length;
             function playMedia(data: any) {
                 stopMedia();
                 const medio: Medio | null = data.medio;
+
+                // Audio: suena sin reproductor, la escena se queda donde está
+                if (medio?.tipo === 'audio') {
+                    body.classList.remove('video-active');
+                    audioPlayer.src = medio.src;
+                    audioPlayer.play().catch(() => {});
+                    return;
+                }
+                if (!medio) {
+                    body.classList.remove('video-active');
+                    return;
+                }
+
                 encuadrarConMonitor();
                 body.classList.add('video-active');
 
-                if (medio?.tipo === 'video') {
+                if (medio.tipo === 'video') {
                     videoPlayer.hidden = false;
                     videoPlayer.src = medio.src;
                     // Es un portfolio de música: el vídeo suena. Soltar el
@@ -708,17 +718,9 @@ const total = estaciones.length;
                     // permite; si aun así lo bloquea, arranca en silencio.
                     videoPlayer.muted = false;
                     videoPlayer.play().catch(() => { videoPlayer.muted = true; videoPlayer.play().catch(() => {}); });
-                } else if (medio?.tipo === 'vimeo') {
+                } else {
                     vimeoPlayer.hidden = false;
                     vimeoPlayer.src = `https://player.vimeo.com/video/${medio.id}?autoplay=1&title=0&byline=0&portrait=0&badge=0&dnt=1&color=D74F42`;
-                } else {
-                    // Solo audio, o sin medio: el monitor enseña la portada
-                    stillImage.src = data.cover;
-                    stillImage.hidden = false;
-                    if (medio?.tipo === 'audio') {
-                        audioPlayer.src = medio.src;
-                        audioPlayer.play().catch(() => {});
-                    }
                 }
             }
 
@@ -731,8 +733,6 @@ const total = estaciones.length;
                 videoPlayer.hidden = true;
                 if (vimeoPlayer.getAttribute('src') !== 'about:blank') vimeoPlayer.src = 'about:blank';
                 vimeoPlayer.hidden = true;
-                stillImage.hidden = true;
-                stillImage.removeAttribute('src');
             }
         });
     </script>

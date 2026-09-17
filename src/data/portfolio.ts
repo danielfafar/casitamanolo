@@ -2,11 +2,11 @@
 //
 // Cada estación es una caja de discos con su tema: los proyectos grandes
 // tienen caja propia y los spots van juntos. Soltar un disco en el plato
-// enciende el monitor con su vídeo, su audio o, si no hay, su portada.
+// enciende el monitor si tiene vídeo; si es audio, suena sin reproductor.
 //
 // Para añadir un proyecto basta con meter un disco aquí.
 
-/** Lo que suena o se ve al poner el disco. Sin medio, el monitor muestra la portada. */
+/** Lo que suena o se ve al poner el disco. El audio suena sin abrir el monitor. */
 export type Medio =
   | { tipo: 'video'; src: string }
   | { tipo: 'vimeo'; id: string }
