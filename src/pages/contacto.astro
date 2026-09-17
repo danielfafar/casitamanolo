@@ -21,7 +21,7 @@ import Layout from '../layouts/Layout.astro';
                 <!-- Encabezado del Local -->
                 <header class="ticket-header">
                     <h1>CASITA MANOLO</h1>
-                    <p>MUSIC HOUSE MADRID - NY</p>
+                    <p>MUSIC HOUSE MADRID - NYC</p>
                     <p>C/ INVENTADA, 42 - MADRID</p>
                     <p>NIF: B-12345678</p>
                 </header>
@@ -89,6 +89,7 @@ import Layout from '../layouts/Layout.astro';
                     <p class="total">TOTAL: INVALUABLE</p>
                     <p class="thank-you">GRACIAS POR SU VISITA</p>
                     <p class="thank-you">WWW.CASITAMANOLO.COM</p>
+                    <a href="/" class="ticket-salida">&larr; VOLVER A LA CASITA</a>
                 </footer>
 
             </article>
@@ -133,24 +134,53 @@ import Layout from '../layouts/Layout.astro';
         overflow-x: hidden;
     }
 
-    /* Botón Volver Minimalista */
+    /* Botón Volver. Va fijo sobre el ticket, que es blanco y ocupa el
+       centro de la pantalla: sin chapa propia el texto desaparecía. */
     .btn-volver {
         position: fixed;
-        top: 40px;
-        left: 40px;
+        top: 24px;
+        left: 24px;
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 10px 18px;
+        border-radius: 999px;
+        background: rgba(8, 17, 14, 0.92);
+        border: 1px solid rgba(244, 241, 236, 0.35);
         color: var(--paper-light);
         text-decoration: none;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         font-weight: 700;
-        letter-spacing: 0.3em;
+        letter-spacing: 0.2em;
         text-transform: uppercase;
-        transition: color 0.3s, transform 0.3s;
+        transition: background-color 0.3s, color 0.3s, transform 0.3s;
         z-index: 100;
     }
 
-    .btn-volver:hover {
+    .btn-volver:hover, .btn-volver:focus-visible {
+        background: var(--accent-red);
+        color: var(--paper-light);
+        transform: translateX(-4px);
+    }
+
+    /* Y otra salida al final del ticket, para quien llega abajo del todo */
+    .ticket-salida {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        margin-top: 18px;
+        padding: 10px 16px;
+        border: 1px dashed rgba(17, 35, 30, 0.45);
+        color: var(--ink-dark);
+        text-decoration: none;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+    }
+    .ticket-salida:hover, .ticket-salida:focus-visible {
+        border-style: solid;
         color: var(--accent-red);
-        transform: translateX(-5px);
+        border-color: var(--accent-red);
     }
 
     /* ========================================================
@@ -397,6 +427,21 @@ import Layout from '../layouts/Layout.astro';
     .system-toast.active {
         opacity: 1;
         transform: translateX(-50%) translateY(0);
+    }
+
+    /* En el móvil el ticket ocupa el ancho entero: el botón se queda arriba
+       a la izquierda y el papel sale un poco más abajo de la ranura para que
+       no le tape la cabecera. */
+    @media (max-width: 680px) {
+        .btn-volver {
+            top: 16px;
+            left: 16px;
+            padding: 10px 14px;
+            font-size: 0.64rem;
+            letter-spacing: 0.14em;
+        }
+
+        .ticket-wrapper { margin-top: -6px; }
     }
 </style>
 

@@ -13,7 +13,11 @@ import { clients } from '../data/clients';
       {clients.map((client, index) => (
         <button type="button" class="coaster-wrapper" data-client={client.id} style={`--tilt:${[-9, 8, -5, 12, -7, 5][index % 6]}deg`} aria-label={`Girar el posavasos de ${client.name}`} aria-controls={`project-${client.id}`}>
           <span class="coaster-body">
-            <span class={`coaster-face coaster-front c-${client.surface}`}><span class:list={["coaster-logo", { largo: client.name.length > 11 }]}>{client.name}<span>{client.category}</span></span></span>
+            <span class={`coaster-face coaster-front c-${client.surface}`}>
+              {client.logo
+                ? <span class="coaster-logo con-imagen"><img src={client.logo} alt={client.name} loading="lazy" /><span>{client.category}</span></span>
+                : <span class:list={["coaster-logo", { largo: client.name.length > 11 }]}>{client.name}<span>{client.category}</span></span>}
+            </span>
             <span class="coaster-face coaster-back" aria-hidden="true"><span class="back-category">{client.category}</span><span class="back-title">{client.project?.title || client.name}</span><span class="back-action">Abrir ficha →</span></span>
           </span>
         </button>
@@ -30,7 +34,7 @@ import { clients } from '../data/clients';
         {client.project.year && <p>{client.project.year}</p>}
         <p><strong>Nuestra participación:</strong> {client.project.role}</p><p>{client.project.summary}</p>
         {client.project.audio && <audio controls preload="none" src={client.project.audio} aria-label={`Escuchar ${client.project.title}`}></audio>}
-        {client.project.video && <video controls playsinline preload="none" src={client.project.video} aria-label={`Ver ${client.project.title}`}></video>}
+        {client.project.video && <video controls playsinline preload="none" poster={client.project.poster} src={client.project.video} aria-label={`Ver ${client.project.title}`}></video>}
       </> : <p class="pending-case">La ficha del proyecto todavía no está disponible.</p>}
       <div class="dialog-actions"><a href="/portfolio">Ir al archivo musical</a><button type="button" data-turn-back={client.id}>Volver a girarlo</button></div>
     </dialog>
@@ -63,6 +67,9 @@ import { clients } from '../data/clients';
   .c-black { background: #252924; color: #f4f4f0; }
   .c-kraft { background: #d2b48c; color: #3e2723; }
   .coaster-logo.largo { font-size: 19px; }
+  /* Las marcas de las que tenemos logo lo llevan impreso; el resto, su nombre */
+  .coaster-logo.con-imagen { display: flex; flex-direction: column; align-items: center; }
+  .coaster-logo.con-imagen img { display: block; width: 104px; max-height: 58px; object-fit: contain; }
   [data-client='movistar'] .coaster-logo { color: #019df4; }
   [data-client='airbnb'] .coaster-logo { color: #ff385c; }
   [data-client='icex'] .coaster-logo { color: #e8b059; }
@@ -88,7 +95,7 @@ import { clients } from '../data/clients';
   .dialog-actions { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-top: 30px; }
   .dialog-actions a { color: #11231e; text-underline-offset: 5px; font-size: 14px; }
   .dialog-actions button { font: inherit; font-size: 14px; min-height: 44px; border: 1px solid #11231e; background: none; cursor: pointer; padding: 10px 14px; }
-  @media (max-width: 680px) { .coaster-world { min-height: max(640px, calc(var(--filas-2) * 172px)); grid-template-columns: repeat(2, 1fr); padding: 10px; gap: 20px; } .coaster-wrapper { width: 144px; height: 144px; } .coaster-logo { font-size: 20px; } .coaster-logo.largo { font-size: 15px; } .coaster-face { padding: 15px; } .coaster-back { gap: 7px; } .back-title { font-size: 14px; } .header-ui { gap: 14px; } .coaster-heading { order: 3; flex-basis: 100%; } }
+  @media (max-width: 680px) { .coaster-world { min-height: max(640px, calc(var(--filas-2) * 172px)); grid-template-columns: repeat(2, 1fr); padding: 10px; gap: 20px; } .coaster-wrapper { width: 144px; height: 144px; } .coaster-logo { font-size: 20px; } .coaster-logo.largo { font-size: 15px; } .coaster-logo.con-imagen img { width: 84px; max-height: 46px; } .coaster-face { padding: 15px; } .coaster-back { gap: 7px; } .back-title { font-size: 14px; } .header-ui { gap: 14px; } .coaster-heading { order: 3; flex-basis: 100%; } }
   @media (max-width: 360px) { .coaster-world { gap: 10px; padding: 0; } .coaster-wrapper { width: 132px; height: 132px; } }
   @media (prefers-reduced-motion: reduce) { .coaster-body, .coaster-wrapper { transition: none !important; } }
 </style>

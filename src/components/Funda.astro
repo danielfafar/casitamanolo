@@ -38,9 +38,6 @@ const costuras = direcciones.flatMap((d, k) => [
 ]);
 const colores = disco.pentagonos?.length ? disco.pentagonos : ['#1a1a1a'];
 const idClip = `balon-${disco.id}`;
-const estiloPortada = [`background-image: url('${disco.portada}')`, disco.fondo && `background-color: ${disco.fondo}`]
-    .filter(Boolean)
-    .join('; ');
 ---
 
 <div
@@ -50,6 +47,7 @@ const estiloPortada = [`background-image: url('${disco.portada}')`, disco.fondo 
     data-titulo={disco.titulo}
     data-detalle={disco.detalle}
     data-portada={disco.portada}
+    data-logo={disco.logo}
     data-medio={disco.medio ? JSON.stringify(disco.medio) : undefined}
 >
     <div class:list={['vinyl-wrapper', { 'es-balon': esBalon }]}>
@@ -77,14 +75,24 @@ const estiloPortada = [`background-image: url('${disco.portada}')`, disco.fondo 
                 <circle cx="50" cy="50" r="48" fill="#0b1714" stroke="#223b33" stroke-width="0.5" />
                 <circle cx="50" cy="50" r="38" stroke="#1a2e28" stroke-width="1" fill="none" />
                 <circle cx="50" cy="50" r="28" stroke="#1a2e28" stroke-width="1" fill="none" />
-                <circle cx="50" cy="50" r="16" fill={disco.galleta} />
-                <circle cx="50" cy="50" r="2" fill="#F4F1EC" />
+                {disco.logo ? (
+                    <>
+                        {/* Galleta con el logo de la marca impreso, y el color de la marca en el filo */}
+                        <circle cx="50" cy="50" r="16" fill="#0f1c18" stroke={disco.galleta} stroke-width="1.6" />
+                        <image href={disco.logo} x="37" y="41.5" width="26" height="17" preserveAspectRatio="xMidYMid meet" />
+                    </>
+                ) : (
+                    <>
+                        <circle cx="50" cy="50" r="16" fill={disco.galleta} />
+                        <circle cx="50" cy="50" r="2" fill="#F4F1EC" />
+                    </>
+                )}
             </svg>
         )}
     </div>
     <div
-        class:list={['album-cover', { 'es-logo': disco.portadaEsLogo }]}
-        style={estiloPortada}
+        class="album-cover"
+        style={`background-image: url('${disco.portada}')`}
         role="img"
         aria-label={`${disco.titulo}. ${disco.detalle}`}
     >
@@ -113,11 +121,6 @@ const estiloPortada = [`background-image: url('${disco.portada}')`, disco.fondo 
         border: 1px solid rgba(244, 241, 236, 0.1);
         cursor: pointer;
         transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), box-shadow 0.4s ease;
-    }
-    /* Los logos no se recortan: van centrados sobre su color */
-    .album-cover.es-logo {
-        background-size: 72% auto;
-        background-position: center 42%;
     }
 
     .sleeve-container:hover .album-cover {

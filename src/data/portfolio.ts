@@ -20,12 +20,12 @@ export interface Disco {
   titulo: string;
   /** Línea bajo el título: tipo de trabajo, año… */
   detalle: string;
+  /** Carátula: un fotograma del propio trabajo */
   portada: string;
-  /** La portada es un logo: se centra sobre `fondo` en vez de cubrir la funda */
-  portadaEsLogo?: boolean;
-  fondo?: string;
   /** Color de la galleta del vinilo */
   galleta: string;
+  /** Logo de la marca: impreso en la galleta y de marca de agua al sonar */
+  logo?: string;
   /** Lo que sale de la funda. Por defecto, un vinilo */
   forma?: 'vinilo' | 'balon';
   /** Colores de los pentágonos del balón; si hay varios, se alternan */
@@ -55,6 +55,7 @@ export interface Estacion {
 }
 
 const P = '/portfolio';
+const L = '/portfolio/logos';
 
 export const estaciones: Estacion[] = [
   {
@@ -100,6 +101,7 @@ export const estaciones: Estacion[] = [
         detalle: 'Spain, Where Talent Ignites · ICEX · Estreno en Cannes',
         portada: `${P}/la-tarara.webp`,
         galleta: '#b3141c',
+        logo: `${L}/icex.png`,
         medio: { tipo: 'video', src: `${P}/la-tarara.mp4` },
       },
     ],
@@ -121,10 +123,9 @@ export const estaciones: Estacion[] = [
         etiqueta: 'AIRBNB',
         titulo: 'Roots & Heritage',
         detalle: 'Airbnb · Campaña global · Música original',
-        portada: `${P}/airbnb.svg`,
-        portadaEsLogo: true,
-        fondo: '#f4f1ec',
+        portada: `${P}/airbnb-roots.webp`,
         galleta: '#ff5a5f',
+        logo: `${L}/airbnb.png`,
         medio: { tipo: 'vimeo', id: '1200890612' },
       },
     ],
@@ -147,6 +148,7 @@ export const estaciones: Estacion[] = [
         detalle: 'Movistar · Es por la Roja · Spot 2025',
         portada: `${P}/movistar-batido.webp`,
         galleta: '#019df4',
+        logo: `${L}/movistar.png`,
         medio: { tipo: 'vimeo', id: '1195977095' },
       },
       {
@@ -156,6 +158,7 @@ export const estaciones: Estacion[] = [
         detalle: 'Škoda · Spot 2026',
         portada: `${P}/skoda-navidad.webp`,
         galleta: '#4ba82e',
+        logo: `${L}/skoda.png`,
         medio: { tipo: 'vimeo', id: '1154287399' },
       },
       {
@@ -163,10 +166,9 @@ export const estaciones: Estacion[] = [
         etiqueta: 'CASA TARRADELLAS',
         titulo: 'In Fraganti',
         detalle: 'Casa Tarradellas · Spot 2025',
-        portada: `${P}/casa-tarradellas.svg`,
-        portadaEsLogo: true,
-        fondo: '#f4f1ec',
+        portada: `${P}/casa-tarradellas.webp`,
         galleta: '#c8102e',
+        logo: `${L}/casa-tarradellas.png`,
         medio: { tipo: 'vimeo', id: '1192277273' },
       },
       {
@@ -175,9 +177,8 @@ export const estaciones: Estacion[] = [
         titulo: 'El Trato Andaluz',
         detalle: 'Turismo de Andalucía · Campaña 2025',
         portada: `${P}/trato-andaluz.webp`,
-        portadaEsLogo: true,
-        fondo: '#f4f1ec',
         galleta: '#007a33',
+        logo: `${L}/junta-andalucia.png`,
         medio: { tipo: 'vimeo', id: '1145955458' },
       },
     ],
@@ -197,9 +198,8 @@ export const estaciones: Estacion[] = [
         titulo: 'En serio, muy bien',
         detalle: 'DIA · Spot 2026',
         portada: `${P}/dia.webp`,
-        portadaEsLogo: true,
-        fondo: '#f4f1ec',
         galleta: '#e30613',
+        logo: `${L}/dia.png`,
         medio: { tipo: 'vimeo', id: '1190131920' },
       },
       {
@@ -208,9 +208,8 @@ export const estaciones: Estacion[] = [
         titulo: '¿Quieres ahorrar conmigo?',
         detalle: 'Eroski · Spot 2025',
         portada: `${P}/eroski.webp`,
-        portadaEsLogo: true,
-        fondo: '#ffffff',
         galleta: '#e2001a',
+        logo: `${L}/eroski.png`,
         medio: { tipo: 'vimeo', id: '1177732189' },
       },
       {
@@ -220,6 +219,7 @@ export const estaciones: Estacion[] = [
         detalle: 'Freixenet · Campaña digital',
         portada: `${P}/freixenet-laura-escanes.webp`,
         galleta: '#c9a24a',
+        logo: `${L}/freixenet.png`,
         medio: { tipo: 'video', src: `${P}/freixenet.mp4` },
       },
     ],

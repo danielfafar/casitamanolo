@@ -1,6 +1,12 @@
-Fotos de la galería (servilletas). Nombres esperados:
-  foto1.jpg  -> Sesiones de estudio
-  foto2.jpg  -> Cuerdas y metales
-  foto3.jpg  -> Rodajes
-  foto4.jpg  -> La casa por dentro
-Basta con dejarlas aquí: la página las detecta y sustituye el hueco "FOTO PENDIENTE".
+Fotos de la galería (servilletas). Las que hay ahora:
+  paula-partitura.jpg   -> Mesa 1 · Sobre el piano
+  paula-retrato.jpg     -> Mesa 1 · Entre toma y toma
+  paula-ventana.jpg     -> Mesa 1 · Luz de ventana
+  paula-pausa.jpg       -> Mesa 2 · La pausa
+  paula-contraluz.jpg   -> Mesa 2 · A contraluz
+  victor-direccion.jpg  -> Mesa 3 · Dirigiendo
+  victor-2.jpg          -> Mesa 3 · PENDIENTE (falta el archivo)
+
+Para cambiarlas o añadir más se dejan aquí y se apuntan en `mesas`
+(src/pages/galeria.astro). Si el archivo no existe, la servilleta enseña el
+hueco "FOTO PENDIENTE" en vez de una imagen rota.

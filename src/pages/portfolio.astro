@@ -71,6 +71,20 @@ const total = estaciones.length;
         }
         .btn-volver:hover { color: var(--accent-color); transform: translateX(-5px); }
 
+        /* Sale solo cuando hay un disco en el plato. Es la salida evidente:
+           levanta la aguja, apaga el monitor y devuelve el disco al estante. */
+        .btn-expulsar {
+            opacity: 0; pointer-events: none; transform: translateY(-6px);
+            font-family: 'Space Mono', monospace; font-size: 0.7rem; font-weight: 700;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            color: var(--text-color); background: rgba(8, 17, 14, 0.88);
+            border: 1px solid rgba(215, 79, 66, 0.8); border-radius: 999px;
+            padding: 11px 20px; cursor: pointer;
+            transition: opacity 0.35s, transform 0.35s, background-color 0.3s, color 0.3s;
+        }
+        body.disco-puesto .btn-expulsar { opacity: 1; transform: none; pointer-events: auto; }
+        .btn-expulsar:hover, .btn-expulsar:focus-visible { background: var(--accent-color); color: #08110e; }
+
         .nav-btn {
             position: absolute; top: 50%; transform: translateY(-50%);
             background: transparent; border: none; color: var(--text-color);
@@ -98,6 +112,26 @@ const total = estaciones.length;
         .video-presentation video,
         .video-presentation iframe { width: 100%; height: 100%; border: 0; object-fit: contain; display: block; }
         .video-presentation [hidden] { display: none; }
+
+        /* Mientras el reproductor arranca, la carátula ocupa el monitor: así
+           nunca se ve el rectángulo negro de Vimeo cargando. */
+        .monitor-portada {
+            position: absolute; inset: 0; z-index: 2; pointer-events: none;
+            display: flex; align-items: flex-end; justify-content: center;
+            background:
+                linear-gradient(rgba(8,17,14,0.45), rgba(8,17,14,0.65)),
+                var(--portada, none) center / cover no-repeat,
+                #08110e;
+            opacity: 1; transition: opacity 0.5s ease;
+        }
+        .monitor-portada::after {
+            content: 'CARGANDO EL VÍDEO';
+            margin-bottom: 20px; padding: 7px 14px; border-radius: 999px;
+            background: rgba(8, 17, 14, 0.8); color: var(--text-color);
+            font-size: 0.55rem; letter-spacing: 0.25em;
+            animation: pulse 1.6s infinite;
+        }
+        .monitor-portada.lista { opacity: 0; }
 
         body.video-active .video-presentation { opacity: 1; transform: translateX(0) scale(1); pointer-events: auto; }
 
@@ -195,7 +229,19 @@ const total = estaciones.length;
             position: absolute; top: 15%; width: 100%; text-align: center;
             font-size: clamp(4rem, 10vw, 8rem); font-weight: 700; color: rgba(244,241,236,0.03);
             letter-spacing: 0.1em; z-index: 0; pointer-events: none; white-space: nowrap;
+            transition: opacity 0.6s ease;
         }
+
+        /* Al sonar un disco, el rótulo gigante de la estación deja su sitio
+           al logo de la marca: se ve de quién es el trabajo sin leer nada. */
+        .marca-fondo {
+            position: absolute; inset: 0; z-index: 0; pointer-events: none;
+            background: var(--marca, none) center 17% / min(52vmin, 420px) auto no-repeat;
+            filter: grayscale(1) brightness(1.9);
+            opacity: 0; transition: opacity 0.9s ease;
+        }
+        .station.con-marca .marca-fondo { opacity: 0.16; }
+        .station.con-marca .station-bg-text { opacity: 0; }
 
         .rack { display: flex; flex-direction: column; gap: 50px; z-index: 20; }
 
@@ -336,6 +382,15 @@ const total = estaciones.length;
             .btn-volver { font-size: 0.6rem; letter-spacing: 0.16em; }
             .section-title { font-size: 0.56rem; letter-spacing: 0.14em; }
 
+            /* Arriba no cabe con el indicador: baja al centro, justo encima
+               de las flechas para no pisarlas */
+            .btn-expulsar {
+                position: fixed; left: 50%; bottom: 82px;
+                transform: translate(-50%, 8px);
+                font-size: 0.62rem; letter-spacing: 0.1em; padding: 12px 16px;
+            }
+            body.disco-puesto .btn-expulsar { transform: translate(-50%, 0); }
+
             .station-bg-text { top: 9%; font-size: 2.6rem; }
             .fondo--duelo { --circulo: 96px; }
 
@@ -385,6 +440,7 @@ const total = estaciones.length;
         <div class="video-presentation" aria-live="polite">
             <video id="project-video" playsinline loop preload="none" hidden></video>
             <iframe id="project-vimeo" title="Vídeo del proyecto" src="about:blank" allow="autoplay; fullscreen; picture-in-picture" hidden></iframe>
+            <div class="monitor-portada lista" id="monitor-portada" aria-hidden="true"></div>
         </div>
 
         <audio id="player-audio" loop preload="none"></audio>
@@ -392,6 +448,7 @@ const total = estaciones.length;
         <!-- UI SUPERIOR -->
         <div class="header-ui">
             <div class="section-title" id="station-indicator">{estaciones[0].nombre} · 1 / {total}</div>
+            <button type="button" class="btn-expulsar" id="btn-expulsar">⏏ Quitar el disco</button>
             <a href="/" class="btn-volver">← VOLVER A CASA</a>
         </div>
 
@@ -407,6 +464,7 @@ const total = estaciones.length;
                     return (
                         <section class={`station station--${est.tema}`} data-nombre={est.nombre} style={`--disco: ${tam}px`}>
                             <div class="station-bg-text" aria-hidden="true">{est.rotulo}</div>
+                            <div class="marca-fondo" aria-hidden="true"></div>
                             <div class="jukebox-stage">
 
                                 <div class="rack">
@@ -471,8 +529,14 @@ const total = estaciones.length;
             const audioPlayer = document.getElementById('player-audio') as HTMLAudioElement;
             const videoPlayer = document.getElementById('project-video') as HTMLVideoElement;
             const vimeoPlayer = document.getElementById('project-vimeo') as HTMLIFrameElement;
+            const portadaMonitor = document.getElementById('monitor-portada');
+            const btnExpulsar = document.getElementById('btn-expulsar');
 
             if (!track || !btnPrev || !btnNext || !audioPlayer || !videoPlayer || !vimeoPlayer) return;
+
+            // Todo lo que se engancha fuera de la página se suelta al salir
+            const limpieza = new AbortController();
+            document.addEventListener('astro:before-swap', () => limpieza.abort(), { once: true });
 
             // --- CARRUSEL ---
             const stations = track.querySelectorAll<HTMLElement>('.station');
@@ -521,8 +585,9 @@ const total = estaciones.length;
                     title: sleeve.dataset.titulo || 'Proyecto',
                     detail: sleeve.dataset.detalle || '',
                     cover: sleeve.dataset.portada || '',
+                    logo: sleeve.dataset.logo || '',
                     medio,
-                    dropzone, tonearm, projectHud, projectTitle, projectDetail,
+                    station, dropzone, tonearm, projectHud, projectTitle, projectDetail,
                 });
 
                 vinyl.style.transform = `translate(${peekX}px, 0px)`;
@@ -551,9 +616,8 @@ const total = estaciones.length;
 
                     if (data.state === 'playing') {
                         vinyl.classList.remove('playing');
-                        hideProjectInfo(data); stopMedia();
+                        apagarEstacion(data);
                         activeVinyl = null;
-                        body.classList.remove('video-active');
                     }
                 });
 
@@ -636,6 +700,12 @@ const total = estaciones.length;
                 if (data.projectDetail) data.projectDetail.textContent = data.detail;
                 if (data.projectHud) { data.projectHud.style.opacity = '1'; data.projectHud.style.pointerEvents = 'auto'; }
 
+                body.classList.add('disco-puesto');
+                if (data.station && data.logo) {
+                    data.station.style.setProperty('--marca', `url('${data.logo}')`);
+                    data.station.classList.add('con-marca');
+                }
+
                 playMedia(data);
             }
 
@@ -649,8 +719,8 @@ const total = estaciones.length;
                 vinyl.classList.remove('playing');
 
                 if (activeVinyl === vinyl) {
-                    hideProjectInfo(data); stopMedia(); activeVinyl = null;
-                    body.classList.remove('video-active');
+                    apagarEstacion(data);
+                    activeVinyl = null;
                 }
             }
 
@@ -658,6 +728,24 @@ const total = estaciones.length;
                 if (data.tonearm) data.tonearm.classList.remove('tonearm-active');
                 if (data.projectHud) { data.projectHud.style.opacity = '0'; data.projectHud.style.pointerEvents = 'none'; }
             }
+
+            // Levantar la aguja: se para todo, se apaga el monitor y la
+            // estación se queda como estaba antes de poner el disco.
+            function apagarEstacion(data: any) {
+                hideProjectInfo(data);
+                stopMedia();
+                body.classList.remove('video-active', 'disco-puesto');
+                if (data?.station) {
+                    data.station.classList.remove('con-marca');
+                    data.station.style.removeProperty('--marca');
+                }
+            }
+
+            // El botón de quitar el disco: la salida de los vinilos
+            btnExpulsar?.addEventListener('click', () => { if (activeVinyl) returnVinyl(activeVinyl); });
+            document.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Escape' && activeVinyl) returnVinyl(activeVinyl);
+            }, { signal: limpieza.signal });
 
             // --- ENCUADRE CON EL MONITOR ENCENDIDO ---
             // Antes la escena se desplazaba siempre 20vw y se quedaba al 90%:
@@ -691,6 +779,20 @@ const total = estaciones.length;
             document.addEventListener('astro:before-swap', () => window.removeEventListener('resize', encuadrarConMonitor), { once: true });
 
             // --- MEDIOS ---
+            // La carátula tapa el monitor hasta que el reproductor tiene
+            // imagen. El turno evita que la carátula de un disco se quite
+            // porque acabó de cargar el anterior.
+            let turno = 0;
+            function taparMonitor(cover: string) {
+                turno++;
+                if (!portadaMonitor) return;
+                portadaMonitor.style.setProperty('--portada', cover ? `url('${cover}')` : 'none');
+                portadaMonitor.classList.remove('lista');
+            }
+            function destaparMonitor(miTurno: number) {
+                if (miTurno === turno) portadaMonitor?.classList.add('lista');
+            }
+
             function playMedia(data: any) {
                 stopMedia();
                 const medio: Medio | null = data.medio;
@@ -709,9 +811,12 @@ const total = estaciones.length;
 
                 encuadrarConMonitor();
                 body.classList.add('video-active');
+                taparMonitor(data.cover);
+                const miTurno = turno;
 
                 if (medio.tipo === 'video') {
                     videoPlayer.hidden = false;
+                    videoPlayer.onloadeddata = () => destaparMonitor(miTurno);
                     videoPlayer.src = medio.src;
                     // Es un portfolio de música: el vídeo suena. Soltar el
                     // disco es un gesto del usuario, así que el navegador lo
@@ -720,11 +825,18 @@ const total = estaciones.length;
                     videoPlayer.play().catch(() => { videoPlayer.muted = true; videoPlayer.play().catch(() => {}); });
                 } else {
                     vimeoPlayer.hidden = false;
+                    // Vimeo no avisa de cuándo empieza a verse: al cargar el
+                    // reproductor se le da un momento y se retira la carátula.
+                    vimeoPlayer.onload = () => window.setTimeout(() => destaparMonitor(miTurno), 700);
                     vimeoPlayer.src = `https://player.vimeo.com/video/${medio.id}?autoplay=1&title=0&byline=0&portrait=0&badge=0&dnt=1&color=D74F42`;
                 }
             }
 
             function stopMedia() {
+                turno++;
+                portadaMonitor?.classList.add('lista');
+                videoPlayer.onloadeddata = null;
+                vimeoPlayer.onload = null;
                 audioPlayer.pause();
                 audioPlayer.removeAttribute('src');
                 videoPlayer.pause();
