@@ -9,11 +9,11 @@ import { clients } from '../data/clients';
       <div class="coaster-heading"><h1>Las historias de la barra</h1><p>Toca un posavasos para girarlo. También puedes arrastrarlo.</p></div>
       <button class="tidy-button" type="button" id="tidy-coasters">Ordenar la mesa</button>
     </header>
-    <div id="physics-world" class="coaster-world" aria-label="Posavasos de clientes">
+    <div id="physics-world" class="coaster-world" aria-label="Posavasos de clientes" style={`--filas-3:${Math.ceil(clients.length / 3)}; --filas-2:${Math.ceil(clients.length / 2)}`}>
       {clients.map((client, index) => (
-        <button type="button" class="coaster-wrapper" data-client={client.id} style={`--tilt:${[-9, 8, -5, 12, -7, 5][index]}deg`} aria-label={`Girar el posavasos de ${client.name}`} aria-controls={`project-${client.id}`}>
+        <button type="button" class="coaster-wrapper" data-client={client.id} style={`--tilt:${[-9, 8, -5, 12, -7, 5][index % 6]}deg`} aria-label={`Girar el posavasos de ${client.name}`} aria-controls={`project-${client.id}`}>
           <span class="coaster-body">
-            <span class={`coaster-face coaster-front c-${client.surface}`}><span class="coaster-logo">{client.name}<span>{client.category}</span></span></span>
+            <span class={`coaster-face coaster-front c-${client.surface}`}><span class:list={["coaster-logo", { largo: client.name.length > 11 }]}>{client.name}<span>{client.category}</span></span></span>
             <span class="coaster-face coaster-back" aria-hidden="true"><span class="back-category">{client.category}</span><span class="back-title">{client.project?.title || client.name}</span><span class="back-action">Abrir ficha →</span></span>
           </span>
         </button>
@@ -45,7 +45,7 @@ import { clients } from '../data/clients';
   .coaster-heading h1 { font-family: 'Architects Daughter', cursive; font-size: clamp(1.8rem, 4vw, 2.7rem); font-weight: 400; margin: 0 0 8px; }
   .coaster-heading p { font-size: 14px; line-height: 1.7; margin: 0; color: #e0d2c2; max-width: 44ch; }
   .tidy-button { font: inherit; font-size: 14px; min-height: 44px; color: #f4f1ec; background: transparent; border: 1px solid #b6a492; padding: 10px 14px; cursor: pointer; border-radius: 4px; }
-  .coaster-world { position: relative; min-height: 520px; max-width: 1100px; margin: 16px auto 0; display: grid; grid-template-columns: repeat(3, 1fr); place-items: center; gap: 32px; padding: 28px; }
+  .coaster-world { position: relative; min-height: max(520px, calc(var(--filas-3) * 214px)); max-width: 1100px; margin: 16px auto 0; display: grid; grid-template-columns: repeat(3, 1fr); place-items: center; gap: 32px; padding: 28px; }
   .coaster-wrapper { appearance: none; padding: 0; border: 0; background: none; color: inherit; position: relative; width: 180px; height: 180px; cursor: grab; touch-action: pan-y; perspective: 900px; transform: rotate(var(--tilt)); }
   .coaster-world.is-interactive .coaster-wrapper { position: absolute; left: 0; top: 0; touch-action: none; }
   .coaster-wrapper.is-dragging { cursor: grabbing; z-index: 50; }
@@ -62,8 +62,19 @@ import { clients } from '../data/clients';
   .c-white { background: #f4f4f0; color: #17261f; }
   .c-black { background: #252924; color: #f4f4f0; }
   .c-kraft { background: #d2b48c; color: #3e2723; }
-  [data-client='netflix'] .coaster-logo { color: #bf1920; }
-  [data-client='vogue'] .coaster-logo { font-family: Georgia, serif; }
+  .coaster-logo.largo { font-size: 19px; }
+  [data-client='movistar'] .coaster-logo { color: #019df4; }
+  [data-client='airbnb'] .coaster-logo { color: #ff385c; }
+  [data-client='icex'] .coaster-logo { color: #e8b059; }
+  [data-client='freixenet'] .coaster-logo { color: #c9a24a; font-family: Georgia, serif; }
+  [data-client='skoda'] .coaster-logo { color: #1f5f2a; }
+  [data-client='seleccion-espanola'] .coaster-logo { color: #a8111c; }
+  [data-client='casa-tarradellas'] .coaster-logo { color: #c8341f; }
+  [data-client='adolfo-dominguez'] .coaster-logo { font-family: Georgia, serif; font-weight: 400; }
+  [data-client='junta-andalucia'] .coaster-logo { color: #007a33; }
+  [data-client='dia'] .coaster-logo { color: #c8101c; }
+  [data-client='eroski'] .coaster-logo { color: #d6001c; }
+  [data-client='ministerio-cultura'] .coaster-logo { font-family: Georgia, serif; font-weight: 400; }
   .table-note { text-align: center; color: #e0d2c2; font-size: 14px; }
   .bar-counter button:focus-visible, .bar-counter a:focus-visible { outline: 3px solid #e8b059; outline-offset: 7px; }
   .project-dialog { box-sizing: border-box; color: #11231e; background: #f4f1ec; font-family: 'Space Mono', monospace; width: min(560px, calc(100% - 32px)); max-height: 85svh; padding: clamp(22px, 5vw, 38px); border: 2px solid #11231e; border-radius: 6px 10px 7px 12px; box-shadow: 10px 10px 0 #00000040; }
@@ -77,7 +88,7 @@ import { clients } from '../data/clients';
   .dialog-actions { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-top: 30px; }
   .dialog-actions a { color: #11231e; text-underline-offset: 5px; font-size: 14px; }
   .dialog-actions button { font: inherit; font-size: 14px; min-height: 44px; border: 1px solid #11231e; background: none; cursor: pointer; padding: 10px 14px; }
-  @media (max-width: 680px) { .coaster-world { min-height: 640px; grid-template-columns: repeat(2, 1fr); padding: 10px; gap: 20px; } .coaster-wrapper { width: 144px; height: 144px; } .coaster-logo { font-size: 20px; } .coaster-face { padding: 15px; } .coaster-back { gap: 7px; } .back-title { font-size: 14px; } .header-ui { gap: 14px; } .coaster-heading { order: 3; flex-basis: 100%; } }
+  @media (max-width: 680px) { .coaster-world { min-height: max(640px, calc(var(--filas-2) * 172px)); grid-template-columns: repeat(2, 1fr); padding: 10px; gap: 20px; } .coaster-wrapper { width: 144px; height: 144px; } .coaster-logo { font-size: 20px; } .coaster-logo.largo { font-size: 15px; } .coaster-face { padding: 15px; } .coaster-back { gap: 7px; } .back-title { font-size: 14px; } .header-ui { gap: 14px; } .coaster-heading { order: 3; flex-basis: 100%; } }
   @media (max-width: 360px) { .coaster-world { gap: 10px; padding: 0; } .coaster-wrapper { width: 132px; height: 132px; } }
   @media (prefers-reduced-motion: reduce) { .coaster-body, .coaster-wrapper { transition: none !important; } }
 </style>

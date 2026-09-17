@@ -1,6 +1,16 @@
 ---
 // src/pages/portfolio.astro
+//
+// Archivo musical: estaciones con sus cajas de discos. El contenido vive en
+// src/data/portfolio.ts; esta página solo lo pinta y lo hace sonar.
 import { ClientRouter } from 'astro:transitions';
+import Funda from '../components/Funda.astro';
+import { estaciones } from '../data/portfolio';
+
+// La estación de publicidad lleva cuatro discos por estante: van más
+// pequeños para que la columna quepa en alto.
+const tamDisco = (tema: string) => (tema === 'publicidad' ? 130 : 160);
+const total = estaciones.length;
 ---
 
 <!DOCTYPE html>
@@ -9,25 +19,28 @@ import { ClientRouter } from 'astro:transitions';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Casita Manolo | Archivo Musical</title>
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" type="image/png" href="/icon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <ClientRouter />
-    
+
     <style>
         /* ========================================================
            1. RESET & VARIABLES
            ======================================================== */
         :root {
-            --bg-color: #11231E; 
-            --text-color: #F4F1EC; 
-            --accent-color: #D74F42; 
+            --bg-color: #11231E;
+            --text-color: #F4F1EC;
+            --accent-color: #D74F42;
             --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.2);
             --ease-slide: cubic-bezier(0.65, 0, 0.35, 1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+
         body, html {
             width: 100%; height: 100%;
             background-color: var(--bg-color); color: var(--text-color);
@@ -49,7 +62,7 @@ import { ClientRouter } from 'astro:transitions';
             pointer-events: none; z-index: 100;
         }
 
-        .section-title { opacity: 0.3; font-size: 0.75rem; letter-spacing: 0.4em; text-transform: uppercase;}
+        .section-title { opacity: 0.45; font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase; }
 
         .btn-volver {
             pointer-events: auto; color: var(--text-color); text-decoration: none;
@@ -58,7 +71,6 @@ import { ClientRouter } from 'astro:transitions';
         }
         .btn-volver:hover { color: var(--accent-color); transform: translateX(-5px); }
 
-        /* Controles del Carrusel */
         .nav-btn {
             position: absolute; top: 50%; transform: translateY(-50%);
             background: transparent; border: none; color: var(--text-color);
@@ -71,34 +83,100 @@ import { ClientRouter } from 'astro:transitions';
         #btn-next { right: 20px; }
 
         /* ========================================================
-           3. EL MONITOR DE VÍDEO
+           3. EL MONITOR
+           Enseña el vídeo del proyecto, su Vimeo o, si solo es audio o
+           no hay vídeo, la portada. Nunca se queda en negro.
            ======================================================== */
         .video-presentation {
             position: absolute; left: 5%; width: 45vw; aspect-ratio: 16/9;
             background-color: #08110e; border-radius: 12px; overflow: hidden;
             box-shadow: 0 30px 60px rgba(0,0,0,0.8); border: 1px solid rgba(244,241,236,0.1);
-            
             opacity: 0; pointer-events: none;
             transform: translateX(-50px) scale(0.95); transition: all 0.8s var(--ease-spring);
             z-index: 40;
         }
+        .video-presentation video,
+        .video-presentation iframe,
+        .video-presentation img { width: 100%; height: 100%; border: 0; object-fit: contain; display: block; }
+        .video-presentation [hidden] { display: none; }
 
-        .video-presentation video { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-
-        body.video-active .video-presentation { opacity: 1; transform: translateX(0) scale(1); }
+        body.video-active .video-presentation { opacity: 1; transform: translateX(0) scale(1); pointer-events: auto; }
 
         /* ========================================================
-           4. EL SALÓN (Contiene el carrusel de estaciones)
+           3b. FONDOS DE LAS ESTACIONES TEMÁTICAS
+           Capa fija detrás de todo: no se encoge ni se desplaza cuando se
+           enciende el monitor, y al cambiar de estación funde de una a otra.
+           Publicidad no tiene fondo propio y deja ver el verde de la casa.
+           ======================================================== */
+        .fondos { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+        .fondo { position: absolute; inset: 0; opacity: 0; transition: opacity 0.9s ease; }
+        .fondo.is-actual { opacity: 1; }
+
+        /* El Duelo: césped de estadio de noche, medio campo y círculo central
+           rodeando el plato; a la izquierda la luz blanca del Madrid y a la
+           derecha el blaugrana del Barça */
+        .fondo--duelo {
+            --circulo: 250px;
+            background:
+                radial-gradient(ellipse 55% 40% at 50% -8%, rgba(255,255,255,0.2), transparent 70%),
+                radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.6)),
+                linear-gradient(90deg, rgba(255,255,255,0.1), transparent 35%, transparent 65%, rgba(0,77,152,0.18) 88%, rgba(165,0,68,0.16)),
+                radial-gradient(circle at 50% 50%, transparent calc(var(--circulo) - 1px), rgba(255,255,255,0.16) var(--circulo) calc(var(--circulo) + 2px), transparent calc(var(--circulo) + 3px)),
+                linear-gradient(90deg, transparent calc(50% - 1px), rgba(255,255,255,0.16) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
+                repeating-linear-gradient(90deg, #12402a 0 7vw, #0f3622 7vw 14vw);
+        }
+
+        /* Cannes: telón de terciopelo rojo y un foco dorado desde arriba */
+        .fondo--tarara {
+            background:
+                radial-gradient(ellipse 38% 55% at 50% -5%, rgba(232,176,89,0.32), transparent 70%),
+                radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55)),
+                repeating-linear-gradient(90deg, rgba(0,0,0,0.38) 0, rgba(255,255,255,0.05) 48px, rgba(0,0,0,0.38) 96px),
+                linear-gradient(180deg, #6a0c15, #2c0509);
+        }
+
+        /* Airbnb: muro de piedra y el calor de la chimenea desde abajo */
+        .fondo--airbnb {
+            background:
+                radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.65)),
+                linear-gradient(rgba(22,13,7,0.74), rgba(22,13,7,0.74)),
+                url('/portfolio/piedra.webp') center / cover;
+        }
+        .fondo--airbnb::after {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(ellipse 65% 50% at 50% 108%, rgba(255,138,48,0.42), transparent 70%);
+            animation: llama 3.2s ease-in-out infinite alternate;
+        }
+        @keyframes llama { from { opacity: 0.75; } to { opacity: 1; } }
+
+        /* Obra propia: pentagramas dorados sobre la noche y luz de escenario */
+        .fondo--obra {
+            background:
+                radial-gradient(ellipse 45% 55% at 50% -5%, rgba(201,162,74,0.2), transparent 70%),
+                radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.5)),
+                repeating-linear-gradient(180deg,
+                    rgba(232,176,89,0.15) 0 1px, transparent 1px 11px,
+                    rgba(232,176,89,0.15) 11px 12px, transparent 12px 22px,
+                    rgba(232,176,89,0.15) 22px 23px, transparent 23px 33px,
+                    rgba(232,176,89,0.15) 33px 34px, transparent 34px 44px,
+                    rgba(232,176,89,0.15) 44px 45px, transparent 45px 150px),
+                #0a1512;
+        }
+
+        /* ========================================================
+           4. EL SALÓN (carrusel de estaciones)
            ======================================================== */
         .venue {
+            position: relative; z-index: 1;
             width: 100%; height: 100%; overflow: hidden;
             transform: translateX(0) scale(1);
             transition: transform 0.8s var(--ease-spring);
         }
-
-        body.video-active .venue {
-            transform: translateX(20vw) scale(0.9);
-        }
+        /* Con el monitor encendido la escena se aparta a su derecha. El
+           script mide el hueco libre y fija --desplazamiento y --escala para
+           que todos los discos queden visibles; los valores por defecto son
+           solo un respaldo. */
+        body.video-active .venue { transform: translateX(var(--desplazamiento, 20vw)) scale(var(--escala, 0.9)); }
 
         .stations-track {
             display: flex; height: 100%; width: 100%;
@@ -116,46 +194,37 @@ import { ClientRouter } from 'astro:transitions';
 
         .station-bg-text {
             position: absolute; top: 15%; width: 100%; text-align: center;
-            font-size: clamp(4rem, 10vw, 8rem); font-weight: 700; color: rgba(244,241,236,0.02);
-            letter-spacing: 0.1em; z-index: 0; pointer-events: none;
+            font-size: clamp(4rem, 10vw, 8rem); font-weight: 700; color: rgba(244,241,236,0.03);
+            letter-spacing: 0.1em; z-index: 0; pointer-events: none; white-space: nowrap;
         }
 
         .rack { display: flex; flex-direction: column; gap: 50px; z-index: 20; }
 
         /* ========================================================
-           5. DISCOS Y CARÁTULAS
+           5. NOTAS DEL DISCO (estaciones de un solo proyecto)
            ======================================================== */
-        .sleeve-container { position: relative; width: 160px; height: 160px; }
-
-        .album-cover {
-            position: absolute; inset: 0; z-index: 20; border-radius: 4px;
-            background-size: cover; background-position: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6); cursor: pointer;
-            display: flex; align-items: center; justify-content: center; text-align: center;
-            transition: transform 0.4s var(--ease-spring), box-shadow 0.4s ease;
-            border: 1px solid rgba(244,241,236,0.1);
+        .liner-notes {
+            position: relative; width: 220px; padding: 22px 20px; overflow: hidden;
+            border-radius: 4px; transform: rotate(2deg);
+            background: #f4f1ec; color: #11231e;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            font-size: 0.72rem; line-height: 1.7;
         }
+        .liner-notes > * { position: relative; }
+        .liner-sello { display: block; width: 64px; height: auto; margin-bottom: 14px; }
+        .liner-notes a { display: inline-block; margin-top: 14px; color: inherit; font-weight: 700; text-underline-offset: 4px; }
+        .liner-notes a:hover { color: var(--accent-color); }
 
-        .cover-text {
-            font-size: 1.1rem; font-weight: 700; letter-spacing: 0.2em; line-height: 1.4;
-            color: var(--bg-color); background-color: rgba(244,241,236,0.7);
-            width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; pointer-events: none;
+        /* Con foto de fondo: la imagen apagada y el texto claro encima */
+        .liner-notes.con-fondo { background: #1b120c; color: #f4f1ec; }
+        .liner-notes.con-fondo::before {
+            content: ''; position: absolute; inset: 0;
+            background: var(--fondo) center / cover no-repeat; opacity: 0.28;
         }
-
-        .sleeve-container:hover .album-cover { transform: scale(1.05); box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
-
-        .vinyl-wrapper {
-            position: absolute; top: 2px; left: 2px; width: 156px; height: 156px;
-            z-index: 10; touch-action: none; cursor: grab;
-        }
-        .vinyl-wrapper.dragging { cursor: grabbing; z-index: 60 !important; }
-        .vinyl-art { width: 100%; height: 100%; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); }
-
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .vinyl-wrapper.playing .vinyl-art { animation: spin 3s linear infinite; }
+        .liner-notes.con-fondo p { text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
 
         /* ========================================================
-           6. EL TOCADISCOS (Múltiples Estilos)
+           6. EL TOCADISCOS
            ======================================================== */
         .turntable-wrapper {
             position: relative; width: 400px; height: 400px; display: flex; flex-direction: column;
@@ -172,40 +241,65 @@ import { ClientRouter } from 'astro:transitions';
             position: relative; transition: border-color 0.3s ease, background-color 0.3s ease; z-index: 10;
         }
 
-        .platter-ring { position: absolute; border-radius: 50%; border: 1px solid rgba(244,241,236,0.03); pointer-events: none; }
+        .platter-ring { position: absolute; border-radius: 50%; border: 1px solid rgba(244,241,236,0.04); pointer-events: none; }
         .platter-ring.r1 { width: 260px; height: 260px; }
         .platter-ring.r2 { width: 200px; height: 200px; }
 
         .dropzone-text {
             position: absolute; font-size: 0.65rem; letter-spacing: 0.3em;
-            color: rgba(244,241,236,0.3); text-align: center; pointer-events: none; line-height: 1.5;
+            color: rgba(244,241,236,0.35); text-align: center; pointer-events: none; line-height: 1.5;
         }
 
         .spindle { width: 16px; height: 16px; background-color: #b0b8b5; border-radius: 50%; box-shadow: 0 4px 6px rgba(0,0,0,0.5); z-index: 0; }
 
         .tonearm {
             position: absolute; top: 30px; right: 40px; width: 100px; height: 180px;
-            pointer-events: none; transition: transform 0.7s ease-in-out; 
+            pointer-events: none; transition: transform 0.7s ease-in-out;
             transform-origin: 80px 20px; z-index: 40;
         }
         .tonearm-active { transform: rotate(24deg); }
 
-        /* Estilos específicos Estación 1 (Original Oscuro) */
-        .station-1 .turntable-base { background-color: #0d1b17; border: 1px solid #1a332a; }
-        .station-1 .dropzone { background-color: #08110e; border: 2px solid #1a332a; }
-        .station-1 .dropzone.active-hover { border-color: #D74F42; background-color: #15241f; }
+        /* --- Un tocadiscos con el carácter de cada estación --- */
 
-        /* Estilos específicos Estación 2 (Naranja Retro) */
-        .station-2 .turntable-base { background: linear-gradient(135deg, #b34a1c, #80300d); border: 1px solid #d35400; }
-        .station-2 .dropzone { background-color: #4a1900; border: 2px solid #a03c14; }
-        .station-2 .dropzone.active-hover { border-color: #f39c12; background-color: #6a2400; }
+        /* El Duelo: plato partido, blanco del Madrid y rayas del Barça */
+        .station--duelo .turntable-base {
+            background:
+                linear-gradient(90deg, #ece8df 0 50%, transparent 50%),
+                repeating-linear-gradient(90deg, #004d98 0 22px, #a50044 22px 44px);
+            border: 1px solid #c9a24a;
+        }
+        .station--duelo .dropzone { background-color: #0b0d12; border: 2px solid #2a2f3a; }
+        .station--duelo .dropzone.active-hover { border-color: #E8B059; background-color: #151923; }
+
+        /* Cannes: rojo carmín y oro */
+        .station--tarara .turntable-base { background: radial-gradient(circle at 35% 30%, #a5121b, #4a070b 70%); border: 1px solid #c9a24a; }
+        .station--tarara .dropzone { background-color: #2a0507; border: 2px solid #8a6a2c; }
+        .station--tarara .dropzone.active-hover { border-color: #E8B059; background-color: #3d080b; }
+        .station--tarara .liner-notes { background: #3a070b; color: #f4f1ec; border: 1px solid rgba(201,162,74,0.55); }
+
+        /* Airbnb: madera y calor de chimenea */
+        .station--airbnb .turntable-base { background: linear-gradient(135deg, #8a5a3b, #4f301c); border: 1px solid #a8754f; }
+        .station--airbnb .dropzone { background-color: #24160d; border: 2px solid #6b4429; }
+        .station--airbnb .dropzone.active-hover { border-color: #ff5a5f; background-color: #33200f; }
+        .station--airbnb .liner-notes { border: 1px solid rgba(255,138,48,0.45); }
+
+        /* Publicidad: el naranja retro, y la columna de cuatro discos */
+        .station--publicidad .turntable-base { background: linear-gradient(135deg, #b34a1c, #80300d); border: 1px solid #d35400; }
+        .station--publicidad .dropzone { background-color: #4a1900; border: 2px solid #a03c14; }
+        .station--publicidad .dropzone.active-hover { border-color: #f39c12; background-color: #6a2400; }
+        .station--publicidad .rack { gap: 16px; }
+
+        /* Obra propia: noche de concierto con filo dorado */
+        .station--obra .turntable-base { background-color: #0d1b17; border: 1px solid #c9a24a; }
+        .station--obra .dropzone { background-color: #08110e; border: 2px solid #1a332a; }
+        .station--obra .dropzone.active-hover { border-color: #E8B059; background-color: #15241f; }
 
         /* ========================================================
            7. HUD DEL PROYECTO
            ======================================================== */
         .project-hud {
-            position: absolute; bottom: -90px; display: flex; flex-direction: column; align-items: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.7s ease; z-index: 50;
+            position: absolute; bottom: -100px; width: 560px; display: flex; flex-direction: column; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.7s ease; z-index: 50; text-align: center;
         }
 
         .playing-indicator { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
@@ -213,38 +307,45 @@ import { ClientRouter } from 'astro:transitions';
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
         .playing-text { font-size: 0.6rem; letter-spacing: 0.3em; color: var(--accent-color); }
 
-        .project-title { font-size: 2rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; text-align: center; }
+        .project-title { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; line-height: 1.2; }
+        .project-detail { margin-top: 8px; font-size: 0.7rem; letter-spacing: 0.08em; opacity: 0.7; }
 
         /* ========================================================
-           8. MOVIL
-           La escena mide 800px de ancho fijos (disco 160 + tocadiscos
-           400 + disco 160 + huecos). En un movil no cabe y se salia de
-           pantalla sin posibilidad de alcanzarla. En vez de reordenarla,
-           la encogemos entera: se mantiene el gesto de arrastrar el disco
-           al plato, que es de lo que va la pagina.
+           8. MÓVIL
+           Cada escena tiene un ancho fijo (estantes + tocadiscos). En
+           móvil no cabe, así que se encoge entera sin reordenarla: se
+           mantiene el gesto de arrastrar el disco al plato. El script
+           del arrastre lee la escala real, así que el disco sigue al dedo.
            ======================================================== */
         @media (max-width: 560px) {
-            /* Centrado explicito: siendo mas ancha que la pantalla, el
-               justify-content del flex la desbordaba solo hacia la derecha
-               y media escena quedaba fuera. Posicionandola a mano queda
-               centrada pase lo que pase. */
+            /* Centrado explícito: siendo más ancha que la pantalla, el
+               justify-content del flex la desbordaba solo hacia la derecha */
             .jukebox-stage {
+                --zoom: 0.55;
                 position: absolute;
                 top: 50%;
                 left: 50%;
-                width: 800px;
+                width: var(--ancho, 800px);
                 max-width: none;
-                transform: translate(-50%, -50%) scale(0.55);
+                transform: translate(-50%, -50%) scale(calc(var(--zoom) * var(--reduccion, 1)));
             }
+            /* Con tarjeta de notas la escena es más ancha: se reduce algo más */
+            .station--tarara, .station--airbnb { --ancho: 860px; --reduccion: 0.93; }
+            .station--publicidad { --ancho: 740px; }
 
-            /* La cabecera se partia en dos lineas y se pisaba a si misma */
             .header-ui { top: 14px; padding: 0 14px; }
             .btn-volver { font-size: 0.6rem; letter-spacing: 0.16em; }
-            .section-title { font-size: 0.56rem; letter-spacing: 0.18em; }
+            .section-title { font-size: 0.56rem; letter-spacing: 0.14em; }
 
-            .station-bg-text { top: 9%; font-size: 3rem; }
+            .station-bg-text { top: 9%; font-size: 2.6rem; }
+            .fondo--duelo { --circulo: 96px; }
 
-            /* Las flechas bajan al pie: a los lados tapaban la escena */
+            /* Todo lo de dentro de la escena se encoge con ella: más cuerpo */
+            .project-title { font-size: 2.8rem; }
+            .project-detail { font-size: 1.35rem; }
+            .dropzone-text { font-size: 1.2rem; }
+            .liner-notes { width: 240px; font-size: 1.25rem; line-height: 1.5; }
+
             .nav-btn {
                 top: auto; bottom: 22px; transform: none;
                 font-size: 1.5rem; padding: 14px 26px; opacity: 0.55;
@@ -253,208 +354,178 @@ import { ClientRouter } from 'astro:transitions';
             #btn-prev { left: 22%; }
             #btn-next { right: 22%; }
 
-            /* Con el video, en vertical se apila en vez de ponerse al lado */
+            /* Con el monitor encendido, en vertical se apila en vez de ponerse al lado */
             .video-presentation { left: 5vw; width: 90vw; top: 9vh; }
             body.video-active .venue { transform: translateY(19vh) scale(0.8); }
         }
 
         @media (max-width: 480px) {
-            .jukebox-stage { transform: translate(-50%, -50%) scale(0.45); }
+            .jukebox-stage { --zoom: 0.45; }
         }
 
         @media (max-width: 380px) {
-            .jukebox-stage { transform: translate(-50%, -50%) scale(0.37); }
+            .jukebox-stage { --zoom: 0.37; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .fondo--airbnb::after { animation: none; }
+            .fondo { transition: none; }
         }
     </style>
 </head>
 <body>
 
     <main class="portfolio-main">
-        
-        <!-- MONITOR DE VÍDEO -->
-        <div class="video-presentation">
-            <video id="project-video" loop muted playsinline>
-                <source src="" type="video/mp4" />
-            </video>
+
+        <!-- FONDOS: uno por estación, se funden al cambiar -->
+        <div class="fondos" aria-hidden="true">
+            {estaciones.map((est, i) => <div class:list={['fondo', `fondo--${est.tema}`, { 'is-actual': i === 0 }]}></div>)}
         </div>
 
-        <audio id="player-audio" loop>
-            <source src="/sounds/placeholder.mp3" type="audio/mpeg" />
-        </audio>
+        <!-- MONITOR -->
+        <div class="video-presentation" aria-live="polite">
+            <video id="project-video" playsinline loop preload="none" hidden></video>
+            <iframe id="project-vimeo" title="Vídeo del proyecto" src="about:blank" allow="autoplay; fullscreen; picture-in-picture" hidden></iframe>
+            <img id="project-still" alt="" hidden />
+        </div>
+
+        <audio id="player-audio" loop preload="none"></audio>
 
         <!-- UI SUPERIOR -->
         <div class="header-ui">
-            <div class="section-title" id="station-indicator">ESTACIÓN 1 / 2</div>
+            <div class="section-title" id="station-indicator">{estaciones[0].nombre} · 1 / {total}</div>
             <a href="/" class="btn-volver">← VOLVER A CASA</a>
         </div>
 
         <!-- FLECHAS -->
-        <button class="nav-btn" id="btn-prev" disabled>◄</button>
-        <button class="nav-btn" id="btn-next">►</button>
+        <button class="nav-btn" id="btn-prev" aria-label="Estación anterior" disabled>◄</button>
+        <button class="nav-btn" id="btn-next" aria-label="Estación siguiente">►</button>
 
         <!-- EL RECINTO -->
         <div class="venue">
             <div class="stations-track" id="stations-track">
-                
-                <!-- ==============================================
-                     ESTACIÓN 1: DESARROLLO (Oscuro)
-                     ============================================== -->
-                <section class="station station-1">
-                    <div class="station-bg-text">CINE</div>
-                    <div class="jukebox-stage">
-                        
-                        <!-- RACK IZQ (Estación 1) -->
-                        <div class="rack">
-                            <div class="sleeve-container" data-peek="35" data-slide="160" data-title="EL MADRILEÑO" data-video="/videos/interior.mp4">
-                                <div class="vinyl-wrapper"><svg viewBox="0 0 100 100" class="vinyl-art"><circle cx="50" cy="50" r="48" fill="#0b1714" stroke="#223b33" stroke-width="0.5"/><circle cx="50" cy="50" r="38" stroke="#1a2e28" stroke-width="1" fill="none"/><circle cx="50" cy="50" r="28" stroke="#1a2e28" stroke-width="1" fill="none"/><circle cx="50" cy="50" r="16" fill="#D74F42"/><circle cx="50" cy="50" r="2" fill="#F4F1EC"/></svg></div>
-                                <div class="album-cover" style="background-image: url('/images/placeholder-1.jpg');"><span class="cover-text">01<br>MADRILEÑO</span></div>
-                            </div>
-                            <div class="sleeve-container" data-peek="35" data-slide="160" data-title="GIRA 2024">
-                                <div class="vinyl-wrapper"><svg viewBox="0 0 100 100" class="vinyl-art"><circle cx="50" cy="50" r="48" fill="#0b1714" stroke="#223b33" stroke-width="0.5"/><circle cx="50" cy="50" r="38" stroke="#1a2e28" stroke-width="1" fill="none"/><circle cx="50" cy="50" r="28" stroke="#1a2e28" stroke-width="1" fill="none"/><circle cx="50" cy="50" r="16" fill="#E8B059"/><circle cx="50" cy="50" r="2" fill="#F4F1EC"/></svg></div>
-                                <div class="album-cover" style="background-color: #E8B059;"><span class="cover-text" style="background-color: rgba(17,35,30,0.7); color: #F4F1EC;">02<br>GIRA</span></div>
-                            </div>
-                        </div>
+                {estaciones.map((est) => {
+                    const tam = tamDisco(est.tema);
+                    return (
+                        <section class={`station station--${est.tema}`} data-nombre={est.nombre} style={`--disco: ${tam}px`}>
+                            <div class="station-bg-text" aria-hidden="true">{est.rotulo}</div>
+                            <div class="jukebox-stage">
 
-                        <!-- TOCADISCOS (Estación 1) -->
-                        <div class="turntable-wrapper">
-                            <div class="turntable-base"></div>
-                            <div class="dropzone"> 
-                                <div class="platter-ring r1"></div><div class="platter-ring r2"></div>
-                                <div class="dropzone-text">ARRASTRA<br>EL DISCO</div>
-                                <div class="spindle"></div>
-                            </div>
-                            <svg viewBox="0 0 100 180" class="tonearm"> 
-                                <circle cx="80" cy="20" r="14" fill="#1a332a" stroke="#08110e" stroke-width="2"/>
-                                <circle cx="80" cy="20" r="4" fill="#b0b8b5"/>
-                                <path d="M 80 20 L 40 120 L 20 140" fill="none" stroke="#b0b8b5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                                <rect x="11" y="130" width="18" height="30" fill="#2a3b35" rx="2" transform="rotate(45 20 140)"/>
-                            </svg>
-                            <div class="project-hud"> 
-                                <div class="playing-indicator"><div class="red-dot"></div><span class="playing-text">REPRODUCIENDO</span></div>
-                                <h2 class="project-title">Título</h2>
-                            </div>
-                        </div>
+                                <div class="rack">
+                                    {est.izquierda.map((disco) => <Funda disco={disco} lado="izq" tam={tam} />)}
+                                </div>
 
-                        <!-- RACK DER (Estación 1) -->
-                        <div class="rack">
-                            <div class="sleeve-container" data-peek="-35" data-slide="-160" data-title="SESIONES VIVO">
-                                <div class="vinyl-wrapper"><svg viewBox="0 0 100 100" class="vinyl-art"><circle cx="50" cy="50" r="48" fill="#0b1714" stroke="#223b33" stroke-width="0.5"/><circle cx="50" cy="50" r="38" stroke="#1a2e28" stroke-width="1" fill="none"/><circle cx="50" cy="50" r="28" stroke="#1a2e28" stroke-width="1" fill="none"/><circle cx="50" cy="50" r="16" fill="#5982e8"/><circle cx="50" cy="50" r="2" fill="#F4F1EC"/></svg></div>
-                                <div class="album-cover" style="background-color: #5982e8;"><span class="cover-text" style="background-color: rgba(17,35,30,0.7); color: #F4F1EC;">03<br>SESIONES</span></div>
+                                <div class="turntable-wrapper">
+                                    <div class="turntable-base"></div>
+                                    <div class="dropzone">
+                                        <div class="platter-ring r1"></div><div class="platter-ring r2"></div>
+                                        <div class="dropzone-text">ARRASTRA<br>EL DISCO</div>
+                                        <div class="spindle"></div>
+                                    </div>
+                                    <svg viewBox="0 0 100 180" class="tonearm" aria-hidden="true">
+                                        <circle cx="80" cy="20" r="14" fill="#1a332a" stroke="#08110e" stroke-width="2"/>
+                                        <circle cx="80" cy="20" r="4" fill="#b0b8b5"/>
+                                        <path d="M 80 20 L 40 120 L 20 140" fill="none" stroke="#b0b8b5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <rect x="11" y="130" width="18" height="30" fill="#2a3b35" rx="2" transform="rotate(45 20 140)"/>
+                                    </svg>
+                                    <div class="project-hud">
+                                        <div class="playing-indicator"><div class="red-dot"></div><span class="playing-text">REPRODUCIENDO</span></div>
+                                        <h2 class="project-title">Título</h2>
+                                        <p class="project-detail"></p>
+                                    </div>
+                                </div>
+
+                                <div class="rack">
+                                    {est.derecha.map((disco) => <Funda disco={disco} lado="der" tam={tam} />)}
+                                    {est.notas && (
+                                        <aside
+                                            class:list={['liner-notes', { 'con-fondo': est.notas.fondo }]}
+                                            style={est.notas.fondo ? `--fondo: url('${est.notas.fondo}')` : undefined}
+                                        >
+                                            {est.notas.sello && <img class="liner-sello" src={est.notas.sello} alt="" />}
+                                            <p>{est.notas.texto}</p>
+                                            {est.notas.enlace && (
+                                                <a href={est.notas.enlace.href} target="_blank" rel="noopener">{est.notas.enlace.texto}</a>
+                                            )}
+                                        </aside>
+                                    )}
+                                </div>
+
                             </div>
-                        </div>
-
-                    </div>
-                </section>
-
-                <!-- ==============================================
-                     ESTACIÓN 2: BRANDING (Naranja/Retro)
-                     ============================================== -->
-                <section class="station station-2">
-                    <div class="station-bg-text">PUBLICIDAD</div>
-                    <div class="jukebox-stage">
-                        
-                        <!-- RACK IZQ (Estación 2) -->
-                        <div class="rack">
-                            <div class="sleeve-container" data-peek="35" data-slide="160" data-title="LOGOTIPO">
-                                <div class="vinyl-wrapper"><svg viewBox="0 0 100 100" class="vinyl-art"><circle cx="50" cy="50" r="48" fill="#222" stroke="#333" stroke-width="0.5"/><circle cx="50" cy="50" r="38" stroke="#111" stroke-width="1" fill="none"/><circle cx="50" cy="50" r="28" stroke="#111" stroke-width="1" fill="none"/><circle cx="50" cy="50" r="16" fill="#f39c12"/><circle cx="50" cy="50" r="2" fill="#FFF"/></svg></div>
-                                <div class="album-cover" style="background-color: #f39c12;"><span class="cover-text">01<br>LOGO</span></div>
-                            </div>
-                        </div>
-
-                        <!-- TOCADISCOS (Estación 2) -->
-                        <div class="turntable-wrapper">
-                            <div class="turntable-base"></div>
-                            <div class="dropzone">
-                                <div class="platter-ring r1"></div><div class="platter-ring r2"></div>
-                                <div class="dropzone-text">ARRASTRA<br>EL DISCO</div>
-                                <div class="spindle"></div>
-                            </div>
-                            <svg viewBox="0 0 100 180" class="tonearm">
-                                <circle cx="80" cy="20" r="14" fill="#333" stroke="#111" stroke-width="2"/>
-                                <circle cx="80" cy="20" r="4" fill="#ddd"/>
-                                <path d="M 80 20 L 40 120 L 20 140" fill="none" stroke="#ddd" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                                <rect x="11" y="130" width="18" height="30" fill="#f39c12" rx="2" transform="rotate(45 20 140)"/>
-                            </svg>
-                            <div class="project-hud">
-                                <div class="playing-indicator"><div class="red-dot"></div><span class="playing-text">REPRODUCIENDO</span></div>
-                                <h2 class="project-title">Título</h2>
-                            </div>
-                        </div>
-
-                        <!-- RACK DER (Estación 2) -->
-                        <div class="rack">
-                            <div class="sleeve-container" data-peek="-35" data-slide="-160" data-title="PACKAGING">
-                                <div class="vinyl-wrapper"><svg viewBox="0 0 100 100" class="vinyl-art"><circle cx="50" cy="50" r="48" fill="#222" stroke="#333" stroke-width="0.5"/><circle cx="50" cy="50" r="38" stroke="#111" stroke-width="1" fill="none"/><circle cx="50" cy="50" r="28" stroke="#111" stroke-width="1" fill="none"/><circle cx="50" cy="50" r="16" fill="#27ae60"/><circle cx="50" cy="50" r="2" fill="#FFF"/></svg></div>
-                                <div class="album-cover" style="background-color: #27ae60;"><span class="cover-text">02<br>PACK</span></div>
-                            </div>
-                        </div>
-
-                    </div>
-                </section>
-
+                        </section>
+                    );
+                })}
             </div>
         </div>
     </main>
 
     <script>
+        type Medio = { tipo: 'video'; src: string } | { tipo: 'vimeo'; id: string } | { tipo: 'audio'; src: string };
+
         document.addEventListener('astro:page-load', () => {
             const body = document.body;
             const track = document.getElementById('stations-track');
-            const btnPrev = document.getElementById('btn-prev');
-            const btnNext = document.getElementById('btn-next');
+            const btnPrev = document.getElementById('btn-prev') as HTMLButtonElement | null;
+            const btnNext = document.getElementById('btn-next') as HTMLButtonElement | null;
             const indicator = document.getElementById('station-indicator');
-            
-            const sleeves = document.querySelectorAll('.sleeve-container');
+
+            const sleeves = document.querySelectorAll<HTMLElement>('.sleeve-container');
             const audioPlayer = document.getElementById('player-audio') as HTMLAudioElement;
             const videoPlayer = document.getElementById('project-video') as HTMLVideoElement;
+            const vimeoPlayer = document.getElementById('project-vimeo') as HTMLIFrameElement;
+            const stillImage = document.getElementById('project-still') as HTMLImageElement;
 
-            if (!track || !btnPrev || !btnNext) return;
+            if (!track || !btnPrev || !btnNext || !audioPlayer || !videoPlayer || !vimeoPlayer || !stillImage) return;
 
-            // --- LÓGICA DEL CARRUSEL ---
-            const stations = track.querySelectorAll('.station');
+            // --- CARRUSEL ---
+            const stations = track.querySelectorAll<HTMLElement>('.station');
+            const fondos = document.querySelectorAll<HTMLElement>('.fondo');
             const totalStations = stations.length;
             let currentIndex = 0;
-            let activeVinyl = null; 
+            let activeVinyl: HTMLElement | null = null;
 
             function updateCarousel() {
-                track.style.transform = `translateX(-${currentIndex * 100}vw)`;
-                if(indicator) indicator.textContent = `ESTACIÓN ${currentIndex + 1} / ${totalStations}`;
-                btnPrev.disabled = currentIndex === 0;
-                btnNext.disabled = currentIndex === totalStations - 1;
-
-                if (activeVinyl) {
-                    returnVinyl(activeVinyl);
-                }
+                track!.style.transform = `translateX(-${currentIndex * 100}vw)`;
+                const nombre = stations[currentIndex]?.dataset.nombre ?? '';
+                if (indicator) indicator.textContent = `${nombre} · ${currentIndex + 1} / ${totalStations}`;
+                btnPrev!.disabled = currentIndex === 0;
+                btnNext!.disabled = currentIndex === totalStations - 1;
+                fondos.forEach((f, i) => f.classList.toggle('is-actual', i === currentIndex));
+                if (activeVinyl) returnVinyl(activeVinyl);
             }
 
             btnNext.addEventListener('click', () => { if (currentIndex < totalStations - 1) { currentIndex++; updateCarousel(); } });
             btnPrev.addEventListener('click', () => { if (currentIndex > 0) { currentIndex--; updateCarousel(); } });
-            updateCarousel(); 
+            updateCarousel();
 
+            // --- VINILOS ---
+            const vinylData = new Map<HTMLElement, any>();
 
-            // --- LÓGICA DE VINILOS ---
-            const vinylData = new Map();
-
-            sleeves.forEach(sleeve => {
+            sleeves.forEach((sleeve) => {
                 const vinyl = sleeve.querySelector('.vinyl-wrapper') as HTMLElement;
                 const cover = sleeve.querySelector('.album-cover') as HTMLElement;
-                
+
                 const station = sleeve.closest('.station') as HTMLElement;
                 const dropzone = station.querySelector('.dropzone') as HTMLElement;
                 const tonearm = station.querySelector('.tonearm') as HTMLElement;
                 const projectHud = station.querySelector('.project-hud') as HTMLElement;
                 const projectTitle = station.querySelector('.project-title') as HTMLElement;
+                const projectDetail = station.querySelector('.project-detail') as HTMLElement;
 
                 if (!vinyl || !cover || !dropzone || !tonearm) return;
-                
-                const peekX = parseInt(sleeve.getAttribute('data-peek') || '35', 10);
-                const slideX = parseInt(sleeve.getAttribute('data-slide') || '160', 10);
-                const titleText = sleeve.getAttribute('data-title') || 'Proyecto';
-                const videoSrc = sleeve.getAttribute('data-video') || null;
+
+                const peekX = parseInt(sleeve.dataset.peek || '35', 10);
+                const slideX = parseInt(sleeve.dataset.slide || '160', 10);
+                let medio: Medio | null = null;
+                try { medio = sleeve.dataset.medio ? JSON.parse(sleeve.dataset.medio) : null; } catch { medio = null; }
 
                 vinylData.set(vinyl, {
-                    x: peekX, y: 0, state: 'sheathed', title: titleText, homeX: slideX, peekX: peekX, video: videoSrc,
-                    dropzone, tonearm, projectHud, projectTitle
+                    x: peekX, y: 0, state: 'sheathed', homeX: slideX, peekX,
+                    title: sleeve.dataset.titulo || 'Proyecto',
+                    detail: sleeve.dataset.detalle || '',
+                    cover: sleeve.dataset.portada || '',
+                    medio,
+                    dropzone, tonearm, projectHud, projectTitle, projectDetail,
                 });
 
                 vinyl.style.transform = `translate(${peekX}px, 0px)`;
@@ -462,7 +533,7 @@ import { ClientRouter } from 'astro:transitions';
                 cover.addEventListener('click', () => {
                     const data = vinylData.get(vinyl);
                     if (!data) return;
-                    if (data.state === 'sheathed') { data.x = data.homeX; data.state = 'unsheathed'; } 
+                    if (data.state === 'sheathed') { data.x = data.homeX; data.state = 'unsheathed'; }
                     else if (data.state === 'unsheathed') { data.x = data.peekX; data.state = 'sheathed'; }
                     vinyl.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2)';
                     vinyl.style.transform = `translate(${data.x}px, ${data.y}px)`;
@@ -477,10 +548,10 @@ import { ClientRouter } from 'astro:transitions';
 
                     e.preventDefault(); isDragging = true;
                     lastMouseX = e.clientX; lastMouseY = e.clientY;
-                    
+
                     vinyl.classList.add('dragging');
                     vinyl.style.transition = 'none';
-                    
+
                     if (data.state === 'playing') {
                         vinyl.classList.remove('playing');
                         hideProjectInfo(data); stopMedia();
@@ -489,38 +560,34 @@ import { ClientRouter } from 'astro:transitions';
                     }
                 });
 
-                const onPointerMove = (e) => {
+                const onPointerMove = (e: PointerEvent) => {
                     if (!isDragging) return;
-                    
+
                     const currentScale = escalaEscena(vinyl);
                     const deltaX = (e.clientX - lastMouseX) / currentScale;
                     const deltaY = (e.clientY - lastMouseY) / currentScale;
-                    
+
                     const data = vinylData.get(vinyl);
                     if (!data) return;
 
                     data.x += deltaX; data.y += deltaY;
                     vinyl.style.transform = `translate(${data.x}px, ${data.y}px)`;
-                    
+
                     lastMouseX = e.clientX; lastMouseY = e.clientY;
 
-                    if (isOverDropzone(vinyl, data.dropzone)) {
-                        data.dropzone.classList.add('active-hover');
-                    } else {
-                        data.dropzone.classList.remove('active-hover');
-                    }
+                    data.dropzone.classList.toggle('active-hover', isOverDropzone(vinyl, data.dropzone));
                 };
 
                 const onPointerUp = () => {
                     if (!isDragging) return;
                     isDragging = false; vinyl.classList.remove('dragging');
                     const data = vinylData.get(vinyl);
-                    if(!data) return;
+                    if (!data) return;
 
                     data.dropzone.classList.remove('active-hover');
 
                     if (isOverDropzone(vinyl, data.dropzone)) {
-                        if (activeVinyl && activeVinyl !== vinyl) returnVinyl(activeVinyl as HTMLElement);
+                        if (activeVinyl && activeVinyl !== vinyl) returnVinyl(activeVinyl);
                         snapToTurntable(vinyl, data); activeVinyl = vinyl;
                     } else {
                         returnVinyl(vinyl);
@@ -529,27 +596,29 @@ import { ClientRouter } from 'astro:transitions';
 
                 window.addEventListener('pointermove', onPointerMove);
                 window.addEventListener('pointerup', onPointerUp);
-                document.addEventListener('astro:before-swap', () => { window.removeEventListener('pointermove', onPointerMove); window.removeEventListener('pointerup', onPointerUp); }, { once: true });
+                document.addEventListener('astro:before-swap', () => {
+                    window.removeEventListener('pointermove', onPointerMove);
+                    window.removeEventListener('pointerup', onPointerUp);
+                }, { once: true });
             });
 
-            // Escala real a la que se esta dibujando la escena.
-            // Antes se asumia 0.9 o 1 (los dos unicos valores que habia),
-            // pero en movil la encogemos bastante mas. Medirla del DOM
-            // recoge cualquier zoom, venga de donde venga, y mantiene el
-            // disco pegado al dedo.
+            // Al salir de la página, que no siga sonando nada
+            document.addEventListener('astro:before-swap', () => stopMedia(), { once: true });
+
+            // Escala real a la que se está dibujando la escena (el zoom de
+            // móvil, el del monitor encendido…). Mantiene el disco pegado al dedo.
             function escalaEscena(el: HTMLElement) {
                 const escena = el.closest('.jukebox-stage') as HTMLElement | null;
                 if (!escena || !escena.offsetWidth) return 1;
                 return escena.getBoundingClientRect().width / escena.offsetWidth;
             }
 
-            // --- FUNCIONES DE FÍSICAS REFACTORIZADAS ---
-
+            // --- FÍSICAS ---
             function isOverDropzone(vinyl: HTMLElement, dropzone: HTMLElement) {
                 const vRect = vinyl.getBoundingClientRect(); const dRect = dropzone.getBoundingClientRect();
                 const vCenterX = vRect.left + vRect.width / 2; const vCenterY = vRect.top + vRect.height / 2;
                 const dCenterX = dRect.left + dRect.width / 2; const dCenterY = dRect.top + dRect.height / 2;
-                return Math.hypot(vCenterX - dCenterX, vCenterY - dCenterY) < 130 * escalaEscena(vinyl); 
+                return Math.hypot(vCenterX - dCenterX, vCenterY - dCenterY) < 130 * escalaEscena(vinyl);
             }
 
             function snapToTurntable(vinyl: HTMLElement, data: any) {
@@ -564,9 +633,10 @@ import { ClientRouter } from 'astro:transitions';
                 vinyl.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2)';
                 vinyl.style.transform = `translate(${data.x}px, ${data.y}px)`;
                 vinyl.classList.add('playing');
-                
+
                 data.tonearm.classList.add('tonearm-active');
                 if (data.projectTitle) data.projectTitle.textContent = data.title;
+                if (data.projectDetail) data.projectDetail.textContent = data.detail;
                 if (data.projectHud) { data.projectHud.style.opacity = '1'; data.projectHud.style.pointerEvents = 'auto'; }
 
                 playMedia(data);
@@ -576,7 +646,7 @@ import { ClientRouter } from 'astro:transitions';
                 const data = vinylData.get(vinyl); if (!data) return;
 
                 data.x = data.peekX; data.y = 0; data.state = 'sheathed';
-                vinyl.style.zIndex = '10'; 
+                vinyl.style.zIndex = '10';
                 vinyl.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2)';
                 vinyl.style.transform = `translate(${data.x}px, ${data.y}px)`;
                 vinyl.classList.remove('playing');
@@ -592,19 +662,77 @@ import { ClientRouter } from 'astro:transitions';
                 if (data.projectHud) { data.projectHud.style.opacity = '0'; data.projectHud.style.pointerEvents = 'none'; }
             }
 
+            // --- ENCUADRE CON EL MONITOR ENCENDIDO ---
+            // Antes la escena se desplazaba siempre 20vw y se quedaba al 90%:
+            // con cuatro discos por estante, dos quedaban tapados por el vídeo
+            // y la columna derecha se salía de la pantalla. Ahora se mide el
+            // hueco que deja el monitor y la escena se ajusta a él.
+            const venue = document.querySelector('.venue') as HTMLElement;
+            const monitor = document.querySelector('.video-presentation') as HTMLElement;
+            const escritorio = window.matchMedia('(min-width: 561px)');
+
+            function encuadrarConMonitor() {
+                if (!venue || !monitor) return;
+                if (!escritorio.matches) {
+                    // En móvil el monitor va arriba y la escena abajo (lo hace el CSS)
+                    venue.style.removeProperty('--desplazamiento');
+                    venue.style.removeProperty('--escala');
+                    return;
+                }
+                const escena = stations[currentIndex]?.querySelector('.jukebox-stage') as HTMLElement | null;
+                if (!escena) return;
+                const margen = 24;
+                // offsetLeft/offsetWidth: geometría sin la animación de entrada
+                const libreIzq = monitor.offsetLeft + monitor.offsetWidth + margen;
+                const libreDer = window.innerWidth - margen;
+                const escala = Math.min(0.9, (libreDer - libreIzq) / escena.offsetWidth);
+                const desplazamiento = (libreIzq + libreDer) / 2 - window.innerWidth / 2;
+                venue.style.setProperty('--escala', String(escala));
+                venue.style.setProperty('--desplazamiento', `${desplazamiento}px`);
+            }
+            window.addEventListener('resize', encuadrarConMonitor);
+            document.addEventListener('astro:before-swap', () => window.removeEventListener('resize', encuadrarConMonitor), { once: true });
+
+            // --- MEDIOS ---
             function playMedia(data: any) {
-                if (audioPlayer) audioPlayer.play().catch(() => {});
-                if (data.video && videoPlayer) {
-                    body.classList.add('video-active');
-                    videoPlayer.src = data.video; videoPlayer.play().catch(() => {});
+                stopMedia();
+                const medio: Medio | null = data.medio;
+                encuadrarConMonitor();
+                body.classList.add('video-active');
+
+                if (medio?.tipo === 'video') {
+                    videoPlayer.hidden = false;
+                    videoPlayer.src = medio.src;
+                    // Es un portfolio de música: el vídeo suena. Soltar el
+                    // disco es un gesto del usuario, así que el navegador lo
+                    // permite; si aun así lo bloquea, arranca en silencio.
+                    videoPlayer.muted = false;
+                    videoPlayer.play().catch(() => { videoPlayer.muted = true; videoPlayer.play().catch(() => {}); });
+                } else if (medio?.tipo === 'vimeo') {
+                    vimeoPlayer.hidden = false;
+                    vimeoPlayer.src = `https://player.vimeo.com/video/${medio.id}?autoplay=1&title=0&byline=0&portrait=0&badge=0&dnt=1&color=D74F42`;
                 } else {
-                    body.classList.remove('video-active');
+                    // Solo audio, o sin medio: el monitor enseña la portada
+                    stillImage.src = data.cover;
+                    stillImage.hidden = false;
+                    if (medio?.tipo === 'audio') {
+                        audioPlayer.src = medio.src;
+                        audioPlayer.play().catch(() => {});
+                    }
                 }
             }
 
             function stopMedia() {
-                if (audioPlayer) audioPlayer.pause();
-                if (videoPlayer) { videoPlayer.pause(); videoPlayer.src = ""; }
+                audioPlayer.pause();
+                audioPlayer.removeAttribute('src');
+                videoPlayer.pause();
+                videoPlayer.removeAttribute('src');
+                videoPlayer.load();
+                videoPlayer.hidden = true;
+                if (vimeoPlayer.getAttribute('src') !== 'about:blank') vimeoPlayer.src = 'about:blank';
+                vimeoPlayer.hidden = true;
+                stillImage.hidden = true;
+                stillImage.removeAttribute('src');
             }
         });
     </script>

@@ -20,7 +20,7 @@ document.addEventListener('astro:page-load', () => {
       const limit = bounds(s);
       s.x = Math.max(8, Math.min(limit.x, world.clientWidth / cols * (s.index % cols + 0.5) - s.el.offsetWidth / 2));
       s.y = Math.max(8, Math.min(limit.y, world.clientHeight / rows * (Math.floor(s.index / cols) + 0.5) - s.el.offsetHeight / 2));
-      s.rotation = [-9, 8, -5, 12, -7, 5][s.index]; s.vx = 0; s.vy = 0;
+      s.rotation = [-9, 8, -5, 12, -7, 5][s.index % 6]; s.vx = 0; s.vy = 0;
       s.el.classList.add('is-dealing'); draw(s);
       const timer = setTimeout(() => { s.el.classList.remove('is-dealing'); timers.delete(timer); }, 500);
       timers.add(timer);
