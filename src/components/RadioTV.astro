@@ -10,13 +10,32 @@
 //
 // El componente no trae botón propio: el panel se abre desde cualquier
 // elemento con data-radio-trigger (en el home, el satélite de la escena).
-import { moods, televisionScene } from '../data/listening';
+import { moods, emisoras as nombres, televisionScene, escena } from '../data/listening';
+import { t, type Idioma } from '../i18n/config';
+import { textos } from '../i18n/textos';
+
+interface Props {
+    idioma: Idioma;
+}
+
+const { idioma } = Astro.props;
+const T = textos[idioma].radio;
 
 const emisoras = moods.map((m) => ({
-    nombre: m.name.toUpperCase(),
-    titulo: m.title,
+    nombre: t(nombres[m.id].nombre, idioma).toUpperCase(),
+    titulo: t(nombres[m.id].titulo, idioma),
     src: m.source,
 }));
+
+// Los rotulos de la pantalla los pone el script, asi que viajan en data-*
+const estados = {
+    apagada: T.apagada,
+    sintonizando: T.sintonizando,
+    enAntena: T.enAntena,
+    sinSenal: T.sinSenal,
+    encender: T.encender,
+    apagar: T.apagar,
+};
 
 // El dial recorre 270º repartidos entre las emisoras
 const ARCO = 270;
@@ -31,8 +50,9 @@ const paso = ARCO / (emisoras.length - 1);
     id="tv-panel"
     role="dialog"
     aria-modal="true"
-    aria-label="Radio y televisión de la casa"
+    aria-label={T.panel}
     data-emisoras={JSON.stringify(emisoras)}
+    data-estados={JSON.stringify(estados)}
     data-arco={ARCO}
     hidden
 >
@@ -49,7 +69,7 @@ const paso = ARCO / (emisoras.length - 1);
                     loop
                     playsinline
                     preload="none"
-                    aria-label={televisionScene.description}
+                    aria-label={t(escena.descripcion, idioma)}
                 ></video>
                 <div class="tv-static" aria-hidden="true"></div>
 
@@ -61,7 +81,7 @@ const paso = ARCO / (emisoras.length - 1);
                     </div>
                 </div>
 
-                <p class="tv-status" id="tv-status">APAGADA</p>
+                <p class="tv-status" id="tv-status">{T.apagada}</p>
                 <div class="tv-scanlines" aria-hidden="true"></div>
             </div>
         </div>
@@ -80,7 +100,7 @@ const paso = ARCO / (emisoras.length - 1);
                         id="tv-knob"
                         role="slider"
                         tabindex="0"
-                        aria-label="Dial de emisoras"
+                        aria-label={T.dial}
                         aria-valuemin="1"
                         aria-valuemax={emisoras.length}
                         aria-valuenow="1"
@@ -89,13 +109,13 @@ const paso = ARCO / (emisoras.length - 1);
                         <span class="tv-knob-mark"></span>
                     </div>
                 </div>
-                <p class="tv-hint">Gira el dial</p>
+                <p class="tv-hint">{T.giraDial}</p>
             </div>
 
             <div class="tv-buttons">
                 <button class="tv-power" id="tv-power" aria-pressed="false">
                     <span class="tv-led" aria-hidden="true"></span>
-                    <span id="tv-power-label">ENCENDER</span>
+                    <span id="tv-power-label">{T.encender}</span>
                 </button>
                 <ul class="tv-presets">
                     {emisoras.map((e, i) => (
@@ -110,9 +130,9 @@ const paso = ARCO / (emisoras.length - 1);
         </div>
     </div>
 
-    <p class="tv-credit"><a href={televisionScene.creditUrl}>{televisionScene.credit}</a></p>
+    <p class="tv-credit"><a href={televisionScene.creditUrl}>{t(escena.credito, idioma)}</a></p>
 
-    <button class="tv-close" id="tv-close" aria-label="Cerrar la radio">✕ <span class="tv-kbd">ESC</span></button>
+    <button class="tv-close" id="tv-close" aria-label={T.cerrar}>✕ <span class="tv-kbd">ESC</span></button>
 
     <audio id="tv-audio" loop preload="none"></audio>
 </section>
@@ -160,6 +180,9 @@ const paso = ARCO / (emisoras.length - 1);
         let indice = 0;
         let encendida = false;
 
+        // Rotulos de la pantalla en el idioma de la pagina
+        const R = JSON.parse(panel.dataset.estados || '{}') as Record<string, string>;
+
         /* ------------------------------------------------------------------
            Pantalla
            ------------------------------------------------------------------ */
@@ -188,18 +211,18 @@ const paso = ARCO / (emisoras.length - 1);
             if (!encendida) return;
 
             audio.src = emisoras[indice].src;
-            estado('SINTONIZANDO', 'is-loading');
+            estado(R.sintonizando, 'is-loading');
             audio.play().catch(() => {
                 // Si el archivo no existe, el listener de 'error' lo cuenta
             });
         }
 
-        audio.addEventListener('playing', () => estado('EN ANTENA', 'is-playing'));
+        audio.addEventListener('playing', () => estado(R.enAntena, 'is-playing'));
         audio.addEventListener('waiting', () => {
-            if (encendida) estado('SINTONIZANDO', 'is-loading');
+            if (encendida) estado(R.sintonizando, 'is-loading');
         });
         audio.addEventListener('error', () => {
-            if (encendida) estado('SIN SEÑAL', 'is-nosignal');
+            if (encendida) estado(R.sinSenal, 'is-nosignal');
         });
 
         /* ------------------------------------------------------------------
@@ -208,7 +231,7 @@ const paso = ARCO / (emisoras.length - 1);
         function alternarEncendido() {
             encendida = !encendida;
             powerBtn.setAttribute('aria-pressed', String(encendida));
-            powerLabel.textContent = encendida ? 'APAGAR' : 'ENCENDER';
+            powerLabel.textContent = encendida ? R.apagar : R.encender;
             screen.classList.toggle('is-on', encendida);
 
             if (encendida) {
@@ -217,7 +240,7 @@ const paso = ARCO / (emisoras.length - 1);
             } else {
                 audio.pause();
                 video.pause();
-                estado('APAGADA', null);
+                estado(R.apagada, null);
             }
         }
         powerBtn.addEventListener('click', alternarEncendido);
@@ -348,7 +371,7 @@ const paso = ARCO / (emisoras.length - 1);
         );
 
         pintarEmisora();
-        estado('APAGADA', null);
+        estado(R.apagada, null);
     });
 </script>
 

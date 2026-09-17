@@ -1,42 +1,51 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { clients } from '../data/clients';
+import Layout from '../../layouts/Layout.astro';
+import { clients } from '../../data/clients';
+import { rutasDeIdioma, enlace, t, type Idioma } from '../../i18n/config';
+import { textos } from '../../i18n/textos';
+import Tiradores from '../../components/Tiradores.astro';
+
+export function getStaticPaths() { return rutasDeIdioma(); }
+const { idioma } = Astro.props as { idioma: Idioma };
+const T = textos[idioma];
 ---
-<Layout title="Casita Manolo | Los posavasos">
+<Layout title={T.clientes.titulo} idioma={idioma} destino="/clientes">
   <main class="bar-counter">
     <header class="header-ui">
-      <a class="btn-volver" href="/">← Volver a casa</a>
-      <div class="coaster-heading"><h1>Las historias de la barra</h1><p>Toca un posavasos para girarlo. También puedes arrastrarlo.</p></div>
-      <button class="tidy-button" type="button" id="tidy-coasters">Ordenar la mesa</button>
+      <a class="btn-volver" href={enlace('/', idioma)}>{T.comun.volverCasa}</a>
+      <div class="coaster-heading"><h1>{T.clientes.cabecera}</h1><p>{T.clientes.subtitulo}</p></div>
+      <button class="tidy-button" type="button" id="tidy-coasters">{T.clientes.ordenar}</button>
     </header>
-    <div id="physics-world" class="coaster-world" aria-label="Posavasos de clientes" style={`--filas-3:${Math.ceil(clients.length / 3)}; --filas-2:${Math.ceil(clients.length / 2)}`}>
+    <div id="physics-world" class="coaster-world" aria-label={T.clientes.posavasos} data-abrir-ficha={T.clientes.abrirFichaDe} style={`--filas-3:${Math.ceil(clients.length / 3)}; --filas-2:${Math.ceil(clients.length / 2)}`}>
       {clients.map((client, index) => (
-        <button type="button" class="coaster-wrapper" data-client={client.id} style={`--tilt:${[-9, 8, -5, 12, -7, 5][index % 6]}deg`} aria-label={`Girar el posavasos de ${client.name}`} aria-controls={`project-${client.id}`}>
+        <button type="button" class="coaster-wrapper" data-client={client.id} style={`--tilt:${[-9, 8, -5, 12, -7, 5][index % 6]}deg`} aria-label={`${T.clientes.girar} ${client.name}`} aria-controls={`project-${client.id}`}>
           <span class="coaster-body">
             <span class={`coaster-face coaster-front c-${client.surface}`}>
               {client.logo
-                ? <span class="coaster-logo con-imagen"><img src={client.logo} alt={client.name} loading="lazy" /><span>{client.category}</span></span>
-                : <span class:list={["coaster-logo", { largo: client.name.length > 11 }]}>{client.name}<span>{client.category}</span></span>}
+                ? <span class="coaster-logo con-imagen"><img src={client.logo} alt={client.name} loading="lazy" /><span>{t(client.category, idioma)}</span></span>
+                : <span class:list={["coaster-logo", { largo: client.name.length > 11 }]}>{client.name}<span>{t(client.category, idioma)}</span></span>}
             </span>
-            <span class="coaster-face coaster-back" aria-hidden="true"><span class="back-category">{client.category}</span><span class="back-title">{client.project?.title || client.name}</span><span class="back-action">Abrir ficha →</span></span>
+            <span class="coaster-face coaster-back" aria-hidden="true"><span class="back-category">{t(client.category, idioma)}</span><span class="back-title">{client.project ? t(client.project.title, idioma) : client.name}</span><span class="back-action">{T.clientes.abrirFicha}</span></span>
           </span>
         </button>
       ))}
     </div>
-    <p class="table-note">Cada marca tiene su reverso.</p>
+    <p class="table-note">{T.clientes.nota}</p>
+
+    <Tiradores idioma={idioma} destino="/clientes" />
   </main>
   {clients.map(client => (
     <dialog id={`project-${client.id}`} class="project-dialog" aria-labelledby={`title-${client.id}`}>
-      <form method="dialog" class="dialog-top"><span>{client.category}</span><button class="dialog-close" aria-label="Cerrar ficha">✕</button></form>
+      <form method="dialog" class="dialog-top"><span>{t(client.category, idioma)}</span><button class="dialog-close" aria-label={T.clientes.cerrarFicha}>✕</button></form>
       <p class="project-brand">{client.name}</p>
-      <h2 id={`title-${client.id}`}>{client.project?.title || 'La historia de este posavasos'}</h2>
+      <h2 id={`title-${client.id}`}>{client.project ? t(client.project.title, idioma) : T.clientes.sinFicha}</h2>
       {client.project ? <>
         {client.project.year && <p>{client.project.year}</p>}
-        <p><strong>Nuestra participación:</strong> {client.project.role}</p><p>{client.project.summary}</p>
-        {client.project.audio && <audio controls preload="none" src={client.project.audio} aria-label={`Escuchar ${client.project.title}`}></audio>}
-        {client.project.video && <video controls playsinline preload="none" poster={client.project.poster} src={client.project.video} aria-label={`Ver ${client.project.title}`}></video>}
-      </> : <p class="pending-case">La ficha del proyecto todavía no está disponible.</p>}
-      <div class="dialog-actions"><a href="/portfolio">Ir al archivo musical</a><button type="button" data-turn-back={client.id}>Volver a girarlo</button></div>
+        <p><strong>{T.clientes.participacion}</strong> {t(client.project.role, idioma)}</p><p>{t(client.project.summary, idioma)}</p>
+        {client.project.audio && <audio controls preload="none" src={client.project.audio} aria-label={`${T.clientes.escuchar} ${t(client.project.title, idioma)}`}></audio>}
+        {client.project.video && <video controls playsinline preload="none" poster={client.project.poster} src={client.project.video} aria-label={`${T.clientes.ver} ${t(client.project.title, idioma)}`}></video>}
+      </> : <p class="pending-case">{T.clientes.pendiente}</p>}
+      <div class="dialog-actions"><a href={enlace('/portfolio', idioma)}>{T.clientes.irArchivo}</a><button type="button" data-turn-back={client.id}>{T.clientes.volverGirar}</button></div>
     </dialog>
   ))}
 </Layout>
@@ -99,4 +108,4 @@ import { clients } from '../data/clients';
   @media (max-width: 360px) { .coaster-world { gap: 10px; padding: 0; } .coaster-wrapper { width: 132px; height: 132px; } }
   @media (prefers-reduced-motion: reduce) { .coaster-body, .coaster-wrapper { transition: none !important; } }
 </style>
-<script>import '../scripts/coasters';</script>
+<script>import '../../scripts/coasters';</script>

@@ -4,16 +4,19 @@
 // Una funda del archivo musical: la carátula y el vinilo que asoma de ella.
 // El script de la página lee los data-* para saber qué poner al soltarlo.
 import type { Disco } from '../data/portfolio';
+import { t, type Idioma } from '../i18n/config';
 
 interface Props {
     disco: Disco;
+    /** Idioma en el que se pinta la funda */
+    idioma: Idioma;
     /** Estante en el que va: el vinilo asoma hacia el plato */
     lado: 'izq' | 'der';
     /** Lado de la funda en px, para que el disco salga entero al sacarlo */
     tam: number;
 }
 
-const { disco, lado, tam } = Astro.props;
+const { disco, lado, tam, idioma } = Astro.props;
 const hacia = lado === 'izq' ? 1 : -1;
 
 // --- Balón (forma: 'balon') ---
@@ -44,8 +47,8 @@ const idClip = `balon-${disco.id}`;
     class="sleeve-container"
     data-peek={35 * hacia}
     data-slide={tam * hacia}
-    data-titulo={disco.titulo}
-    data-detalle={disco.detalle}
+    data-titulo={t(disco.titulo, idioma)}
+    data-detalle={t(disco.detalle, idioma)}
     data-portada={disco.portada}
     data-logo={disco.logo}
     data-medio={disco.medio ? JSON.stringify(disco.medio) : undefined}
@@ -94,9 +97,9 @@ const idClip = `balon-${disco.id}`;
         class="album-cover"
         style={`background-image: url('${disco.portada}')`}
         role="img"
-        aria-label={`${disco.titulo}. ${disco.detalle}`}
+        aria-label={`${t(disco.titulo, idioma)}. ${t(disco.detalle, idioma)}`}
     >
-        <span class="cover-label">{disco.etiqueta}</span>
+        <span class="cover-label">{t(disco.etiqueta, idioma)}</span>
     </div>
 </div>
 

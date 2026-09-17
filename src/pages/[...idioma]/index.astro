@@ -1,27 +1,41 @@
 ---
 // src/pages/index.astro
-import Layout from '../layouts/Layout.astro';
-import RadioTV from '../components/RadioTV.astro';
+import Layout from '../../layouts/Layout.astro';
+import RadioTV from '../../components/RadioTV.astro';
+import { rutasDeIdioma, enlace, t, type Idioma } from '../../i18n/config';
+import { textos } from '../../i18n/textos';
+import Tiradores from '../../components/Tiradores.astro';
+
+export function getStaticPaths() { return rutasDeIdioma(); }
+const { idioma } = Astro.props as { idioma: Idioma };
+const T = textos[idioma];
+
+// Los chips de los rotulos se ajustan al texto: cada idioma tiene su largo
+const ancho = (texto: string) => Math.round(7.7 * texto.length + 46);
+const Z = T.home.zonas;
 ---
 
-<Layout title="Casita Manolo | Home">
+<Layout title={T.home.titulo} idioma={idioma} descripcion={T.home.descripcion} destino="/">
 
     <!-- RADIO-TV: radio y television juntas, un solo boton arriba a la derecha -->
-    <RadioTV />
+    <RadioTV idioma={idioma} />
+
+    <!-- Los tiradores de la barra: el idioma de la casa -->
+    <Tiradores idioma={idioma} destino="/" />
 
     <!-- CAPA VÍDEO (Modo Cine) -->
-    <div class="media-layer" id="media-layer" role="dialog" aria-modal="true" aria-label="Vídeo del local">
+    <div class="media-layer" id="media-layer" role="dialog" aria-modal="true" aria-label={T.home.videoLocal}>
         <video id="house-video" muted loop playsinline>
             <source src="/videos/interior.mp4" type="video/mp4" />
         </video>
-        <p class="video-fallback" id="video-fallback" hidden>El vídeo del local aún no está disponible.</p>
-        <button class="close-btn" id="close-video-btn">✕ CERRAR <span class="kbd">ESC</span></button>
+        <p class="video-fallback" id="video-fallback" hidden>{T.home.videoNoDisponible}</p>
+        <button class="close-btn" id="close-video-btn">{T.home.cerrarVideo} <span class="kbd">ESC</span></button>
     </div>
     <div class="media-backdrop" id="media-backdrop"></div>
 
     <!-- ESCENA PRINCIPAL (La Casa limpia y restaurada) -->
     <div class="stage">
-        <svg class="svg-layer fade-in-up" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" role="navigation" aria-label="Mapa interactivo de la casa">
+        <svg class="svg-layer fade-in-up" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" role="navigation" aria-label={T.home.mapa}>
 
             <!-- CHIMENEA: en vez de humo salen notas -->
             <g class="house-parts deco">
@@ -56,9 +70,9 @@ import RadioTV from '../components/RadioTV.astro';
                  ============================================================ -->
             <g class="item" id="satellite-group" role="button" tabindex="0"
                data-radio-trigger aria-controls="tv-panel" aria-expanded="false"
-               aria-label="Radio: abrir la radio y la televisión de la casa"
-               data-label="Radio" data-desc="Sintoniza la radio y la televisión de la casa">
-                <title>Radio — radio y televisión de la casa</title>
+               aria-label={Z.radio.aria}
+               data-label={Z.radio.etiqueta} data-desc={Z.radio.descripcion}>
+                <title>{Z.radio.titulo}</title>
                 <rect x="176" y="48" width="122" height="138" fill="transparent" />
                 <rect class="focus-ring" x="176" y="48" width="122" height="138" rx="14" />
 
@@ -102,18 +116,18 @@ import RadioTV from '../components/RadioTV.astro';
                 </g></g>
 
                 <g transform="translate(240, 172)"><g class="hint">
-                    <rect class="hint-bg" x="-42" y="-14" width="84" height="28" rx="14" />
-                    <text class="hint-text" x="0" y="4">RADIO</text>
+                    <rect class="hint-bg" x={-ancho(Z.radio.rotulo) / 2} y="-14" width={ancho(Z.radio.rotulo)} height="28" rx="14" />
+                    <text class="hint-text" x="0" y="4">{Z.radio.rotulo}</text>
                 </g></g>
             </g>
 
             <!-- ============================================================
                  1. VINO  ->  /servicios
                  ============================================================ -->
-            <a href="/servicios" class="item" id="wine-group"
-               aria-label="La carta: ir a servicios"
-               data-label="La carta" data-desc="Sirve una copa y mira la carta: qué compone la casa">
-                <title>La carta — servicios</title>
+            <a href={enlace('/servicios', idioma)} class="item" id="wine-group"
+               aria-label={Z.carta.aria}
+               data-label={Z.carta.etiqueta} data-desc={Z.carta.descripcion}>
+                <title>{Z.carta.titulo}</title>
                 <rect x="185" y="215" width="160" height="215" fill="transparent" />
                 <rect class="focus-ring" x="185" y="215" width="160" height="215" rx="14" />
 
@@ -133,8 +147,8 @@ import RadioTV from '../components/RadioTV.astro';
 
                 <path class="leader" d="M 255,456 L 255,432" />
                 <g transform="translate(255, 470)"><g class="hint">
-                    <rect class="hint-bg" x="-52" y="-14" width="104" height="28" rx="14" />
-                    <text class="hint-text" x="0" y="4">LA CARTA</text>
+                    <rect class="hint-bg" x={-ancho(Z.carta.rotulo) / 2} y="-14" width={ancho(Z.carta.rotulo)} height="28" rx="14" />
+                    <text class="hint-text" x="0" y="4">{Z.carta.rotulo}</text>
                 </g></g>
             </a>
 
@@ -150,10 +164,10 @@ import RadioTV from '../components/RadioTV.astro';
             <!-- ============================================================
                  3. VINILOS  ->  /portfolio
                  ============================================================ -->
-            <a href="/portfolio" class="item" id="vinyl-group"
-               aria-label="Archivo musical: ir al portfolio"
-               data-label="Archivo musical" data-desc="Pon un vinilo: el archivo de proyectos">
-                <title>Archivo musical — portfolio</title>
+            <a href={enlace('/portfolio', idioma)} class="item" id="vinyl-group"
+               aria-label={Z.archivo.aria}
+               data-label={Z.archivo.etiqueta} data-desc={Z.archivo.descripcion}>
+                <title>{Z.archivo.titulo}</title>
                 <rect x="620" y="280" width="120" height="80" fill="transparent" />
                 <rect class="focus-ring" x="620" y="280" width="120" height="80" rx="14" />
 
@@ -178,8 +192,8 @@ import RadioTV from '../components/RadioTV.astro';
 
                 <path class="leader" d="M 680,272 L 680,292" />
                 <g transform="translate(680, 258)"><g class="hint hint-above">
-                    <rect class="hint-bg" x="-78" y="-14" width="156" height="28" rx="14" />
-                    <text class="hint-text" x="0" y="4">ARCHIVO MUSICAL</text>
+                    <rect class="hint-bg" x={-ancho(Z.archivo.rotulo) / 2} y="-14" width={ancho(Z.archivo.rotulo)} height="28" rx="14" />
+                    <text class="hint-text" x="0" y="4">{Z.archivo.rotulo}</text>
                 </g></g>
             </a>
             </g><!-- /grupo-mesa -->
@@ -187,10 +201,10 @@ import RadioTV from '../components/RadioTV.astro';
             <!-- ============================================================
                  4. TABURETE  ->  /contacto
                  ============================================================ -->
-            <a href="/contacto" class="item" id="stool-group"
-               aria-label="El ticket: ir a contacto"
-               data-label="El ticket" data-desc="Siéntate en la barra y escríbenos">
-                <title>El ticket — contacto</title>
+            <a href={enlace('/contacto', idioma)} class="item" id="stool-group"
+               aria-label={Z.ticket.aria}
+               data-label={Z.ticket.etiqueta} data-desc={Z.ticket.descripcion}>
+                <title>{Z.ticket.titulo}</title>
                 <rect x="735" y="355" width="90" height="75" fill="transparent" />
                 <rect class="focus-ring" x="735" y="355" width="90" height="75" rx="14" />
 
@@ -208,8 +222,8 @@ import RadioTV from '../components/RadioTV.astro';
 
                 <path class="leader" d="M 800,456 L 800,432" />
                 <g transform="translate(800, 470)"><g class="hint">
-                    <rect class="hint-bg" x="-56" y="-14" width="112" height="28" rx="14" />
-                    <text class="hint-text" x="0" y="4">EL TICKET</text>
+                    <rect class="hint-bg" x={-ancho(Z.ticket.rotulo) / 2} y="-14" width={ancho(Z.ticket.rotulo)} height="28" rx="14" />
+                    <text class="hint-text" x="0" y="4">{Z.ticket.rotulo}</text>
                 </g></g>
             </a>
 
@@ -219,10 +233,10 @@ import RadioTV from '../components/RadioTV.astro';
             <!-- ============================================================
                  6. VENTANA  ->  /galeria
                  ============================================================ -->
-            <a href="/galeria" class="item house-parts" id="window-group"
-               aria-label="Galería: ir a la galería de mesas"
-               data-label="Galería" data-desc="Asómate a la galería de mesas y montajes">
-                <title>Galería — mesas y montajes</title>
+            <a href={enlace('/galeria', idioma)} class="item house-parts" id="window-group"
+               aria-label={Z.galeria.aria}
+               data-label={Z.galeria.etiqueta} data-desc={Z.galeria.descripcion}>
+                <title>{Z.galeria.titulo}</title>
                 <rect x="458" y="288" width="74" height="74" fill="transparent" />
                 <rect class="focus-ring" x="458" y="288" width="74" height="74" rx="12" />
 
@@ -238,8 +252,8 @@ import RadioTV from '../components/RadioTV.astro';
 
                 <path class="leader" d="M 600,456 L 600,325 L 528,325" />
                 <g transform="translate(600, 470)"><g class="hint">
-                    <rect class="hint-bg" x="-52" y="-14" width="104" height="28" rx="14" />
-                    <text class="hint-text" x="0" y="4">GALERÍA</text>
+                    <rect class="hint-bg" x={-ancho(Z.galeria.rotulo) / 2} y="-14" width={ancho(Z.galeria.rotulo)} height="28" rx="14" />
+                    <text class="hint-text" x="0" y="4">{Z.galeria.rotulo}</text>
                 </g></g>
             </a>
 
@@ -247,9 +261,9 @@ import RadioTV from '../components/RadioTV.astro';
                  7. PUERTA  ->  vídeo (modo cine), no navega
                  ============================================================ -->
             <g class="item house-parts" id="door-group" role="button" tabindex="0"
-               aria-label="Modo cine: abrir el vídeo del local"
-               data-label="Modo cine" data-desc="Entra por la puerta: se abre el vídeo del local">
-                <title>Modo cine — vídeo del local</title>
+               aria-label={Z.cine.aria}
+               data-label={Z.cine.etiqueta} data-desc={Z.cine.descripcion}>
+                <title>{Z.cine.titulo}</title>
                 <rect x="368" y="322" width="74" height="105" fill="transparent" />
                 <rect class="focus-ring" x="368" y="322" width="74" height="105" rx="12" />
 
@@ -264,18 +278,18 @@ import RadioTV from '../components/RadioTV.astro';
 
                 <path class="leader" d="M 400,456 L 400,432" />
                 <g transform="translate(400, 470)"><g class="hint">
-                    <rect class="hint-bg" x="-58" y="-14" width="116" height="28" rx="14" />
-                    <text class="hint-text" x="0" y="4">MODO CINE</text>
+                    <rect class="hint-bg" x={-ancho(Z.cine.rotulo) / 2} y="-14" width={ancho(Z.cine.rotulo)} height="28" rx="14" />
+                    <text class="hint-text" x="0" y="4">{Z.cine.rotulo}</text>
                 </g></g>
             </g>
 
             <!-- ============================================================
                  8. TEJADO  ->  /clientes
                  ============================================================ -->
-            <a href="/clientes" class="item house-parts" id="roof-clients-link"
-               aria-label="Clientes y marcas: ver quién ha pasado por la casa"
-               data-label="Clientes y marcas" data-desc="Levanta el tejado: las marcas que han pasado por la casa">
-                <title>Clientes y marcas</title>
+            <a href={enlace('/clientes', idioma)} class="item house-parts" id="roof-clients-link"
+               aria-label={Z.clientes.aria}
+               data-label={Z.clientes.etiqueta} data-desc={Z.clientes.descripcion}>
+                <title>{Z.clientes.titulo}</title>
                 <rect x="300" y="130" width="300" height="115" fill="transparent" />
                 <rect class="focus-ring" x="300" y="130" width="300" height="115" rx="14" />
 
@@ -296,8 +310,8 @@ import RadioTV from '../components/RadioTV.astro';
 
                 <path class="leader" d="M 410,109 L 410,165" />
                 <g transform="translate(410, 95)"><g class="hint hint-above">
-                    <rect class="hint-bg" x="-88" y="-14" width="176" height="28" rx="14" />
-                    <text class="hint-text" x="0" y="4">CLIENTES Y MARCAS</text>
+                    <rect class="hint-bg" x={-ancho(Z.clientes.rotulo) / 2} y="-14" width={ancho(Z.clientes.rotulo)} height="28" rx="14" />
+                    <text class="hint-text" x="0" y="4">{Z.clientes.rotulo}</text>
                 </g></g>
             </a>
 
@@ -309,12 +323,12 @@ import RadioTV from '../components/RadioTV.astro';
     <!-- BRANDING + BARRA DE ESTADO -->
     <div class="branding fade-in-up" style="animation-delay: 0.3s;">
         <h1>Casita Manolo</h1>
-        <p class="tagline">Music House Madrid - NYC</p>
+        <p class="tagline">{T.home.tagline}</p>
         <p class="status" id="nav-status" aria-live="polite"></p>
     </div>
 
     <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="toast" role="status" aria-live="polite">Abriendo...</div>
+    <div id="toast" class="toast" role="status" aria-live="polite" data-abriendo={T.home.abriendo}></div>
 
 </Layout>
 
@@ -664,7 +678,7 @@ import RadioTV from '../components/RadioTV.astro';
                 // Puerta y satelite abren paneles, no navegan
                 if (item.getAttribute('role') === 'button') return;
                 if (!toast) return;
-                toast.textContent = `Abriendo: ${label}`;
+                toast.textContent = `${toast.dataset.abriendo}: ${label}`;
                 toast.classList.add('show');
                 clearTimeout(toastTimeout);
                 toastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);

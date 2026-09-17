@@ -54,7 +54,8 @@ document.addEventListener('astro:page-load', () => {
       s.el.classList.toggle('is-flipped', back);
       s.el.querySelector('.coaster-front')!.setAttribute('aria-hidden', String(back));
       s.el.querySelector('.coaster-back')!.setAttribute('aria-hidden', String(!back));
-      s.el.setAttribute('aria-label', back ? `Abrir la ficha de ${s.el.querySelector('.coaster-logo')!.firstChild!.textContent}` : originalLabel);
+      const abrirFicha = world.dataset.abrirFicha ?? 'Abrir la ficha de';
+      s.el.setAttribute('aria-label', back ? `${abrirFicha} ${s.el.querySelector('.coaster-logo')!.firstChild!.textContent}` : originalLabel);
     };
     s.el.addEventListener('click', event => {
       if (s.moved && event.detail !== 0) { s.moved = false; return; }

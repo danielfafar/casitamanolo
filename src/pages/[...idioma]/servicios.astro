@@ -1,14 +1,27 @@
 ---
 // src/pages/servicios.astro
 import { ClientRouter } from 'astro:transitions';
+import { rutasDeIdioma, enlace, t, type Idioma } from '../../i18n/config';
+import { textos } from '../../i18n/textos';
+import { alternativas } from '../../i18n/config';
+import { platos } from '../../data/carta';
+import Tiradores from '../../components/Tiradores.astro';
+
+export function getStaticPaths() { return rutasDeIdioma(); }
+const { idioma } = Astro.props as { idioma: Idioma };
+const T = textos[idioma];
+const cursos = ['primeros', 'segundos', 'postres'] as const;
 ---
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang={idioma}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Casita Manolo | La Pizarra</title>
+    <title>{T.carta.titulo}</title>
+    <meta name="description" content={T.carta.subtitulo} />
+    {alternativas('/servicios').map((o) => <link rel="alternate" hreflang={o.idioma} href={o.href} />)}
+    <link rel="alternate" hreflang="x-default" href="/servicios" />
     <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
     <link rel="icon" type="image/png" href="/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -255,7 +268,9 @@ import { ClientRouter } from 'astro:transitions';
         </filter>
     </svg>
 
-    <a href="/" class="btn-volver">← VOLVER AL BAR</a>
+    <a href={enlace('/', idioma)} class="btn-volver">{T.comun.volverBar}</a>
+
+    <Tiradores idioma={idioma} destino="/servicios" />
 
     <main class="chalkboard-scene">
         
@@ -270,67 +285,25 @@ import { ClientRouter } from 'astro:transitions';
                 <div class="menu-content">
                     
                     <header class="menu-header">
-                        <h1>LA CARTA</h1>
-                        <p>Música original para cine y publicidad</p>
+                        <h1>{T.carta.cabecera}</h1>
+                        <p>{T.carta.subtitulo}</p>
                     </header>
 
-                    <!-- PRIMEROS -->
-                    <div class="course">
-                        <h2 class="course-title">~ Primeros ~</h2>
-
-                        <div class="dish">
-                            <span class="dish-name">Identidad Sonora</span>
-                            <span class="dots"></span>
-                            <!-- Botón enlazado al contacto -->
-                            <a href="/contacto" class="price-link">S/M</a>
+                    {cursos.map((curso) => (
+                        <div class="course">
+                            <h2 class="course-title">{T.carta.cursos[curso]}</h2>
+                            {platos.filter((plato) => plato.curso === curso).map((plato) => (
+                                <>
+                                    <div class="dish">
+                                        <span class="dish-name">{t(plato.nombre, idioma)}</span>
+                                        <span class="dots"></span>
+                                        <a href={enlace('/contacto', idioma)} class="price-link">{T.carta.precio}</a>
+                                    </div>
+                                    <span class="dish-desc">{t(plato.descripcion, idioma)}</span>
+                                </>
+                            ))}
                         </div>
-                        <span class="dish-desc">El logo de tu marca, pero para el oído.</span>
-
-                        <div class="dish">
-                            <span class="dish-name">Supervisión Musical</span>
-                            <span class="dots"></span>
-                            <a href="/contacto" class="price-link">S/M</a>
-                        </div>
-                        <span class="dish-desc">Buscamos, negociamos y licenciamos el tema que pide la escena.</span>
-                    </div>
-
-                    <!-- SEGUNDOS -->
-                    <div class="course">
-                        <h2 class="course-title">~ Segundos ~</h2>
-
-                        <div class="dish">
-                            <span class="dish-name">Banda Sonora Original</span>
-                            <span class="dots"></span>
-                            <a href="/contacto" class="price-link">S/M</a>
-                        </div>
-                        <span class="dish-desc">Score a medida para largo, corto o serie. De piano solo a orquesta.</span>
-
-                        <div class="dish">
-                            <span class="dish-name">Música para Spot</span>
-                            <span class="dots"></span>
-                            <a href="/contacto" class="price-link">S/M</a>
-                        </div>
-                        <span class="dish-desc">Composición original para campaña, con todos sus cortes y duraciones.</span>
-                    </div>
-
-                    <!-- POSTRES -->
-                    <div class="course">
-                        <h2 class="course-title">~ Postres ~</h2>
-
-                        <div class="dish">
-                            <span class="dish-name">Grabación y Arreglos</span>
-                            <span class="dots"></span>
-                            <a href="/contacto" class="price-link">S/M</a>
-                        </div>
-                        <span class="dish-desc">Músicos de sesión, cuerdas y metales. Aquí se toca de verdad.</span>
-
-                        <div class="dish" style="margin-top: 15px;">
-                            <span class="dish-name">Diseño Sonoro y Mezcla</span>
-                            <span class="dots"></span>
-                            <a href="/contacto" class="price-link">S/M</a>
-                        </div>
-                        <span class="dish-desc">Ambientes, foley y mezcla final. Nosotros recogemos la mesa.</span>
-                    </div>
+                    ))}
 
                 </div>
             </div>

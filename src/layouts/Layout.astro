@@ -1,30 +1,40 @@
 ---
 // Importamos el componente con su nuevo nombre oficial: ClientRouter
 import { ClientRouter } from 'astro:transitions';
+import { alternativas, idiomaPorDefecto, type Idioma } from '../i18n/config';
 
 interface Props {
 	title: string;
+	idioma: Idioma;
+	descripcion?: string;
+	/** Página actual sin prefijo de idioma, para los enlaces alternos */
+	destino?: string;
 }
 
-const { title } = Astro.props;
+const { title, idioma, descripcion, destino } = Astro.props;
+const otras = destino ? alternativas(destino) : [];
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={idioma}>
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="description" content="Casita Manolo - Music House Madrid - NYC" />
+		<meta name="description" content={descripcion ?? 'Casita Manolo - Music House Madrid - NYC'} />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
 		<link rel="icon" type="image/png" href="/icon-192.png" sizes="192x192" />
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
-		
+
+		{/* La misma página en los otros idiomas, para los buscadores */}
+		{otras.map((otra) => <link rel="alternate" hreflang={otra.idioma} href={otra.href} />)}
+		{destino && <link rel="alternate" hreflang="x-default" href={alternativas(destino).find((o) => o.idioma === idiomaPorDefecto)!.href} />}
+
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-		
+
 		<!-- Magia de Astro: Enrutador de cliente para transiciones suaves -->
 		<ClientRouter />
 	</head>
@@ -40,7 +50,7 @@ const { title } = Astro.props;
 		margin: 0;
 		padding: 0;
 	}
-	
+
 	:root {
 		--bg-color: #F4F1EC;
 		--ink-color: #11231E;

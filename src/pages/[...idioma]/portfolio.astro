@@ -4,21 +4,31 @@
 // Archivo musical: estaciones con sus cajas de discos. El contenido vive en
 // src/data/portfolio.ts; esta página solo lo pinta y lo hace sonar.
 import { ClientRouter } from 'astro:transitions';
-import Funda from '../components/Funda.astro';
-import { estaciones } from '../data/portfolio';
+import Funda from '../../components/Funda.astro';
+import { estaciones } from '../../data/portfolio';
 
 // La estación de publicidad lleva cuatro discos por estante: van más
 // pequeños para que la columna quepa en alto.
 const tamDisco = (tema: string) => (tema === 'publicidad' ? 130 : 160);
 const total = estaciones.length;
+import { rutasDeIdioma, enlace, t, type Idioma } from '../../i18n/config';
+import { textos } from '../../i18n/textos';
+import { alternativas } from '../../i18n/config';
+import Tiradores from '../../components/Tiradores.astro';
+
+export function getStaticPaths() { return rutasDeIdioma(); }
+const { idioma } = Astro.props as { idioma: Idioma };
+const T = textos[idioma];
 ---
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang={idioma}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Casita Manolo | Archivo Musical</title>
+    <title>{T.portfolio.titulo}</title>
+    {alternativas('/portfolio').map((o) => <link rel="alternate" hreflang={o.idioma} href={o.href} />)}
+    <link rel="alternate" hreflang="x-default" href="/portfolio" />
     <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
     <link rel="icon" type="image/png" href="/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -125,7 +135,7 @@ const total = estaciones.length;
             opacity: 1; transition: opacity 0.5s ease;
         }
         .monitor-portada::after {
-            content: 'CARGANDO EL VÍDEO';
+            content: var(--rotulo-carga, '');
             margin-bottom: 20px; padding: 7px 14px; border-radius: 999px;
             background: rgba(8, 17, 14, 0.8); color: var(--text-color);
             font-size: 0.55rem; letter-spacing: 0.25em;
@@ -439,22 +449,22 @@ const total = estaciones.length;
         <!-- MONITOR -->
         <div class="video-presentation" aria-live="polite">
             <video id="project-video" playsinline loop preload="none" hidden></video>
-            <iframe id="project-vimeo" title="Vídeo del proyecto" src="about:blank" allow="autoplay; fullscreen; picture-in-picture" hidden></iframe>
-            <div class="monitor-portada lista" id="monitor-portada" aria-hidden="true"></div>
+            <iframe id="project-vimeo" title={T.portfolio.videoProyecto} src="about:blank" allow="autoplay; fullscreen; picture-in-picture" hidden></iframe>
+            <div class="monitor-portada lista" id="monitor-portada" aria-hidden="true" style={`--rotulo-carga: '${T.portfolio.cargandoVideo}'`}></div>
         </div>
 
         <audio id="player-audio" loop preload="none"></audio>
 
         <!-- UI SUPERIOR -->
         <div class="header-ui">
-            <div class="section-title" id="station-indicator">{estaciones[0].nombre} · 1 / {total}</div>
-            <button type="button" class="btn-expulsar" id="btn-expulsar">⏏ Quitar el disco</button>
-            <a href="/" class="btn-volver">← VOLVER A CASA</a>
+            <div class="section-title" id="station-indicator">{t(estaciones[0].nombre, idioma)} · 1 / {total}</div>
+            <button type="button" class="btn-expulsar" id="btn-expulsar">{T.portfolio.expulsar}</button>
+            <a href={enlace('/', idioma)} class="btn-volver">{T.comun.volverCasa}</a>
         </div>
 
         <!-- FLECHAS -->
-        <button class="nav-btn" id="btn-prev" aria-label="Estación anterior" disabled>◄</button>
-        <button class="nav-btn" id="btn-next" aria-label="Estación siguiente">►</button>
+        <button class="nav-btn" id="btn-prev" aria-label={T.portfolio.anterior} disabled>◄</button>
+        <button class="nav-btn" id="btn-next" aria-label={T.portfolio.siguiente}>►</button>
 
         <!-- EL RECINTO -->
         <div class="venue">
@@ -462,20 +472,20 @@ const total = estaciones.length;
                 {estaciones.map((est) => {
                     const tam = tamDisco(est.tema);
                     return (
-                        <section class={`station station--${est.tema}`} data-nombre={est.nombre} style={`--disco: ${tam}px`}>
-                            <div class="station-bg-text" aria-hidden="true">{est.rotulo}</div>
+                        <section class={`station station--${est.tema}`} data-nombre={t(est.nombre, idioma)} style={`--disco: ${tam}px`}>
+                            <div class="station-bg-text" aria-hidden="true">{t(est.rotulo, idioma)}</div>
                             <div class="marca-fondo" aria-hidden="true"></div>
                             <div class="jukebox-stage">
 
                                 <div class="rack">
-                                    {est.izquierda.map((disco) => <Funda disco={disco} lado="izq" tam={tam} />)}
+                                    {est.izquierda.map((disco) => <Funda disco={disco} lado="izq" tam={tam} idioma={idioma} />)}
                                 </div>
 
                                 <div class="turntable-wrapper">
                                     <div class="turntable-base"></div>
                                     <div class="dropzone">
                                         <div class="platter-ring r1"></div><div class="platter-ring r2"></div>
-                                        <div class="dropzone-text">ARRASTRA<br>EL DISCO</div>
+                                        <div class="dropzone-text">{T.portfolio.arrastra1}<br>{T.portfolio.arrastra2}</div>
                                         <div class="spindle"></div>
                                     </div>
                                     <svg viewBox="0 0 100 180" class="tonearm" aria-hidden="true">
@@ -485,23 +495,23 @@ const total = estaciones.length;
                                         <rect x="11" y="130" width="18" height="30" fill="#2a3b35" rx="2" transform="rotate(45 20 140)"/>
                                     </svg>
                                     <div class="project-hud">
-                                        <div class="playing-indicator"><div class="red-dot"></div><span class="playing-text">REPRODUCIENDO</span></div>
+                                        <div class="playing-indicator"><div class="red-dot"></div><span class="playing-text">{T.portfolio.reproduciendo}</span></div>
                                         <h2 class="project-title">Título</h2>
                                         <p class="project-detail"></p>
                                     </div>
                                 </div>
 
                                 <div class="rack">
-                                    {est.derecha.map((disco) => <Funda disco={disco} lado="der" tam={tam} />)}
+                                    {est.derecha.map((disco) => <Funda disco={disco} lado="der" tam={tam} idioma={idioma} />)}
                                     {est.notas && (
                                         <aside
                                             class:list={['liner-notes', { 'con-fondo': est.notas.fondo }]}
                                             style={est.notas.fondo ? `--fondo: url('${est.notas.fondo}')` : undefined}
                                         >
                                             {est.notas.sello && <img class="liner-sello" src={est.notas.sello} alt="" />}
-                                            <p>{est.notas.texto}</p>
+                                            <p>{t(est.notas.texto, idioma)}</p>
                                             {est.notas.enlace && (
-                                                <a href={est.notas.enlace.href} target="_blank" rel="noopener">{est.notas.enlace.texto}</a>
+                                                <a href={est.notas.enlace.href} target="_blank" rel="noopener">{t(est.notas.enlace.texto, idioma)}</a>
                                             )}
                                         </aside>
                                     )}
@@ -513,6 +523,7 @@ const total = estaciones.length;
                 })}
             </div>
         </div>
+        <Tiradores idioma={idioma} destino="/portfolio" />
     </main>
 
     <script>

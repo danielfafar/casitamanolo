@@ -1,70 +1,28 @@
 ---
-// src/pages/galeria.astro
+// src/pages/[...idioma]/galeria.astro
 //
-// Galería de mesas: cada mesa del bar tiene servilletas dobladas con una foto
-// impresa. Se desdoblan al pasar el ratón o al tocarlas, y abiertas se amplían.
-// Para añadir una foto basta con meter una servilleta en `mesas`.
+// Galeria de mesas: cada mesa del bar tiene servilletas dobladas con una foto
+// impresa. Se desdoblan al pasar el raton o al tocarlas, y abiertas se amplian.
+// Las mesas y sus fotos viven en src/data/galeria.ts.
 import { ClientRouter } from 'astro:transitions';
+import { rutasDeIdioma, enlace, t, alternativas, type Idioma } from '../../i18n/config';
+import { textos } from '../../i18n/textos';
+import { mesas } from '../../data/galeria';
+import Tiradores from '../../components/Tiradores.astro';
 
-type Tinta = 'azul' | 'rojo';
-interface Servilleta {
-    foto: string;
-    categoria: string;
-    descripcion: string;
-    tinta: Tinta;
-    /** Giro sobre la mesa en reposo y al abrirla, en grados */
-    giro: [number, number];
-    /** Desplazamiento vertical dentro de su hueco, para que no queden alineadas */
-    dy: number;
-    /** Qué parte de la foto se ve en el hueco (background-position) */
-    foco?: string;
-}
-interface Mesa {
-    id: 'vermut' | 'cafe' | 'sobremesa';
-    nombre: string;
-    servilletas: Servilleta[];
-}
-
-// Las fotos son de la casa: Paula y Víctor, los fundadores, componiendo y en
-// sesión. Nada de fotogramas de los encargos: esos ya están en el archivo
-// musical. Si una foto todavía no existe, la servilleta enseña el hueco
-// "FOTO PENDIENTE" en vez de una imagen rota: basta con dejar el archivo en
-// public/images para que aparezca.
-const mesas: Mesa[] = [
-    {
-        id: 'vermut',
-        nombre: 'El vermut',
-        servilletas: [
-            { foto: '/images/paula-partitura.jpg', categoria: 'SOBRE EL PIANO', descripcion: 'Paula, cofundadora de Casita Manolo, escribiendo a mano sobre la partitura', tinta: 'azul', giro: [-9, -2], dy: -18, foco: '38% center' },
-            { foto: '/images/paula-retrato.jpg', categoria: 'ENTRE TOMA Y TOMA', descripcion: 'Un alto en el estudio, con la grabación a medias', tinta: 'rojo', giro: [11, 2], dy: 22, foco: 'center 38%' },
-            { foto: '/images/paula-ventana.jpg', categoria: 'LUZ DE VENTANA', descripcion: 'Paula en una sesión de retrato en el estudio', tinta: 'azul', giro: [-5, 3], dy: -6, foco: '58% 45%' },
-        ],
-    },
-    {
-        id: 'cafe',
-        nombre: 'El café',
-        servilletas: [
-            { foto: '/images/paula-pausa.jpg', categoria: 'LA PAUSA', descripcion: 'La casa también se para a mirar por la ventana', tinta: 'rojo', giro: [-7, -3], dy: 20, foco: '55% 35%' },
-            { foto: '/images/paula-contraluz.jpg', categoria: 'A CONTRALUZ', descripcion: 'Retrato de Paula, mitad de la casa junto a Víctor', tinta: 'azul', giro: [13, 1], dy: -16, foco: 'center 35%' },
-        ],
-    },
-    {
-        id: 'sobremesa',
-        nombre: 'La sobremesa',
-        servilletas: [
-            { foto: '/images/victor-direccion.jpg', categoria: 'DIRIGIENDO', descripcion: 'Víctor, cofundador de Casita Manolo, dirigiendo una sesión de grabación', tinta: 'rojo', giro: [-8, -2], dy: -14, foco: '52% 40%' },
-            { foto: '/images/victor-2.jpg', categoria: 'EN LA SALA', descripcion: 'Otra foto de Víctor en el estudio', tinta: 'azul', giro: [10, 2], dy: 18 },
-        ],
-    },
-];
+export function getStaticPaths() { return rutasDeIdioma(); }
+const { idioma } = Astro.props as { idioma: Idioma };
+const T = textos[idioma];
 ---
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang={idioma}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Casita Manolo | Galería de Mesas</title>
+    <title>{T.galeria.titulo}</title>
+    {alternativas('/galeria').map((o) => <link rel="alternate" hreflang={o.idioma} href={o.href} />)}
+    <link rel="alternate" hreflang="x-default" href="/galeria" />
     <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
     <link rel="icon" type="image/png" href="/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -435,20 +393,20 @@ const mesas: Mesa[] = [
     </svg>
 
     <header class="header-controls">
-        <a href="/" class="btn-volver">← Volver al local</a>
-        <div class="table-indicator" id="table-indicator" aria-live="polite">Mesa 1 / {mesas.length} · {mesas[0].nombre}</div>
+        <a href={enlace('/', idioma)} class="btn-volver">{T.comun.volverLocal}</a>
+        <div class="table-indicator" id="table-indicator" aria-live="polite" data-mesa={T.galeria.mesa}>{T.galeria.mesa} 1 / {mesas.length} · {t(mesas[0].nombre, idioma)}</div>
     </header>
 
-    <button class="nav-btn" id="btn-prev" aria-label="Mesa anterior" disabled>◄</button>
-    <button class="nav-btn" id="btn-next" aria-label="Mesa siguiente">►</button>
+    <button class="nav-btn" id="btn-prev" aria-label={T.galeria.anterior} disabled>◄</button>
+    <button class="nav-btn" id="btn-next" aria-label={T.galeria.siguiente}>►</button>
 
     <main class="venue" id="venue">
         <div class="tables-track" id="tables-track">
             {mesas.map((mesa) => (
                 <section
                     class={`bar-table theme-${mesa.id}`}
-                    data-nombre={mesa.nombre}
-                    aria-label={`Mesa: ${mesa.nombre}`}
+                    data-nombre={t(mesa.nombre, idioma)}
+                    aria-label={`${T.galeria.mesa}: ${t(mesa.nombre, idioma)}`}
                     style={`--huecos: ${mesa.servilletas.length}`}
                 >
 
@@ -505,7 +463,7 @@ const mesas: Mesa[] = [
                                     <path d="M4 4 l3 3 l-3 3 l3 3 l-3 3 l3 3 l-3 3 l3 3 l-3 3 l3 3 l-3 3 l3 3 l-3 3 l3 3 l-3 3 l3 3 l-3 3 M116 4 l-3 3 l3 3 l-3 3 l3 3 l-3 3 l3 3 l-3 3 l3 3 l-3 3 l3 3 l-3 3 l3 3 l-3 3 l3 3 l-3 3 l3 3" fill="none" stroke="#d9d2c4" stroke-width="1" />
                                     <path d="M24 34 L34 25 L44 34" fill="none" stroke="#D74F42" stroke-width="2.5" stroke-linejoin="round" />
                                     <rect x="27" y="34" width="14" height="11" fill="none" stroke="#11231E" stroke-width="2" />
-                                    <text x="54" y="31" font-family="Space Mono, monospace" font-size="10" font-weight="700" fill="#11231E" letter-spacing="1.5">AZÚCAR</text>
+                                    <text x="54" y="31" font-family="Space Mono, monospace" font-size="10" font-weight="700" fill="#11231E" letter-spacing="1.5">{T.galeria.azucar}</text>
                                     <text x="54" y="44" font-family="Space Mono, monospace" font-size="6.5" fill="#11231E" opacity="0.7" letter-spacing="0.8">CASITA MANOLO</text>
                                 </svg>
                             </div>
@@ -550,9 +508,9 @@ const mesas: Mesa[] = [
                             role="button"
                             tabindex="0"
                             aria-expanded="false"
-                            aria-label={`${s.categoria}: ${s.descripcion}. Abrir la servilleta`}
-                            data-categoria={s.categoria}
-                            data-descripcion={s.descripcion}
+                            aria-label={`${t(s.categoria, idioma)}: ${t(s.descripcion, idioma)}. ${T.galeria.abrirServilleta}`}
+                            data-categoria={t(s.categoria, idioma)}
+                            data-descripcion={t(s.descripcion, idioma)}
                             style={`--rot-start: ${s.giro[0]}deg; --rot-end: ${s.giro[1]}deg; --dy: ${s.dy}px;`}
                         >
                             <div class="napkin-flap">
@@ -563,7 +521,7 @@ const mesas: Mesa[] = [
                                         <rect x="13" y="17" width="5" height="7" fill="#11231E" />
                                         <rect x="23" y="4" width="3" height="5" fill="#11231E" />
                                     </svg>
-                                    <div class={`napkin-branding tinta-${s.tinta}`}>GRACIAS POR SU VISITA<span>{s.categoria}</span></div>
+                                    <div class={`napkin-branding tinta-${s.tinta}`}>{T.galeria.gracias}<span>{t(s.categoria, idioma)}</span></div>
                                 </div>
                                 <div class="flap-back"></div>
                             </div>
@@ -571,10 +529,10 @@ const mesas: Mesa[] = [
                                 <div class="photo-slot" data-photo={s.foto} style={s.foco ? `--foco: ${s.foco}` : undefined}>
                                     <div class="photo-pending" aria-hidden="true">
                                         <svg viewBox="0 0 34 26"><rect x="1.2" y="4" width="31.6" height="21" rx="2.5" /><path d="M10 4 L12.5 1 H21.5 L24 4" /><circle cx="17" cy="14.5" r="6" /><circle cx="17" cy="14.5" r="2.4" /></svg>
-                                        <span class="pending-label">FOTO PENDIENTE</span>
+                                        <span class="pending-label">{T.galeria.fotoPendiente}</span>
                                     </div>
                                 </div>
-                                <span class="ampliar" aria-hidden="true">AMPLIAR ⤢</span>
+                                <span class="ampliar" aria-hidden="true">{T.galeria.ampliar}</span>
                             </div>
                         </div>
                     ))}
@@ -583,8 +541,10 @@ const mesas: Mesa[] = [
         </div>
     </main>
 
+    <Tiradores idioma={idioma} destino="/galeria" />
+
     <dialog class="foto-grande" id="foto-grande" aria-labelledby="foto-grande-titulo">
-        <form method="dialog"><button class="foto-cerrar" aria-label="Cerrar la foto">✕</button></form>
+        <form method="dialog"><button class="foto-cerrar" aria-label={T.galeria.cerrarFoto}>✕</button></form>
         <figure>
             <img id="foto-grande-img" alt="" />
             <figcaption><strong id="foto-grande-titulo"></strong><span id="foto-grande-pie"></span></figcaption>
@@ -612,7 +572,8 @@ const mesas: Mesa[] = [
             function updateCarousel() {
                 // el 40px compensa el margin-right que separa las mesas
                 track!.style.transform = `translateX(calc(-${currentIndex * 100}% - ${currentIndex * 40}px))`;
-                indicator!.textContent = `Mesa ${currentIndex + 1} / ${tables.length} · ${tables[currentIndex].dataset.nombre}`;
+                const rotulo = indicator!.dataset.mesa ?? 'Mesa';
+                indicator!.textContent = `${rotulo} ${currentIndex + 1} / ${tables.length} · ${tables[currentIndex].dataset.nombre}`;
                 btnPrev!.disabled = currentIndex === 0;
                 btnNext!.disabled = currentIndex === tables.length - 1;
                 // al cambiar de mesa, las servilletas de la anterior se vuelven a doblar

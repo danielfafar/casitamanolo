@@ -1,16 +1,25 @@
 ---
 // src/pages/contacto.astro
-import Layout from '../layouts/Layout.astro';
+import Layout from '../../layouts/Layout.astro';
+import { rutasDeIdioma, enlace, t, type Idioma } from '../../i18n/config';
+import { textos } from '../../i18n/textos';
+import Tiradores from '../../components/Tiradores.astro';
+
+export function getStaticPaths() { return rutasDeIdioma(); }
+const { idioma } = Astro.props as { idioma: Idioma };
+const T = textos[idioma];
 ---
 
-<Layout title="Casita Manolo | El Ticket">
+<Layout title={T.contacto.titulo} idioma={idioma} destino="/contacto">
     
     <main class="printer-room">
         
         <!-- Botón Volver -->
-        <a href="/" class="btn-volver">
-            ← VOLVER A CASA
+        <a href={enlace('/', idioma)} class="btn-volver">
+            {T.comun.volverCasa}
         </a>
+
+        <Tiradores idioma={idioma} destino="/contacto" />
 
         <!-- La ranura de la impresora por donde sale el ticket -->
         <div class="printer-slot"></div>
@@ -20,30 +29,30 @@ import Layout from '../layouts/Layout.astro';
                 
                 <!-- Encabezado del Local -->
                 <header class="ticket-header">
-                    <h1>CASITA MANOLO</h1>
-                    <p>MUSIC HOUSE MADRID - NYC</p>
-                    <p>C/ INVENTADA, 42 - MADRID</p>
-                    <p>NIF: B-12345678</p>
+                    <h1>{T.contacto.casa}</h1>
+                    <p>{T.contacto.sede}</p>
+                    <p>{T.contacto.direccion}</p>
+                    <p>{T.contacto.nif}</p>
                 </header>
 
                 <!-- Metadatos (Generados dinámicamente) -->
                 <div class="ticket-meta">
-                    <div class="row"><span>MESA:</span> <span>04</span></div>
-                    <div class="row"><span>FECHA:</span> <span id="current-date">--/--/----</span></div>
-                    <div class="row"><span>HORA:</span> <span id="current-time">--:--</span></div>
-                    <div class="row"><span>ATENDIÓ:</span> <span>MANOLO</span></div>
+                    <div class="row"><span>{T.contacto.mesa}</span> <span>04</span></div>
+                    <div class="row"><span>{T.contacto.fecha}</span> <span id="current-date">--/--/----</span></div>
+                    <div class="row"><span>{T.contacto.hora}</span> <span id="current-time">--:--</span></div>
+                    <div class="row"><span>{T.contacto.atendio}</span> <span>{T.contacto.camarero}</span></div>
                 </div>
 
                 <div class="divider"></div>
 
                 <!-- El "Manifiesto" disfrazado de comanda -->
                 <div class="ticket-items">
-                    <div class="row font-bold mb-2"><span>DESCRIPCIÓN</span> <span>IMP.</span></div>
-                    <div class="row"><span>1x BRIEFING Y CAFÉ</span> <span>0.00</span></div>
-                    <div class="row"><span>1x SESIÓN DE ESCUCHA</span> <span>0.00</span></div>
-                    <div class="row"><span>1x TEMA A MEDIDA</span> <span>INV.</span></div>
-                    <div class="row"><span>3x REVISIONES DEL CLIENTE</span> <span>INV.</span></div>
-                    <div class="row"><span>1x MEZCLA Y MÁSTER</span> <span>INV.</span></div>
+                    <div class="row font-bold mb-2"><span>{T.contacto.descripcion}</span> <span>{T.contacto.importe}</span></div>
+                    <div class="row"><span>{T.contacto.items.briefing}</span> <span>0.00</span></div>
+                    <div class="row"><span>{T.contacto.items.escucha}</span> <span>0.00</span></div>
+                    <div class="row"><span>{T.contacto.items.tema}</span> <span>{T.contacto.invitacion}</span></div>
+                    <div class="row"><span>{T.contacto.items.revisiones}</span> <span>{T.contacto.invitacion}</span></div>
+                    <div class="row"><span>{T.contacto.items.mezcla}</span> <span>{T.contacto.invitacion}</span></div>
                 </div>
 
                 <div class="divider"></div>
@@ -51,45 +60,52 @@ import Layout from '../layouts/Layout.astro';
 
                 <!-- Formulario integrado en el ticket -->
                 <div class="ticket-form-section">
-                    <p class="form-instructions">>> A RELLENAR POR EL CLIENTE:</p>
+                    <p class="form-instructions">{T.contacto.rellenar}</p>
                     
                     <form id="contact-form" class="ticket-form" action="https://formsubmit.co/infocasitamanolo@gmail.com" method="POST" data-astro-reload>
-                        <input type="hidden" name="_subject" value="Nuevo ticket | Casita Manolo" />
+                        <input type="hidden" name="_subject" value={T.contacto.asunto} />
                         <input type="hidden" name="_template" value="table" />
                         <input type="hidden" name="Fecha_UTC" id="submission-date" value="" />
                         <div class="form-row">
-                            <label for="name">NOMBRE:</label>
+                            <label for="name">{T.contacto.nombre}</label>
                             <input type="text" id="name" name="nombre" required autocomplete="name" maxlength="150" />
                         </div>
                         
                         <div class="form-row">
-                            <label for="email">E-MAIL:</label>
+                            <label for="email">{T.contacto.email}</label>
                             <input type="email" id="email" name="email" required autocomplete="email" maxlength="254" />
                         </div>
                         
                         <div class="form-row-col">
-                            <label for="message">EL ENCARGO:</label>
+                            <label for="message">{T.contacto.encargo}</label>
                             <textarea id="message" name="encargo" rows="3" required maxlength="10000"></textarea>
                         </div>
 
                         <!-- El Botón es un Sello de Caucho Rojo -->
                         <div class="stamp-container">
-                            <button type="submit" class="stamp-btn" id="submit-btn">
-                                ENVIAR EL TICKET
+                            <button
+                                type="submit"
+                                class="stamp-btn"
+                                id="submit-btn"
+                                data-enviar={T.contacto.enviar}
+                                data-enviando={T.contacto.enviando}
+                                data-aviso={T.contacto.aviso}
+                            >
+                                {T.contacto.enviar}
                             </button>
                         </div>
                     </form>
-                    <p class="contact-direct">También puedes escribirnos a <a href="mailto:infocasitamanolo@gmail.com">infocasitamanolo@gmail.com</a>.</p>
+                    <p class="contact-direct">{T.contacto.tambien} <a href="mailto:infocasitamanolo@gmail.com">infocasitamanolo@gmail.com</a>.</p>
                 </div>
 
                 <div class="divider"></div>
 
                 <!-- Pie del Ticket limpio -->
                 <footer class="ticket-footer">
-                    <p class="total">TOTAL: INVALUABLE</p>
-                    <p class="thank-you">GRACIAS POR SU VISITA</p>
-                    <p class="thank-you">WWW.CASITAMANOLO.COM</p>
-                    <a href="/" class="ticket-salida">&larr; VOLVER A LA CASITA</a>
+                    <p class="total">{T.contacto.total}</p>
+                    <p class="thank-you">{T.contacto.gracias}</p>
+                    <p class="thank-you">{T.contacto.web}</p>
+                    <a href={enlace('/', idioma)} class="ticket-salida">{T.comun.volverCasita}</a>
                 </footer>
 
             </article>
@@ -452,8 +468,9 @@ import Layout from '../layouts/Layout.astro';
         
         if (dateElement && timeElement) {
             const now = new Date();
-            dateElement.textContent = now.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
-            timeElement.textContent = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            const local = document.documentElement.lang || 'es';
+            dateElement.textContent = now.toLocaleDateString(local, { day: '2-digit', month: '2-digit', year: 'numeric' });
+            timeElement.textContent = now.toLocaleTimeString(local, { hour: '2-digit', minute: '2-digit' });
         }
 
         const form = document.getElementById('contact-form') as HTMLFormElement;
@@ -466,7 +483,7 @@ import Layout from '../layouts/Layout.astro';
             const options = { signal: lifetime.signal };
             const resetSubmit = () => {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'ENVIAR EL TICKET';
+                submitBtn.textContent = submitBtn.dataset.enviar ?? '';
                 toast.classList.remove('active');
                 toast.textContent = '';
             };
@@ -475,8 +492,8 @@ import Layout from '../layouts/Layout.astro';
                 if (submitBtn.disabled) { event.preventDefault(); return; }
                 if (submissionDate) submissionDate.value = new Date().toISOString();
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'CONTINUANDO...';
-                toast.textContent = 'Continúa en la página de envío para completar el ticket.';
+                submitBtn.textContent = submitBtn.dataset.enviando ?? '';
+                toast.textContent = submitBtn.dataset.aviso ?? '';
                 toast.classList.add('active');
                 // Native POST works without JavaScript, keeps FormSubmit's CAPTCHA,
                 // and lets the provider handle activation, errors and confirmation.
