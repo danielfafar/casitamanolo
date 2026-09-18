@@ -3,6 +3,7 @@
 import Layout from '../../layouts/Layout.astro';
 import { rutasDeIdioma, enlace, t, type Idioma } from '../../i18n/config';
 import { textos } from '../../i18n/textos';
+import { correo, whatsapp, enlaceWhatsapp } from '../../data/casa';
 import Idiomas from '../../components/Idiomas.astro';
 
 export function getStaticPaths() { return rutasDeIdioma(); }
@@ -95,7 +96,25 @@ const T = textos[idioma];
                             </button>
                         </div>
                     </form>
-                    <p class="contact-direct">{T.contacto.tambien} <a href="mailto:infocasitamanolo@gmail.com">infocasitamanolo@gmail.com</a>.</p>
+                    <p class="contact-direct">{T.contacto.tambien} <a href={`mailto:${correo}`}>{correo}</a>.</p>
+
+                    <!-- Para quien no quiere rellenar nada: WhatsApp, con el mensaje ya empezado -->
+                    <a
+                        class="ticket-whatsapp"
+                        href={enlaceWhatsapp(T.contacto.whatsappMensaje)}
+                        target="_blank"
+                        rel="noopener"
+                        aria-label={`${T.contacto.whatsappAria}: ${whatsapp.visible}`}
+                    >
+                        <svg class="ticket-whatsapp-icono" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 3.1a8.9 8.9 0 0 0-7.7 13.4L3.1 20.9l4.5-1.2A8.9 8.9 0 1 0 12 3.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+                            <path d="M9.1 8c.3-.5.9-.5 1.2-.1l.9 1.3c.2.3.2.8-.1 1.1l-.5.5c.5 1 1.3 1.8 2.3 2.3l.5-.5c.3-.3.8-.3 1.1-.1l1.3.9c.4.3.4.9-.1 1.2-.8.6-1.9.8-2.9.3-1.7-.8-3.1-2.2-3.9-3.9-.5-1-.3-2.1.2-2.8z" fill="currentColor" />
+                        </svg>
+                        <span class="ticket-whatsapp-texto">
+                            <strong>{T.contacto.whatsappPrisa}</strong>
+                            <span>{whatsapp.visible}</span>
+                        </span>
+                    </a>
                 </div>
 
                 <div class="divider"></div>
@@ -399,6 +418,29 @@ const T = textos[idioma];
     .stamp-btn:disabled { opacity: 0.5; cursor: wait; }
     .contact-direct { margin-top: 20px; font-size: 0.8rem; line-height: 1.7; text-align: center; overflow-wrap: anywhere; }
     .contact-direct a { color: inherit; text-underline-offset: 3px; }
+
+    /* WhatsApp: una casilla más del ticket, con el mismo trazado a puntos.
+       El bocadillo es el de siempre para que se reconozca sin leer, pero en
+       tinta de impresora; el verde de WhatsApp solo sale al pasar por encima. */
+    .ticket-whatsapp {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 18px auto 0;
+        padding: 10px 14px;
+        border: 1px dashed rgba(17, 35, 30, 0.45);
+        color: var(--ink-dark);
+        text-decoration: none;
+        transition: border-color 0.25s, color 0.25s;
+    }
+    .ticket-whatsapp-icono { width: 28px; height: 28px; flex: none; transition: color 0.25s; }
+    .ticket-whatsapp-texto { display: flex; flex-direction: column; gap: 3px; text-align: left; }
+    .ticket-whatsapp-texto strong { font-size: 0.68rem; letter-spacing: 0.06em; line-height: 1.35; }
+    .ticket-whatsapp-texto span { font-size: 0.8rem; letter-spacing: 0.08em; }
+    .ticket-whatsapp:hover,
+    .ticket-whatsapp:focus-visible { border-style: solid; border-color: var(--ink-dark); }
+    .ticket-whatsapp:hover .ticket-whatsapp-icono,
+    .ticket-whatsapp:focus-visible .ticket-whatsapp-icono { color: #1f9d55; }
 
     /* ========================================================
        5. PIE DEL TICKET
