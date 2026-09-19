@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- La casita de Casita Manolo, para la pestaña del navegador.
+       Trazos gruesos a proposito: a 16px tienen que seguir leyendose. -->
+  <rect width="64" height="64" rx="12" fill="#F4F1EC"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- chimenea, asomando por el faldon derecho -->
+    <path d="M42 20.5 V11 H49 V26.5" stroke="#11231E" stroke-width="4.5"/>
+    <!-- paredes: el techo del cuerpo es la base roja del tejado -->
+    <path d="M13.5 30 V55 H50.5 V30" stroke="#11231E" stroke-width="5"/>
+    <!-- tejado -->
+    <path d="M6.5 30 L32 8.5 L57.5 30 Z" stroke="#B3150F" stroke-width="5.5"/>
+    <!-- ventana con su cruz -->
+    <rect x="18.5" y="35.5" width="11" height="10" stroke="#11231E" stroke-width="3.2"/>
+    <path d="M24 35.5 V45.5 M18.5 40.5 H29.5" stroke="#11231E" stroke-width="2.6"/>
+    <!-- puerta -->
+    <path d="M36.5 55 V40.5 H45 V55" stroke="#11231E" stroke-width="3.6"/>
+  </g>
+  <circle cx="42.8" cy="48" r="1.4" fill="#11231E"/>
+</svg>
