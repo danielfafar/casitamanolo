@@ -6,6 +6,8 @@ recorta a lo esencial y se engruesa el trazo antes de reducir.
 
 Uso: python scripts/generate-favicons.py
 """
+import base64
+import io
 from pathlib import Path
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
@@ -74,10 +76,23 @@ def generar():
     fondo.paste(apple, mask=apple.getchannel('A'))
     fondo.save(PUBLIC / 'apple-touch-icon.png', optimize=True)
 
+    # Respaldo en /favicon.svg: ahi estaba el logo de Astro de la plantilla y
+    # hay navegadores que lo siguen pidiendo. Lleva dentro la casa a 64px con
+    # el trazo de los tamanos de pestana. Ninguna pagina lo anuncia: el .ico
+    # afinado sigue siendo el principal.
+    buf = io.BytesIO()
+    icono(casa, CASA, 64, 7).save(buf, 'PNG', optimize=True)
+    datos = base64.b64encode(buf.getvalue()).decode('ascii')
+    (PUBLIC / 'favicon.svg').write_text(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
+        f'<image width="64" height="64" href="data:image/png;base64,{datos}"/></svg>\n',
+        encoding='utf-8',
+    )
+
     return ico
 
 
 if __name__ == '__main__':
     generar()
-    for nombre in ('favicon.ico', 'icon-192.png', 'apple-touch-icon.png'):
+    for nombre in ('favicon.ico', 'icon-192.png', 'apple-touch-icon.png', 'favicon.svg'):
         print(nombre, (PUBLIC / nombre).stat().st_size, 'bytes')
