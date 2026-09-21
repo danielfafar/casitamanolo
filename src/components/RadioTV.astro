@@ -210,17 +210,45 @@ const paso = ARCO / (emisoras.length - 1);
             pintarEmisora();
             if (!encendida) return;
 
-            audio.src = emisoras[indice].src;
-            // La musica entra por donde va la imagen, no desde el principio
+            // Cambiar de musica no es empezar otra cancion: es la misma
+            // escena con otra banda sonora. Asi que la pista entra por donde
+            // va la imagen y, cuando suena de verdad, la imagen se coloca
+            // exactamente en la pista. El video se congela mientras carga,
+            // que es menos feo que verlo correr con el sonido a destiempo.
             const desde = video.currentTime;
+            video.pause();
+            audio.src = emisoras[indice].src;
+
             audio.addEventListener(
                 'loadedmetadata',
                 () => { if (audio.duration) audio.currentTime = desde % audio.duration; },
                 { once: true }
             );
+            audio.addEventListener(
+                'playing',
+                () => {
+                    if (!encendida) return;
+                    if (Math.abs(video.currentTime - audio.currentTime) > 0.12) {
+                        video.currentTime = audio.currentTime;
+                    }
+                    video.play().catch(() => {});
+                },
+                { once: true }
+            );
+
             estado(R.sintonizando, 'is-loading');
             audio.play().catch(() => {
                 // Si el archivo no existe, el listener de 'error' lo cuenta
+                video.play().catch(() => {});
+            });
+        }
+
+        // Con la tele encendida, las otras pistas se van bajando en segundo
+        // plano: asi cambiar de estilo es instantaneo y no hay que esperar.
+        function precargarPistas() {
+            emisoras.forEach((e, i) => {
+                if (i === indice) return;
+                fetch(e.src, { cache: 'force-cache' }).catch(() => {});
             });
         }
 
@@ -244,6 +272,7 @@ const paso = ARCO / (emisoras.length - 1);
             if (encendida) {
                 video.play().catch(() => {});
                 sintonizar(indice);
+                precargarPistas();
             } else {
                 audio.pause();
                 video.pause();

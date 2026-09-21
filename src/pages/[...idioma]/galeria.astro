@@ -340,7 +340,9 @@ const T = textos[idioma];
            8. MÓVIL
            ======================================================== */
         @media (max-width: 680px) {
-            :root { --servilleta: 160px; }
+            /* Apiladas en una sola columna sobran los lados y falta la foto:
+               la servilleta ocupa casi todo el hueco que tiene */
+            :root { --servilleta: 196px; }
 
             .header-controls { top: 16px; left: 16px; right: 16px; }
             .btn-volver { font-size: 0.62rem; letter-spacing: 0.14em; }
@@ -526,7 +528,12 @@ const T = textos[idioma];
                                 <div class="flap-back"></div>
                             </div>
                             <div class="napkin-base">
-                                <div class="photo-slot" data-photo={s.foto} style={s.foco ? `--foco: ${s.foco}` : undefined}>
+                                <div
+                                    class="photo-slot"
+                                    data-photo={s.foto}
+                                    data-mini={s.foto.replace('/images/', '/images/mini/')}
+                                    style={s.foco ? `--foco: ${s.foco}` : undefined}
+                                >
                                     <div class="photo-pending" aria-hidden="true">
                                         <svg viewBox="0 0 34 26"><rect x="1.2" y="4" width="31.6" height="21" rx="2.5" /><path d="M10 4 L12.5 1 H21.5 L24 4" /><circle cx="17" cy="14.5" r="6" /><circle cx="17" cy="14.5" r="2.4" /></svg>
                                         <span class="pending-label">{T.galeria.fotoPendiente}</span>
@@ -670,17 +677,31 @@ const T = textos[idioma];
             updateCarousel();
 
             // --- FOTOS ---
-            // Se prueban antes de pintarlas: si el archivo existe va como fondo
-            // del hueco; si no, se queda el aviso de "foto pendiente".
+            // En la servilleta va una copia pequeña: nueve fotos a tamaño
+            // completo tardaban en llegar y el hueco se quedaba en "foto
+            // pendiente" un buen rato. La grande solo se carga al ampliar.
+            // Se prueban antes de pintarlas: si el archivo no existe, se
+            // queda el aviso en vez de una imagen rota.
             document.querySelectorAll<HTMLElement>('.photo-slot').forEach((slot) => {
-                const src = slot.dataset.photo;
-                if (!src) return;
+                const mini = slot.dataset.mini || slot.dataset.photo;
+                if (!mini) return;
                 const probe = new Image();
                 probe.addEventListener('load', () => {
-                    slot.style.backgroundImage = `url('${src}')`;
+                    slot.style.backgroundImage = `url('${mini}')`;
                     slot.classList.add('is-filled');
                 });
-                probe.src = src;
+                // Si la copia pequeña falta, se intenta con la grande
+                probe.addEventListener('error', () => {
+                    const grande = slot.dataset.photo;
+                    if (!grande || grande === mini) return;
+                    const otra = new Image();
+                    otra.addEventListener('load', () => {
+                        slot.style.backgroundImage = `url('${grande}')`;
+                        slot.classList.add('is-filled');
+                    });
+                    otra.src = grande;
+                });
+                probe.src = mini;
             });
         });
     </script>

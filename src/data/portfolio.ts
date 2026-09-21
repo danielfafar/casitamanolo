@@ -165,8 +165,8 @@ export const estaciones: Estacion[] = [
   },
   {
     tema: 'paula',
-    nombre: { es: 'Los anuncios de Paula', en: "Paula's spots" },
-    rotulo: igual('PAULA'),
+    nombre: { es: 'Publicidad', en: 'Advertising' },
+    rotulo: { es: 'PUBLICIDAD', en: 'ADVERTISING' },
     izquierda: [
       {
         id: 'custo',
@@ -211,8 +211,8 @@ export const estaciones: Estacion[] = [
   },
   {
     tema: 'publicidad',
-    nombre: { es: 'Publicidad', en: 'Advertising' },
-    rotulo: { es: 'PUBLICIDAD', en: 'ADVERTISING' },
+    nombre: { es: 'Marcas', en: 'Brands' },
+    rotulo: { es: 'MARCAS', en: 'BRANDS' },
     izquierda: [
       {
         id: 'movistar-batido',

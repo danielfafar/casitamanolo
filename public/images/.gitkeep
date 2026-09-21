@@ -9,6 +9,10 @@ Fotos de la galería (servilletas). Las que hay ahora:
   victor-partitura.jpg   -> Mesa 3 · Sobre la partitura
   victor-mesa.jpg        -> Mesa 3 · La mesa de mezclas
 
-Para cambiarlas o añadir más se dejan aquí y se apuntan en src/data/galeria.ts.
-Si el archivo no existe, la servilleta enseña el hueco "FOTO PENDIENTE" en vez
-de una imagen rota.
+En mini/ va una copia pequeña de cada una: es la que se ve en la servilleta,
+para que carguen deprisa. La grande solo se descarga al ampliar la foto.
+Al añadir o cambiar una foto hay que generar su copia:
+  python scripts/fotos-galeria.py
+
+Las servilletas se apuntan en src/data/galeria.ts. Si el archivo no existe,
+la servilleta enseña el hueco "FOTO PENDIENTE" en vez de una imagen rota.

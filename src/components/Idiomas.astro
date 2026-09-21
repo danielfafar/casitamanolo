@@ -149,7 +149,11 @@ const T = textos[idioma];
 
     /* En el móvil arriba están el volver y el indicador de la mesa, así que
        bajan a la esquina de la izquierda: lejos de las flechas y del
-       distintivo de Netlify, que va a la derecha. */
+       distintivo de Netlify, que va a la derecha.
+
+       Y solo se ve la chapa del idioma al que puedes cambiar: el que estás
+       leyendo ya lo dice la propia página, así que gastar con él una esquina
+       encima del contenido no compensa en una pantalla pequeña. */
     @media (max-width: 680px) {
         .idiomas {
             top: auto;
@@ -160,6 +164,9 @@ const T = textos[idioma];
             align-items: flex-start;
             gap: 6px;
         }
+        .idioma--puesto { display: none; }
+        .idioma { padding: 6px 10px 6px 6px; font-size: 11px; opacity: 0.85; }
+        .bandera { width: 18px; height: 12.6px; }
     }
 
     @media (prefers-reduced-motion: reduce) {

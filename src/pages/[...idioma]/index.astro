@@ -41,7 +41,7 @@ const Z = T.home.zonas;
             <!-- CHIMENEA: en vez de humo salen notas -->
             <g class="house-parts deco">
                 <rect x="520" y="160" width="30" height="40" class="line-art fill-bg" />
-                <g transform="translate(535, 152)" aria-hidden="true">
+                <g class="humo" transform="translate(535, 152)" aria-hidden="true">
                     <!-- corchea -->
                     <g class="nota nota-1">
                         <ellipse cx="0" cy="0" rx="6" ry="4.5" transform="rotate(-20)" class="nota-cabeza" />
@@ -367,10 +367,6 @@ const Z = T.home.zonas;
 
 <style>
     @media (max-width: 600px) { .branding { padding: 0 16px; box-sizing: border-box; } }
-    /* Pantallas bajas en horizontal. Solo en anchas: en un movil vertical
-       muy bajito chocaria con la composicion vertical de mas abajo y
-       descentraria la escena. */
-    @media (max-height: 650px) and (min-width: 561px) { .stage { position: relative; top: auto; left: auto; transform: none; height: min(65vw, 440px); margin: 0 auto; } .branding { position: relative; bottom: auto; margin: 12px 0 28px; } }
     /* ========================================================
        1. MODO CINE
        ======================================================== */
@@ -397,8 +393,27 @@ const Z = T.home.zonas;
     body.video-mode .deco,
     body.video-mode .branding { opacity: 0 !important; pointer-events: none; }
 
-    .stage { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 900px; height: 600px; display: flex; align-items: center; justify-content: center; }
+    /* La casa, lo mas grande que quepa: limitada por el ancho de la ventana
+       y por el alto, para no comerse la marca de abajo. El dibujo es 3:2, asi
+       que el alto sale del ancho y no hay que cuadrar dos numeros a mano. */
+    .stage {
+        --ancho: min(1400px, 94vw, 124vh);
+        position: absolute; top: 44%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: var(--ancho); max-width: none;
+        height: calc(var(--ancho) / 1.5);
+        display: flex; align-items: center; justify-content: center;
+    }
     .svg-layer { position: relative; width: 100%; height: 100%; z-index: 10; }
+
+    /* Pantallas de portatil: la marca de abajo se recoge un poco y la casa
+       aprovecha lo que deja libre. */
+    @media (max-height: 820px) and (min-width: 561px) {
+        .stage { --ancho: min(1400px, 94vw, 128vh); }
+        .branding { bottom: 18px; }
+        .branding h1 { font-size: clamp(1.4rem, 3.4vw, 2.2rem); }
+        .tagline { margin-bottom: 0.5rem; }
+    }
 
     /* ========================================================
        2. LINEAS Y COLORES
@@ -592,6 +607,23 @@ const Z = T.home.zonas;
     .toast.show { bottom: 40px; opacity: 1; }
 
     /* ========================================================
+       6 bis. EL MOVIL TUMBADO
+       Un movil en horizontal no llega ni a 400px de alto: la marca no cabe
+       debajo de la casa y se le subia encima. Aqui la casa se mide por el
+       alto y el nombre se encoge hasta caber en la banda de abajo, que en
+       el dibujo es suelo vacio.
+       Va despues de .stage y de .branding a proposito: son reglas de la
+       misma fuerza y manda la ultima.
+       ======================================================== */
+    @media (max-height: 520px) and (min-width: 561px) {
+        .stage { --ancho: min(1400px, 88vw, 129vh); top: 46%; }
+        .branding { bottom: 10px; }
+        .branding h1 { font-size: 1.15rem; letter-spacing: 0.2em; margin-bottom: 0.15rem; }
+        .tagline { font-size: 0.55rem; letter-spacing: 0.25em; margin-bottom: 0; }
+        .status { display: none; }
+    }
+
+    /* ========================================================
        7. MOVIL: composicion vertical
        El dibujo es 900x600 apaisado; en un movil eso deja dos tercios
        de pantalla vacios y los objetos salen a 30px. Aqui recortamos el
@@ -600,7 +632,7 @@ const Z = T.home.zonas;
        ======================================================== */
     @media (max-width: 560px) {
         /* La escena se ancla arriba y deja el pie para la marca */
-        .stage { top: 0; transform: translateX(-50%); height: 74dvh; max-width: none; }
+        .stage { width: 100%; top: 0; transform: translateX(-50%); height: 79dvh; max-width: none; }
 
         /* Las lineas guia estorban cuando todo esta mas junto */
         .leader { display: none; }
@@ -618,7 +650,7 @@ const Z = T.home.zonas;
            amontonarse en la banda de abajo con la de los vinilos. */
         #door-group .hint { transform: translate(5px, -180px); }
         #window-group .hint { transform: translate(-105px, -75px); }
-        #stool-group .hint { transform: translate(-60px, -30px); }
+        #stool-group .hint { transform: translate(-60px, -25px); }
 
         /* El satelite entra por la izquierda del recorte. Para dejarle
            sitio arriba, la etiqueta del tejado baja al propio tejado; y en
@@ -630,8 +662,19 @@ const Z = T.home.zonas;
         #roof-clients-link:hover .hint,
         #roof-clients-link:focus-visible .hint { transform: translate(40px, 125px); }
 
-        .hint-text { font-size: 13px; }
-        .hint-bg { opacity: 0.55; }
+        /* Las notas de la chimenea suben menos: en vertical el cielo es
+           mas bajo y la ultima se salia por arriba del dibujo */
+        .humo { transform: translate(535px, 152px) scale(0.72); }
+
+        /* Los puntos rojos invitan a pasar el raton por encima. En el movil
+           no hay raton y los rotulos ya se ven siempre, asi que solo eran
+           siete manchas sueltas repartidas por el dibujo. */
+        .pulse { display: none; }
+
+        /* La chapa, plana: translucida sobre el tejado rojo se ensuciaba y
+           parecia otra cosa. Y la letra, mas discreta. */
+        .hint-text { font-size: 12px; letter-spacing: 0.1em; opacity: 0.72; }
+        .hint-bg { opacity: 1; stroke-width: 1.2px; stroke-opacity: 0.28; }
 
         /* La marca, mas contenida para no competir con la casa */
         .branding { bottom: 22px; }
@@ -643,8 +686,8 @@ const Z = T.home.zonas;
        8. TACTIL: sin hover, todo tiene que verse ya
        ======================================================== */
     @media (hover: none) {
-        .hint-bg { opacity: 0.6; }
-        .hint-text { opacity: 0.85; }
+        .hint-bg { opacity: 1; stroke-width: 1.2px; stroke-opacity: 0.28; }
+        .hint-text { opacity: 0.72; }
         .leader { opacity: 0.35; }
         .item:active .hint-bg { fill: var(--accent-color); stroke: var(--accent-color); opacity: 1; }
         .item:active .hint-text { fill: var(--bg-color); opacity: 1; }
@@ -700,7 +743,9 @@ const Z = T.home.zonas;
             if (!svg) return;
             svg.setAttribute(
                 'viewBox',
-                enMovil.matches ? '250 60 400 640' : '0 0 900 600'
+                // Un poco mas de cielo y de suelo que el dibujo: asi las notas,
+                // el satelite y el globo no salen cortados por el borde
+                enMovil.matches ? '250 36 400 684' : '0 0 900 600'
             );
         };
         ajustarLienzo();
