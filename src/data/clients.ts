@@ -95,6 +95,17 @@ export const clients: Client[] = [
     },
   },
   {
+    id: 'custo', name: 'CUSTO BARCELONA', category: { es: 'Moda', en: 'Fashion' }, surface: 'white', logo: '/portfolio/logos/custo.png',
+    project: {
+      title: { es: 'Anuncio vertical', en: 'Vertical spot' }, role: musicaOriginal,
+      summary: {
+        es: 'Pieza de moda para redes, grabada en vertical: los estampados de la casa a toda velocidad y una música que aguanta el ritmo del montaje.',
+        en: 'A fashion piece for social, shot vertical: the label’s prints at full speed and a track that keeps up with the cut.',
+      },
+      video: '/portfolio/custo.mp4', poster: '/portfolio/custo.webp',
+    },
+  },
+  {
     id: 'adolfo-dominguez', name: 'ADOLFO DOMÍNGUEZ', category: { es: 'Moda', en: 'Fashion' }, surface: 'black',
     project: {
       title: { es: 'Impermeable', en: 'Raincoat' }, year: '2025', role: musicaOriginal,

@@ -69,10 +69,107 @@ const T = textos[idioma];
         .header-ui {
             position: absolute; top: 40px; width: 100%;
             display: flex; justify-content: space-between; padding: 0 50px;
-            pointer-events: none; z-index: 100;
+            /* Por encima del índice: salir de casa no puede depender de
+               cerrar antes un menú */
+            pointer-events: none; z-index: 130;
+        }
+        body.indice-abierto .section-title,
+        body.indice-abierto .btn-expulsar { opacity: 0; pointer-events: none; }
+
+        /* El rótulo de la estación abre el índice: es lo que ya estabas
+           mirando para saber dónde estás, así que es donde se busca el resto. */
+        .section-title {
+            pointer-events: auto;
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 0; border: 0; background: none; cursor: pointer;
+            color: var(--text-color); font-family: 'Space Mono', monospace;
+            opacity: 0.45; font-size: 0.75rem; font-weight: 400;
+            letter-spacing: 0.3em; text-transform: uppercase;
+            transition: opacity 0.3s;
+        }
+        .section-title:hover, .section-title:focus-visible { opacity: 1; }
+        .section-title:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 6px; }
+        .section-title-glifo { font-size: 0.9rem; letter-spacing: 0; opacity: 0.8; }
+
+        /* ========================================================
+           EL ÍNDICE
+           Seis cajas en la mesa, cada una con la carátula de su trabajo.
+           Se entra por aquí y se vuelve cuando quieras: ir con las flechas
+           de una en una hasta la sexta no era manera.
+           ======================================================== */
+        .indice {
+            position: fixed; inset: 0; z-index: 120;
+            display: flex; align-items: center; justify-content: center;
+            padding: clamp(16px, 4vw, 40px);
+            background: rgba(5, 11, 9, 0.9);
+            backdrop-filter: blur(7px);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.45s ease;
+        }
+        .indice.is-open { opacity: 1; pointer-events: auto; }
+
+        .indice-panel { width: min(1200px, 100%); max-height: 100%; overflow-y: auto; text-align: center; }
+
+        .indice-cabecera h2 {
+            margin: 0 0 8px;
+            font-family: 'Space Mono', monospace; font-weight: 700;
+            font-size: clamp(1rem, 2.4vw, 1.4rem);
+            letter-spacing: 0.4em; text-transform: uppercase; color: var(--text-color);
+        }
+        .indice-cabecera p {
+            margin: 0 0 30px;
+            font-size: 0.72rem; letter-spacing: 0.14em; color: rgba(244, 241, 236, 0.5);
         }
 
-        .section-title { opacity: 0.45; font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase; }
+        .indice-cajas {
+            list-style: none; margin: 0 0 28px; padding: 0;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 20px;
+        }
+
+        .caja {
+            width: 100%; padding: 0; border: 0; background: none; cursor: pointer;
+            display: flex; flex-direction: column; text-align: left;
+            font-family: 'Space Mono', monospace; color: inherit;
+            transition: transform 0.35s var(--ease-spring);
+        }
+        /* Sale de la caja como sale un disco: hacia arriba */
+        .caja:hover, .caja:focus-visible { transform: translateY(-10px); }
+        .caja:focus-visible { outline: 3px solid var(--accent-color); outline-offset: 5px; }
+
+        .caja-portada {
+            position: relative; display: block; aspect-ratio: 1;
+            background-color: #0b1714; background-size: cover; background-position: center;
+            box-shadow: 0 16px 28px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(244, 241, 236, 0.2);
+        }
+        /* El brillo del plástico de la funda */
+        .caja-portada::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(118deg, rgba(255, 255, 255, 0.18) 0 16%, transparent 44%);
+        }
+        .caja-num {
+            position: absolute; top: 8px; left: 8px; z-index: 2;
+            padding: 3px 7px; border-radius: 2px;
+            background: rgba(8, 17, 14, 0.78); color: var(--text-color);
+            font-size: 0.58rem; letter-spacing: 0.1em;
+        }
+
+        /* La pegatina del anticuario, pegada en el canto de abajo */
+        .caja-etiqueta { background: #f4f1ec; color: #11231E; padding: 10px; border-top: 2px solid #11231E; }
+        .caja-nombre { display: block; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.35; }
+        .caja-cuenta { display: block; margin-top: 4px; font-size: 0.56rem; letter-spacing: 0.12em; opacity: 0.6; }
+        .caja:hover .caja-etiqueta, .caja:focus-visible .caja-etiqueta { background: var(--accent-color); color: #08110e; }
+
+        .indice-cerrar {
+            font-family: 'Space Mono', monospace; font-size: 0.68rem; font-weight: 700;
+            letter-spacing: 0.24em; text-transform: uppercase;
+            color: var(--text-color); background: none;
+            border: 1px solid rgba(244, 241, 236, 0.3); border-radius: 999px;
+            padding: 12px 26px; cursor: pointer; transition: background-color 0.3s, color 0.3s;
+        }
+        .indice-cerrar:hover, .indice-cerrar:focus-visible { background: var(--text-color); color: #08110e; }
+
+        /* Al saltar de caja el viaje no se ve: está tapado por el índice */
+        .stations-track.sin-viaje { transition: none; }
 
         /* El centro de arriba es de los tiradores: quitar el disco se pone
            al lado de volver a casa */
@@ -438,7 +535,14 @@ const T = textos[idioma];
 
             .header-ui { top: 14px; padding: 0 14px; }
             .btn-volver { font-size: 0.6rem; letter-spacing: 0.16em; }
-            .section-title { font-size: 0.56rem; letter-spacing: 0.14em; }
+            .section-title { font-size: 0.56rem; letter-spacing: 0.14em; gap: 7px; }
+            /* Arriba manda el volver a casa: el índice empieza por debajo */
+            .indice { align-items: flex-start; padding: 52px 14px 18px; }
+            .indice-cajas { grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 12px; }
+            .indice-cabecera h2 { letter-spacing: 0.26em; }
+            .indice-cabecera p { margin-bottom: 20px; font-size: 0.62rem; }
+            .caja-nombre { font-size: 0.58rem; }
+            .caja:hover, .caja:focus-visible { transform: none; }
 
             /* Arriba no cabe con el indicador: baja al centro, justo encima
                de las flechas para no pisarlas */
@@ -507,10 +611,46 @@ const T = textos[idioma];
 
         <!-- UI SUPERIOR -->
         <div class="header-ui">
-            <div class="section-title" id="station-indicator">{t(estaciones[0].nombre, idioma)} · 1 / {total}</div>
+            <button type="button" class="section-title" id="btn-indice"
+                    aria-haspopup="dialog" aria-controls="indice" aria-label={T.portfolio.indiceAbrir}>
+                <span class="section-title-glifo" aria-hidden="true">☰</span>
+                <span id="station-indicator">{t(estaciones[0].nombre, idioma)} · 1 / {total}</span>
+            </button>
             <div class="header-derecha">
                 <button type="button" class="btn-expulsar" id="btn-expulsar">{T.portfolio.expulsar}</button>
                 <a href={enlace('/', idioma)} class="btn-volver">{T.comun.volverCasa}</a>
+            </div>
+        </div>
+
+        <!-- EL ÍNDICE: las cajas del archivo -->
+        <div class="indice is-open" id="indice" role="dialog" aria-modal="true" aria-labelledby="indice-titulo">
+            <div class="indice-panel">
+                <div class="indice-cabecera">
+                    <h2 id="indice-titulo">{T.portfolio.indiceTitulo}</h2>
+                    <p>{T.portfolio.indiceAyuda}</p>
+                </div>
+
+                <ul class="indice-cajas">
+                    {estaciones.map((est, i) => {
+                        const discos = est.izquierda.length + est.derecha.length;
+                        const portada = (est.izquierda[0] ?? est.derecha[0]).portada;
+                        return (
+                            <li>
+                                <button type="button" class="caja" data-ir={i}>
+                                    <span class="caja-portada" style={`background-image: url('${portada}')`}>
+                                        <span class="caja-num">{String(i + 1).padStart(2, '0')}</span>
+                                    </span>
+                                    <span class="caja-etiqueta">
+                                        <span class="caja-nombre">{t(est.nombre, idioma)}</span>
+                                        <span class="caja-cuenta">{discos} {discos === 1 ? T.portfolio.disco : T.portfolio.discos}</span>
+                                    </span>
+                                </button>
+                            </li>
+                        );
+                    })}
+                </ul>
+
+                <button type="button" class="indice-cerrar" id="indice-cerrar">{T.portfolio.indiceCerrar}</button>
             </div>
         </div>
 
@@ -620,6 +760,46 @@ const T = textos[idioma];
 
             btnNext.addEventListener('click', () => { if (currentIndex < totalStations - 1) { currentIndex++; updateCarousel(); } });
             btnPrev.addEventListener('click', () => { if (currentIndex > 0) { currentIndex--; updateCarousel(); } });
+
+            // --- EL ÍNDICE ---
+            const indice = document.getElementById('indice');
+            const btnIndice = document.getElementById('btn-indice');
+            const indiceAbierto = () => indice?.classList.contains('is-open') ?? false;
+
+            const abrirIndice = () => {
+                indice?.removeAttribute('inert');
+                indice?.classList.add('is-open');
+                document.body.classList.add('indice-abierto');
+                (indice?.querySelector('.caja') as HTMLElement | null)?.focus();
+            };
+            const cerrarIndice = () => {
+                indice?.classList.remove('is-open');
+                document.body.classList.remove('indice-abierto');
+                // Cerrado no se tabula: si no, se navega a ciegas por él
+                indice?.setAttribute('inert', '');
+                btnIndice?.focus();
+            };
+
+            if (indiceAbierto()) document.body.classList.add('indice-abierto');
+            btnIndice?.addEventListener('click', abrirIndice, { signal: limpieza.signal });
+            document.getElementById('indice-cerrar')?.addEventListener('click', cerrarIndice, { signal: limpieza.signal });
+            // Pinchar la mesa de alrededor también cierra
+            indice?.addEventListener('click', (ev) => {
+                if (ev.target === indice) cerrarIndice();
+            }, { signal: limpieza.signal });
+
+            indice?.querySelectorAll<HTMLElement>('[data-ir]').forEach((caja) => {
+                caja.addEventListener('click', () => {
+                    const destino = Number(caja.dataset.ir);
+                    if (Number.isNaN(destino)) return;
+                    // El salto no se ve, así que no hace falta recorrer el camino
+                    track!.classList.add('sin-viaje');
+                    currentIndex = Math.max(0, Math.min(totalStations - 1, destino));
+                    updateCarousel();
+                    requestAnimationFrame(() => track!.classList.remove('sin-viaje'));
+                    cerrarIndice();
+                }, { signal: limpieza.signal });
+            });
             updateCarousel();
 
             // --- VINILOS ---
@@ -807,7 +987,10 @@ const T = textos[idioma];
             // El botón de quitar el disco: la salida de los vinilos
             btnExpulsar?.addEventListener('click', () => { if (activeVinyl) returnVinyl(activeVinyl); });
             document.addEventListener('keydown', (ev) => {
-                if (ev.key === 'Escape' && activeVinyl) returnVinyl(activeVinyl);
+                if (ev.key !== 'Escape') return;
+                // Primero se cierra lo que esté por encima
+                if (indiceAbierto()) { cerrarIndice(); return; }
+                if (activeVinyl) returnVinyl(activeVinyl);
             }, { signal: limpieza.signal });
 
             // --- ENCUADRE CON EL MONITOR ENCENDIDO ---

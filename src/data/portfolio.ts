@@ -170,11 +170,13 @@ export const estaciones: Estacion[] = [
     izquierda: [
       {
         id: 'custo',
-        etiqueta: igual('CUSTO'),
-        titulo: igual('Custo'),
+        etiqueta: igual('CUSTO BARCELONA'),
+        titulo: igual('Custo Barcelona'),
         detalle: { es: 'Moda · Anuncio vertical', en: 'Fashion · Vertical spot' },
         portada: `${P}/custo.webp`,
-        galleta: '#d4645a',
+        // El magenta de la marca, sacado de su propio cierre
+        galleta: '#E2009F',
+        logo: `${L}/custo.png`,
         // Grabado en vertical: el monitor se convierte en un móvil
         medio: { tipo: 'video', src: `${P}/custo.mp4`, vertical: true },
       },

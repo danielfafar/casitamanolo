@@ -121,6 +121,12 @@ const es = {
         videoProyecto: 'Vídeo del proyecto',
         anterior: 'Estación anterior',
         siguiente: 'Estación siguiente',
+        indiceAbrir: 'Ver todas las cajas del archivo',
+        indiceTitulo: 'El archivo',
+        indiceAyuda: 'Cada caja es un trabajo. Elige por dónde empezar.',
+        indiceCerrar: 'Cerrar el índice',
+        disco: 'disco',
+        discos: 'discos',
     },
 
     galeria: {
@@ -309,6 +315,12 @@ const en: typeof es = {
         videoProyecto: 'Project video',
         anterior: 'Previous station',
         siguiente: 'Next station',
+        indiceAbrir: 'See every crate in the archive',
+        indiceTitulo: 'The archive',
+        indiceAyuda: 'Each crate is a body of work. Pick where to start.',
+        indiceCerrar: 'Close the index',
+        disco: 'record',
+        discos: 'records',
     },
 
     galeria: {
