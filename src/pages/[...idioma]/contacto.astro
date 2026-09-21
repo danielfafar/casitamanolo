@@ -28,12 +28,15 @@ const T = textos[idioma];
         <div class="ticket-wrapper">
             <article class="ticket">
                 
-                <!-- Encabezado del Local -->
+                <!-- Encabezado del Local.
+                     Aquí iban una dirección y un NIF inventados. Un ticket sin
+                     dirección se lee como un estudio que trabaja por correo;
+                     con una falsa se lee como otra cosa, y esta página se
+                     manda a clientes. Cuando haya sede, vuelven aquí:
+                     T.contacto.direccion y T.contacto.nif. -->
                 <header class="ticket-header">
                     <h1>{T.contacto.casa}</h1>
                     <p>{T.contacto.sede}</p>
-                    <p>{T.contacto.direccion}</p>
-                    <p>{T.contacto.nif}</p>
                 </header>
 
                 <!-- Metadatos (Generados dinámicamente) -->
