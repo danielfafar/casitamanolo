@@ -85,6 +85,15 @@ export const mesas: Mesa[] = [
                 },
                 tinta: 'azul', giro: [13, 1], dy: -16, foco: 'center 35%',
             },
+            {
+                foto: '/images/sesion-cuerdas.jpg',
+                categoria: { es: 'LA SESIÓN', en: 'THE SESSION' },
+                descripcion: {
+                    es: 'Cuerdas grabando en el estudio, con la casa al otro lado del cristal',
+                    en: 'Strings recording at the studio, with the house on the other side of the glass',
+                },
+                tinta: 'rojo', giro: [-6, 2], dy: 8, foco: 'center 45%',
+            },
         ],
     },
     {
@@ -92,7 +101,7 @@ export const mesas: Mesa[] = [
         nombre: { es: 'La sobremesa', en: 'After dinner' },
         servilletas: [
             {
-                foto: '/images/victor-direccion.jpg',
+                foto: '/images/victor-dirigiendo.jpg',
                 categoria: { es: 'DIRIGIENDO', en: 'CONDUCTING' },
                 descripcion: {
                     es: 'Víctor, cofundador de Casita Manolo, dirigiendo una sesión de grabación',
@@ -101,13 +110,22 @@ export const mesas: Mesa[] = [
                 tinta: 'rojo', giro: [-8, -2], dy: -14, foco: '52% 40%',
             },
             {
-                foto: '/images/victor-2.jpg',
-                categoria: { es: 'EN LA SALA', en: 'IN THE ROOM' },
+                foto: '/images/victor-partitura.jpg',
+                categoria: { es: 'SOBRE LA PARTITURA', en: 'OVER THE SCORE' },
                 descripcion: {
-                    es: 'Otra foto de Víctor en el estudio',
-                    en: 'Another photo of Víctor at the studio',
+                    es: 'Repasando la partitura entre dos tomas',
+                    en: 'Going over the score between takes',
                 },
-                tinta: 'azul', giro: [10, 2], dy: 18,
+                tinta: 'azul', giro: [10, 2], dy: 18, foco: '55% 35%',
+            },
+            {
+                foto: '/images/victor-mesa.jpg',
+                categoria: { es: 'LA MESA DE MEZCLAS', en: 'THE MIXING DESK' },
+                descripcion: {
+                    es: 'En la mesa del estudio, donde se decide cómo suena todo',
+                    en: 'At the studio desk, where how it all sounds gets decided',
+                },
+                tinta: 'rojo', giro: [-5, 3], dy: -4, foco: 'center 55%',
             },
         ],
     },

@@ -64,7 +64,7 @@ const paso = ARCO / (emisoras.length - 1);
                     class="tv-video"
                     id="tv-video"
                     src={televisionScene.source}
-                    poster="/videos/demo-flower-poster.jpg"
+                    poster={televisionScene.poster}
                     muted
                     loop
                     playsinline
@@ -130,7 +130,7 @@ const paso = ARCO / (emisoras.length - 1);
         </div>
     </div>
 
-    <p class="tv-credit"><a href={televisionScene.creditUrl}>{t(escena.credito, idioma)}</a></p>
+    <p class="tv-credit">{t(escena.credito, idioma)}</p>
 
     <button class="tv-close" id="tv-close" aria-label={T.cerrar}>✕ <span class="tv-kbd">ESC</span></button>
 
@@ -211,6 +211,13 @@ const paso = ARCO / (emisoras.length - 1);
             if (!encendida) return;
 
             audio.src = emisoras[indice].src;
+            // La musica entra por donde va la imagen, no desde el principio
+            const desde = video.currentTime;
+            audio.addEventListener(
+                'loadedmetadata',
+                () => { if (audio.duration) audio.currentTime = desde % audio.duration; },
+                { once: true }
+            );
             estado(R.sintonizando, 'is-loading');
             audio.play().catch(() => {
                 // Si el archivo no existe, el listener de 'error' lo cuenta

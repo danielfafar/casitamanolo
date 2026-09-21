@@ -42,8 +42,8 @@ export const clients: Client[] = [
     project: {
       title: { es: 'Roots & Heritage', en: 'Roots & Heritage' }, role: musicaOriginal,
       summary: {
-        es: 'Un homenaje acústico a la España rural: maderas, cuerdas íntimas y el calor de reunirse alrededor de una chimenea leonesa.',
-        en: 'An acoustic tribute to rural Spain: woodwinds, intimate strings and the warmth of gathering around a fireplace in León.',
+        es: 'Un homenaje acústico a la España rural: maderas, cuerdas íntimas y el calor de juntarse alrededor del fuego.',
+        en: 'An acoustic tribute to rural Spain: woodwinds, intimate strings and the warmth of gathering around the fire.',
       },
     },
   },

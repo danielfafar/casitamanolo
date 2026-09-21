@@ -7,9 +7,9 @@ import { ClientRouter } from 'astro:transitions';
 import Funda from '../../components/Funda.astro';
 import { estaciones } from '../../data/portfolio';
 
-// La estación de publicidad lleva cuatro discos por estante: van más
+// Publicidad y obra propia llevan varios discos por estante: van más
 // pequeños para que la columna quepa en alto.
-const tamDisco = (tema: string) => (tema === 'publicidad' ? 130 : 160);
+const tamDisco = (tema: string) => (tema === 'publicidad' || tema === 'obra' ? 130 : 160);
 const total = estaciones.length;
 import { rutasDeIdioma, enlace, t, type Idioma } from '../../i18n/config';
 import { textos } from '../../i18n/textos';
@@ -149,6 +149,24 @@ const T = textos[idioma];
 
         body.video-active .video-presentation { opacity: 1; transform: translateX(0) scale(1); pointer-events: auto; }
 
+        /* Anuncios verticales: en vez del televisor, un móvil. Mismo sitio y
+           misma entrada; solo cambian la forma y el marco. */
+        body.video-vertical .video-presentation {
+            width: min(26vw, 36vh);
+            aspect-ratio: 9 / 16;
+            border: 9px solid #0d1a16;
+            border-radius: 30px;
+        }
+        /* El altavoz, sobre el marco */
+        body.video-vertical .video-presentation::after {
+            content: '';
+            position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+            width: 44px; height: 4px; border-radius: 3px;
+            background: rgba(244, 241, 236, 0.35);
+        }
+        body.video-vertical .video-presentation video,
+        body.video-vertical .video-presentation iframe { object-fit: cover; }
+
         /* ========================================================
            3b. FONDOS DE LAS ESTACIONES TEMÁTICAS
            Capa fija detrás de todo: no se encoge ni se desplaza cuando se
@@ -195,6 +213,14 @@ const T = textos[idioma];
             animation: llama 3.2s ease-in-out infinite alternate;
         }
         @keyframes llama { from { opacity: 0.75; } to { opacity: 1; } }
+
+        /* Paula: noche de rosa empolvado, con una luz de pasarela desde arriba */
+        .fondo--paula {
+            background:
+                radial-gradient(ellipse 40% 55% at 50% -5%, rgba(255, 214, 200, 0.3), transparent 70%),
+                radial-gradient(ellipse at center, transparent 42%, rgba(0, 0, 0, 0.55)),
+                linear-gradient(180deg, #5e3b3f, #2a1a1e 72%);
+        }
 
         /* Obra propia: pentagramas dorados sobre la noche y luz de escenario */
         .fondo--obra {
@@ -342,6 +368,14 @@ const T = textos[idioma];
         .station--airbnb .dropzone.active-hover { border-color: #ff5a5f; background-color: #33200f; }
         .station--airbnb .liner-notes { border: 1px solid rgba(255,138,48,0.45); }
 
+        /* Obra propia y publicidad apilan varios discos: menos aire entre ellos */
+        .station--obra .rack { gap: 16px; }
+
+        /* Paula: cobre y rosa empolvado */
+        .station--paula .turntable-base { background: linear-gradient(135deg, #c98a76, #6b3f3c); border: 1px solid #e0b4a2; }
+        .station--paula .dropzone { background-color: #2a1618; border: 2px solid #8a5a52; }
+        .station--paula .dropzone.active-hover { border-color: #E8B059; background-color: #3a1e20; }
+
         /* Publicidad: el naranja retro, y la columna de cuatro discos */
         .station--publicidad .turntable-base { background: linear-gradient(135deg, #b34a1c, #80300d); border: 1px solid #d35400; }
         .station--publicidad .dropzone { background-color: #4a1900; border: 2px solid #a03c14; }
@@ -434,6 +468,8 @@ const T = textos[idioma];
 
             /* Con el monitor encendido, en vertical se apila en vez de ponerse al lado */
             .video-presentation { left: 5vw; width: 90vw; top: 9vh; }
+            /* El anuncio vertical, centrado y más estrecho */
+            body.video-vertical .video-presentation { left: 0; right: 0; margin-inline: auto; width: 52vw; top: 7vh; }
             body.video-active .venue { transform: translateY(19vh) scale(0.8); }
         }
 
@@ -761,7 +797,7 @@ const T = textos[idioma];
             function apagarEstacion(data: any) {
                 hideProjectInfo(data);
                 stopMedia();
-                body.classList.remove('video-active', 'disco-puesto');
+                body.classList.remove('video-active', 'disco-puesto', 'video-vertical');
                 if (data?.station) {
                     data.station.classList.remove('con-marca');
                     data.station.style.removeProperty('--marca');
@@ -836,6 +872,9 @@ const T = textos[idioma];
                     return;
                 }
 
+                // Vertical antes de medir: el hueco que deja el móvil no es el
+                // mismo que el del televisor
+                body.classList.toggle('video-vertical', medio.tipo !== 'audio' && !!medio.vertical);
                 encuadrarConMonitor();
                 body.classList.add('video-active');
                 taparMonitor(data.cover);

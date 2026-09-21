@@ -10,10 +10,11 @@
 
 import type { Texto } from '../i18n/config';
 
-/** Lo que suena o se ve al poner el disco. El audio suena sin abrir el monitor. */
+/** Lo que suena o se ve al poner el disco. El audio suena sin abrir el monitor.
+ *  `vertical` cambia el televisor por un móvil, para los anuncios de redes. */
 export type Medio =
-  | { tipo: 'video'; src: string }
-  | { tipo: 'vimeo'; id: string }
+  | { tipo: 'video'; src: string; vertical?: boolean }
+  | { tipo: 'vimeo'; id: string; vertical?: boolean }
   | { tipo: 'audio'; src: string };
 
 export interface Disco {
@@ -44,7 +45,7 @@ export interface Notas {
   enlace?: { href: string; texto: Texto };
 }
 
-export type Tema = 'duelo' | 'tarara' | 'airbnb' | 'publicidad' | 'obra';
+export type Tema = 'duelo' | 'tarara' | 'airbnb' | 'paula' | 'publicidad' | 'obra';
 
 export interface Estacion {
   tema: Tema;
@@ -157,10 +158,56 @@ export const estaciones: Estacion[] = [
     notas: {
       fondo: `${P}/chimenea.webp`,
       texto: {
-        es: 'Un homenaje acústico a la España rural: maderas, cuerdas íntimas y el calor de reunirse alrededor de una chimenea leonesa.',
-        en: 'An acoustic tribute to rural Spain: woodwinds, intimate strings and the warmth of gathering around a fireplace in León.',
+        es: 'Un homenaje acústico a la España rural: maderas, cuerdas íntimas y el calor de juntarse alrededor del fuego.',
+        en: 'An acoustic tribute to rural Spain: woodwinds, intimate strings and the warmth of gathering around the fire.',
       },
     },
+  },
+  {
+    tema: 'paula',
+    nombre: { es: 'Los anuncios de Paula', en: "Paula's spots" },
+    rotulo: igual('PAULA'),
+    izquierda: [
+      {
+        id: 'custo',
+        etiqueta: igual('CUSTO'),
+        titulo: igual('Custo'),
+        detalle: { es: 'Moda · Anuncio vertical', en: 'Fashion · Vertical spot' },
+        portada: `${P}/custo.webp`,
+        galleta: '#d4645a',
+        // Grabado en vertical: el monitor se convierte en un móvil
+        medio: { tipo: 'video', src: `${P}/custo.mp4`, vertical: true },
+      },
+      {
+        id: 'perfume',
+        etiqueta: igual('PERFUME'),
+        titulo: igual('Perfume'),
+        detalle: { es: 'Campaña · Música original', en: 'Campaign · Original music' },
+        portada: `${P}/perfume.webp`,
+        galleta: '#c9a24a',
+        medio: { tipo: 'video', src: `${P}/perfume.mp4` },
+      },
+    ],
+    derecha: [
+      {
+        id: 'port-adriano',
+        etiqueta: igual('PORT ADRIANO'),
+        titulo: igual('Port Adriano'),
+        detalle: { es: 'Campaña · Música original', en: 'Campaign · Original music' },
+        portada: `${P}/port-adriano.webp`,
+        galleta: '#2f7f9e',
+        medio: { tipo: 'video', src: `${P}/port-adriano.mp4` },
+      },
+      {
+        id: 'gym',
+        etiqueta: igual('GYM'),
+        titulo: { es: 'Gimnasio', en: 'Gym' },
+        detalle: { es: 'Campaña · Música original', en: 'Campaign · Original music' },
+        portada: `${P}/gym.webp`,
+        galleta: '#8c1c13',
+        medio: { tipo: 'video', src: `${P}/gym.mp4` },
+      },
+    ],
   },
   {
     tema: 'publicidad',
@@ -285,6 +332,15 @@ export const estaciones: Estacion[] = [
         galleta: '#7d8f86',
         medio: { tipo: 'audio', src: `${P}/komorebi.mp3` },
       },
+      {
+        id: 'la-nina-del-vals',
+        etiqueta: igual('LA NIÑA DEL VALS'),
+        titulo: igual('La Niña del Vals'),
+        detalle: { es: 'Obra original · Cuerdas', en: 'Original work · Strings' },
+        portada: `${P}/la-nina-del-vals.webp`,
+        galleta: '#8a6a9e',
+        medio: { tipo: 'audio', src: `${P}/la-nina-del-vals.mp3` },
+      },
     ],
     derecha: [
       {
@@ -295,6 +351,15 @@ export const estaciones: Estacion[] = [
         portada: `${P}/larghetto.webp`,
         galleta: '#b5763a',
         medio: { tipo: 'audio', src: `${P}/larghetto.mp3` },
+      },
+      {
+        id: 'thriller',
+        etiqueta: igual('THRILLER'),
+        titulo: igual('Thriller'),
+        detalle: { es: 'Obra original · Tensión', en: 'Original work · Tension' },
+        portada: `${P}/thriller.webp`,
+        galleta: '#8c1c13',
+        medio: { tipo: 'audio', src: `${P}/thriller.mp3` },
       },
     ],
   },

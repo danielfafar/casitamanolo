@@ -11,7 +11,7 @@ const channels = moods.filter(mood => mood.id !== 'energia');
   </header>
   <section id="television" class="television" aria-label="Comparador de bandas sonoras">
     <div class="tv-screen">
-      <video id="scene-video" src={televisionScene.source} poster="/videos/demo-flower-poster.jpg" controls muted playsinline preload="metadata" aria-describedby="scene-description"></video>
+      <video id="scene-video" src={televisionScene.source} poster={televisionScene.poster} controls muted playsinline preload="metadata" aria-describedby="scene-description"></video>
       <span class="channel-badge" id="channel-badge">CH 01 · CALMA</span>
     </div>
     <div class="tv-controls">
@@ -27,7 +27,7 @@ const channels = moods.filter(mood => mood.id !== 'energia');
       <p id="tv-status" class="sound-status" role="status">Calma seleccionada. Dale al play.</p>
     </div>
   </section>
-  <p class="demo-note" id="scene-description">{televisionScene.description} <a href={televisionScene.creditUrl}>{televisionScene.credit}</a> Las tres músicas son bocetos de demostración, ajenos al portfolio.</p>
+  <p class="demo-note" id="scene-description">{televisionScene.description} La misma imagen cambia de sentido según la música que le pongas.</p>
   <p><a href="/radio">Seguir escuchando en Radio Manolo →</a></p>
   <noscript><p>Activa JavaScript para comparar las bandas sonoras. El vídeo puede reproducirse con sus controles.</p></noscript>
 </ListeningRoom>
