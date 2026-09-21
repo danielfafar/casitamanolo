@@ -139,7 +139,13 @@ const T = textos[idioma];
         .caja-portada {
             position: relative; display: block; aspect-ratio: 1;
             background-color: #0b1714; background-size: cover; background-position: center;
-            box-shadow: 0 16px 28px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(244, 241, 236, 0.2);
+            /* Contacto + media + ambiente: una sola sombra grande deja la
+               funda flotando, tres la apoyan */
+            box-shadow:
+                0 1px 2px rgba(0, 0, 0, 0.34),
+                0 6px 12px rgba(0, 0, 0, 0.28),
+                0 16px 30px rgba(0, 0, 0, 0.34),
+                inset 0 0 0 1px rgba(244, 241, 236, 0.2);
         }
         /* El brillo del plástico de la funda */
         .caja-portada::after {
@@ -215,7 +221,11 @@ const T = textos[idioma];
         .video-presentation {
             position: absolute; left: 5%; width: 45vw; aspect-ratio: 16/9;
             background-color: #08110e; border-radius: 12px; overflow: hidden;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8); border: 1px solid rgba(244,241,236,0.1);
+            box-shadow:
+                0 2px 5px rgba(0,0,0,0.42),
+                0 12px 26px rgba(0,0,0,0.40),
+                0 34px 66px rgba(0,0,0,0.50);
+            border: 1px solid rgba(244,241,236,0.1);
             opacity: 0; pointer-events: none;
             transform: translateX(-50px) scale(0.95); transition: all 0.8s var(--ease-spring);
             z-index: 40;
@@ -274,56 +284,156 @@ const T = textos[idioma];
         .fondo { position: absolute; inset: 0; opacity: 0; transition: opacity 0.9s ease; }
         .fondo.is-actual { opacity: 1; }
 
+        /* El grano de la sala.
+           Un degradado suave y grande no cabe en 8 bits de color: el salto
+           entre dos tonos vecinos se ve como una banda, y en una pantalla
+           ancha salen veinte bandas. El grano las rompe (es lo mismo que
+           hace el cine) y de paso los fondos dejan de parecer aerógrafo.
+           Se dibuja una vez de 160px y se repite: no cuesta nada. */
+        .fondos::after {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
+            background-size: 160px 160px;
+            opacity: 0.055;
+        }
+
+        /* La viñeta y la luz de arriba, con la caída acelerada en vez de
+           recta: así cae como cae la luz, y de paso son más paradas, que es
+           menos banda por tramo. */
+        .fondos {
+            --vineta:
+                radial-gradient(ellipse at center,
+                    rgba(0,0,0,0) 38%, rgba(0,0,0,0.035) 52%, rgba(0,0,0,0.10) 63%,
+                    rgba(0,0,0,0.20) 73%, rgba(0,0,0,0.33) 82%, rgba(0,0,0,0.46) 91%,
+                    rgba(0,0,0,0.60) 100%);
+            --vineta-suave:
+                radial-gradient(ellipse at center,
+                    rgba(0,0,0,0) 36%, rgba(0,0,0,0.03) 51%, rgba(0,0,0,0.085) 62%,
+                    rgba(0,0,0,0.17) 73%, rgba(0,0,0,0.28) 82%, rgba(0,0,0,0.40) 91%,
+                    rgba(0,0,0,0.52) 100%);
+        }
+
         /* El Duelo: césped de estadio de noche, medio campo y círculo central
            rodeando el plato; a la izquierda la luz blanca del Madrid y a la
            derecha el blaugrana del Barça */
         .fondo--duelo {
             --circulo: 250px;
             background:
-                radial-gradient(ellipse 55% 40% at 50% -8%, rgba(255,255,255,0.2), transparent 70%),
-                radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.6)),
-                linear-gradient(90deg, rgba(255,255,255,0.1), transparent 35%, transparent 65%, rgba(0,77,152,0.18) 88%, rgba(165,0,68,0.16)),
-                radial-gradient(circle at 50% 50%, transparent calc(var(--circulo) - 1px), rgba(255,255,255,0.16) var(--circulo) calc(var(--circulo) + 2px), transparent calc(var(--circulo) + 3px)),
-                linear-gradient(90deg, transparent calc(50% - 1px), rgba(255,255,255,0.16) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
-                repeating-linear-gradient(90deg, #12402a 0 7vw, #0f3622 7vw 14vw);
+                radial-gradient(ellipse 55% 42% at 50% -8%,
+                    rgba(255,255,255,0.19) 0%, rgba(255,255,255,0.12) 26%, rgba(255,255,255,0.066) 44%,
+                    rgba(255,255,255,0.03) 60%, rgba(255,255,255,0.01) 74%, rgba(255,255,255,0) 86%),
+                var(--vineta),
+                linear-gradient(90deg,
+                    rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.045) 14%, rgba(255,255,255,0.012) 26%,
+                    transparent 36%, transparent 64%,
+                    rgba(0,77,152,0.05) 74%, rgba(0,77,152,0.14) 86%, rgba(165,0,68,0.16) 100%),
+                /* Las franjas del corte: los cantos difuminados, que el césped
+                   no se corta con un cúter, y el dibujo cierra en sí mismo
+                   para que no haya costura al repetirse. */
+                repeating-linear-gradient(90deg,
+                    #12402a 0, #12402a 2.4vw,
+                    #0f3622 5.2vw, #0f3622 8.6vw,
+                    #12402a 11.4vw, #12402a 14vw);
+        }
+
+        /* Las marcas del campo, aparte: así se pueden desvanecer por arriba y
+           por abajo en vez de cortarse a hueso contra el borde. */
+        .fondo--duelo::before {
+            content: ''; position: absolute; inset: 0;
+            background:
+                radial-gradient(circle at 50% 50%,
+                    transparent calc(var(--circulo) - 1.5px), rgba(255,255,255,0.15) var(--circulo),
+                    rgba(255,255,255,0.15) calc(var(--circulo) + 1px), transparent calc(var(--circulo) + 2.5px)),
+                linear-gradient(90deg,
+                    transparent calc(50% - 1.5px), rgba(255,255,255,0.13) calc(50% - 0.5px),
+                    rgba(255,255,255,0.13) calc(50% + 0.5px), transparent calc(50% + 1.5px));
+            -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 78%, transparent 100%);
+            mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 78%, transparent 100%);
         }
 
         /* Cannes: telón de terciopelo rojo y un foco dorado desde arriba */
         .fondo--tarara {
             background:
-                radial-gradient(ellipse 38% 55% at 50% -5%, rgba(232,176,89,0.32), transparent 70%),
-                radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55)),
-                repeating-linear-gradient(90deg, rgba(0,0,0,0.38) 0, rgba(255,255,255,0.05) 48px, rgba(0,0,0,0.38) 96px),
-                linear-gradient(180deg, #6a0c15, #2c0509);
+                radial-gradient(ellipse 38% 58% at 50% -5%,
+                    rgba(232,176,89,0.30) 0%, rgba(232,176,89,0.19) 26%, rgba(232,176,89,0.105) 44%,
+                    rgba(232,176,89,0.047) 60%, rgba(232,176,89,0.016) 75%, rgba(232,176,89,0) 88%),
+                var(--vineta-suave),
+                /* Dos pliegues de periodos distintos (82 y 134) que no casan
+                   entre sí: el terciopelo deja de caer como un código de
+                   barras y no se repite dentro de la pantalla. */
+                repeating-linear-gradient(90deg, rgba(0,0,0,0.30) 0, rgba(255,255,255,0.045) 41px, rgba(0,0,0,0.30) 82px),
+                repeating-linear-gradient(90deg, rgba(0,0,0,0.13) 0, rgba(255,255,255,0.028) 67px, rgba(0,0,0,0.13) 134px),
+                linear-gradient(180deg, #6a0c15 0%, #5d0a12 22%, #4e080f 44%, #40070c 64%, #35060a 82%, #2c0509 100%);
         }
 
         /* Airbnb: muro de piedra y el calor de la chimenea desde abajo */
         .fondo--airbnb {
             background:
-                radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.65)),
+                radial-gradient(ellipse at center,
+                    rgba(0,0,0,0) 33%, rgba(0,0,0,0.04) 48%, rgba(0,0,0,0.115) 60%,
+                    rgba(0,0,0,0.22) 71%, rgba(0,0,0,0.36) 81%, rgba(0,0,0,0.50) 91%,
+                    rgba(0,0,0,0.65) 100%),
                 linear-gradient(rgba(22,13,7,0.74), rgba(22,13,7,0.74)),
                 url('/portfolio/piedra.webp') center / cover;
         }
+        /* El fuego desde abajo: caliente en el centro y amarillo justo en el
+           arranque, que una llama no es de un solo naranja */
         .fondo--airbnb::after {
             content: ''; position: absolute; inset: 0;
-            background: radial-gradient(ellipse 65% 50% at 50% 108%, rgba(255,138,48,0.42), transparent 70%);
+            background:
+                radial-gradient(ellipse 34% 26% at 50% 106%,
+                    rgba(255,196,96,0.30) 0%, rgba(255,160,60,0.14) 45%, rgba(255,150,50,0) 78%),
+                radial-gradient(ellipse 65% 52% at 50% 108%,
+                    rgba(255,138,48,0.40) 0%, rgba(255,131,44,0.25) 26%, rgba(255,124,40,0.135) 44%,
+                    rgba(255,120,38,0.06) 60%, rgba(255,120,38,0.018) 75%, rgba(255,120,38,0) 88%);
             animation: llama 3.2s ease-in-out infinite alternate;
         }
         @keyframes llama { from { opacity: 0.75; } to { opacity: 1; } }
 
-        /* Paula: noche de rosa empolvado, con una luz de pasarela desde arriba */
+        /* Paula: un plató de rodaje en rosa empolvado. Era un degradado liso
+           de arriba abajo y no había nada que mirar; ahora tiene el foco, la
+           curva del ciclorama donde la pared se hace suelo, y el charco de
+           luz en el que se apoya el tocadiscos. */
         .fondo--paula {
             background:
-                radial-gradient(ellipse 40% 55% at 50% -5%, rgba(255, 214, 200, 0.3), transparent 70%),
-                radial-gradient(ellipse at center, transparent 42%, rgba(0, 0, 0, 0.55)),
-                linear-gradient(180deg, #5e3b3f, #2a1a1e 72%);
+                radial-gradient(ellipse 40% 58% at 50% -5%,
+                    rgba(255,214,200,0.28) 0%, rgba(255,214,200,0.175) 26%, rgba(255,214,200,0.097) 44%,
+                    rgba(255,214,200,0.043) 60%, rgba(255,214,200,0.015) 75%, rgba(255,214,200,0) 88%),
+                radial-gradient(ellipse 44% 15% at 50% 84%,
+                    rgba(255,214,200,0.085) 0%, rgba(255,214,200,0.048) 32%, rgba(255,214,200,0.017) 58%,
+                    rgba(255,214,200,0) 80%),
+                var(--vineta-suave),
+                linear-gradient(180deg,
+                    transparent 50%, rgba(255,226,214,0.014) 56%, rgba(255,226,214,0.03) 62%,
+                    rgba(255,226,214,0.014) 68%, transparent 74%),
+                linear-gradient(180deg, #5e3b3f 0%, #543438 20%, #482c30 38%, #3b2328 56%, #321d22 72%, #2a1a1e 100%);
+        }
+
+        /* Marcas: se había quedado sin fondo y salía el color pelado de la
+           casa. Es la caja de los spots de televisión, así que un plató en
+           penumbra con la luz cálida del foco y el barrido de una tele
+           encendida. */
+        .fondo--publicidad {
+            background:
+                radial-gradient(ellipse 52% 46% at 50% -6%,
+                    rgba(243,156,18,0.17) 0%, rgba(243,156,18,0.105) 26%, rgba(243,156,18,0.058) 44%,
+                    rgba(243,156,18,0.025) 60%, rgba(243,156,18,0.008) 75%, rgba(243,156,18,0) 88%),
+                radial-gradient(ellipse 48% 16% at 50% 86%,
+                    rgba(255,170,80,0.07) 0%, rgba(255,170,80,0.038) 34%, rgba(255,170,80,0.012) 60%,
+                    rgba(255,170,80,0) 80%),
+                var(--vineta),
+                repeating-linear-gradient(180deg, rgba(255,255,255,0.022) 0 1px, transparent 1px 4px),
+                linear-gradient(180deg, #2d1810 0%, #26130c 24%, #1e0f0a 48%, #170c09 72%, #120a08 100%);
         }
 
         /* Obra propia: pentagramas dorados sobre la noche y luz de escenario */
         .fondo--obra {
             background:
-                radial-gradient(ellipse 45% 55% at 50% -5%, rgba(201,162,74,0.2), transparent 70%),
-                radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.5)),
+                radial-gradient(ellipse 45% 58% at 50% -5%,
+                    rgba(201,162,74,0.19) 0%, rgba(201,162,74,0.12) 26%, rgba(201,162,74,0.066) 44%,
+                    rgba(201,162,74,0.029) 60%, rgba(201,162,74,0.01) 75%, rgba(201,162,74,0) 88%),
+                var(--vineta-suave),
                 repeating-linear-gradient(180deg,
                     rgba(232,176,89,0.15) 0 1px, transparent 1px 11px,
                     rgba(232,176,89,0.15) 11px 12px, transparent 12px 22px,
@@ -389,7 +499,10 @@ const T = textos[idioma];
             position: relative; width: 220px; padding: 22px 20px; overflow: hidden;
             border-radius: 4px; transform: rotate(2deg);
             background: #f4f1ec; color: #11231e;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            box-shadow:
+                0 1px 2px rgba(0,0,0,0.30),
+                0 6px 14px rgba(0,0,0,0.26),
+                0 18px 36px rgba(0,0,0,0.36);
             font-size: 0.72rem; line-height: 1.7;
         }
         .liner-notes > * { position: relative; }
@@ -415,7 +528,27 @@ const T = textos[idioma];
 
         .turntable-base {
             position: absolute; inset: 0; border-radius: 50%;
-            box-shadow: inset 0 10px 30px rgba(0,0,0,0.8), 0 20px 40px rgba(0,0,0,0.5);
+            box-shadow:
+                /* el canto, que le da el grosor */
+                inset 0 1px 1px rgba(255,255,255,0.12),
+                inset 0 0 0 1px rgba(0,0,0,0.30),
+                /* el hueco de dentro */
+                inset 0 14px 28px rgba(0,0,0,0.55),
+                inset 0 -10px 24px rgba(0,0,0,0.30),
+                /* y cómo se apoya en la mesa */
+                0 2px 4px rgba(0,0,0,0.34),
+                0 14px 28px rgba(0,0,0,0.34),
+                0 34px 56px rgba(0,0,0,0.38);
+        }
+
+        /* El plato era un disco plano de un solo color. Esto le pone la luz
+           de arriba a la izquierda, que es de donde viene en toda la casa. */
+        .turntable-base::after {
+            content: ''; position: absolute; inset: 0; border-radius: 50%;
+            background: radial-gradient(ellipse 72% 58% at 30% 16%,
+                rgba(255,255,255,0.125) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.032) 42%,
+                rgba(255,255,255,0.011) 58%, rgba(255,255,255,0) 72%);
+            pointer-events: none;
         }
 
         .dropzone {
@@ -432,7 +565,11 @@ const T = textos[idioma];
             color: rgba(244,241,236,0.35); text-align: center; pointer-events: none; line-height: 1.5;
         }
 
-        .spindle { width: 16px; height: 16px; background-color: #b0b8b5; border-radius: 50%; box-shadow: 0 4px 6px rgba(0,0,0,0.5); z-index: 0; }
+        .spindle {
+            width: 16px; height: 16px; border-radius: 50%; z-index: 0;
+            background: linear-gradient(160deg, #d6dbd9, #b0b8b5 45%, #8d9694);
+            box-shadow: 0 1px 1px rgba(0,0,0,0.55), 0 3px 5px rgba(0,0,0,0.38), inset 0 1px 1px rgba(255,255,255,0.4);
+        }
 
         .tonearm {
             position: absolute; top: 30px; right: 40px; width: 100px; height: 180px;
