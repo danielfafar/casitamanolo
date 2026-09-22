@@ -108,7 +108,8 @@ const T = textos[idioma];
         }
         .indice.is-open { opacity: 1; pointer-events: auto; }
 
-        .indice-panel { width: min(1200px, 100%); max-height: 100%; overflow-y: auto; text-align: center; }
+        /* Un mueble no ocupa toda la pared: se queda en su ancho */
+        .indice-panel { width: min(880px, 100%); max-height: 100%; padding: 0 12px; overflow-y: auto; overflow-x: hidden; text-align: center; }
 
         .indice-cabecera h2 {
             margin: 0 0 8px;
@@ -121,49 +122,142 @@ const T = textos[idioma];
             font-size: 0.72rem; letter-spacing: 0.14em; color: rgba(244, 241, 236, 0.5);
         }
 
+        /* ========================================================
+           EL MUEBLE DE CAJONES
+           Seis huecos de vinilos, como el mueble que se usa para guardarlos:
+           el frente lleva una onda recortada por la que asoma la portada y por
+           la que se meten los dedos para ir pasando discos. En la madera y con
+           el filo verde de la casa, y a oscuras, que esto es el salón de
+           escucha y no un escaparate.
+           ======================================================== */
+        .mueble {
+            position: relative;
+            margin: 0 0 54px;
+            padding: 13px;
+            border-radius: 5px;
+            background:
+                /* la veta, en vertical como las duelas de un mueble */
+                repeating-linear-gradient(90deg, rgba(0,0,0,0.11) 0 1px, transparent 1px 11px),
+                linear-gradient(180deg, #614a34 0%, #523e2b 55%, #412f20 100%);
+            box-shadow:
+                inset 0 0 0 1px rgba(0,0,0,0.4),
+                inset 0 1px 0 rgba(255, 226, 186, 0.16),
+                0 2px 4px rgba(0,0,0,0.42),
+                0 18px 32px rgba(0,0,0,0.4),
+                0 44px 66px rgba(0,0,0,0.42);
+        }
+
+        /* La encimera: es donde estaría el tocadiscos */
+        .mueble::before {
+            content: ''; position: absolute; left: -7px; right: -7px; top: -11px; height: 11px;
+            border-radius: 3px 3px 0 0;
+            background: linear-gradient(180deg, #33251a, #1d150e);
+            box-shadow: inset 0 1px 0 rgba(255,226,186,0.14), 0 3px 7px rgba(0,0,0,0.4);
+        }
+
+        /* Las dos patas, como las del mueble de verdad */
+        .mueble::after {
+            content: ''; position: absolute; left: 9%; right: 9%; bottom: -13px; height: 13px;
+            background:
+                linear-gradient(180deg, #4b361f, #2e2114) left / 22% 100% no-repeat,
+                linear-gradient(180deg, #4b361f, #2e2114) right / 22% 100% no-repeat;
+            filter: drop-shadow(0 5px 7px rgba(0,0,0,0.5));
+        }
+
         .indice-cajas {
-            list-style: none; margin: 0 0 28px; padding: 0;
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 20px;
+            list-style: none; margin: 0; padding: 0;
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px;
         }
 
         .caja {
             width: 100%; padding: 0; border: 0; background: none; cursor: pointer;
-            display: flex; flex-direction: column; text-align: left;
+            display: block; text-align: left;
             font-family: 'Space Mono', monospace; color: inherit;
-            transition: transform 0.35s var(--ease-spring);
         }
-        /* Sale de la caja como sale un disco: hacia arriba */
-        .caja:hover, .caja:focus-visible { transform: translateY(-10px); }
-        .caja:focus-visible { outline: 3px solid var(--accent-color); outline-offset: 5px; }
+        .caja:focus-visible { outline: none; }
 
-        .caja-portada {
-            position: relative; display: block; aspect-ratio: 1;
-            background-color: #0b1714; background-size: cover; background-position: center;
-            /* Contacto + media + ambiente: una sola sombra grande deja la
-               funda flotando, tres la apoyan */
+        /* El hueco del cajón: por dentro está oscuro */
+        .caja-hueco {
+            position: relative; display: block; overflow: hidden;
+            aspect-ratio: 1 / 0.92;
+            border-radius: 2px;
+            background: linear-gradient(180deg, #1a120c, #100b07);
             box-shadow:
-                0 1px 2px rgba(0, 0, 0, 0.34),
-                0 6px 12px rgba(0, 0, 0, 0.28),
-                0 16px 30px rgba(0, 0, 0, 0.34),
-                inset 0 0 0 1px rgba(244, 241, 236, 0.2);
+                inset 0 0 0 1px rgba(0,0,0,0.55),
+                inset 0 7px 15px rgba(0,0,0,0.62);
+        }
+        .caja:focus-visible .caja-hueco { box-shadow: inset 0 0 0 3px var(--accent-color); }
+
+        /* Los discos de detrás, solo insinuados por el canto */
+        .caja-pila {
+            position: absolute; left: 9%; right: 5%; top: 7%; height: 46%;
+            background:
+                linear-gradient(90deg, rgba(244,241,236,0.16) 0 2px, transparent 2px) right / 100% 100% no-repeat,
+                linear-gradient(180deg, #2a2119, #1b150f);
+            transform: rotate(-0.6deg);
+        }
+
+        /* La portada que asoma por la onda */
+        /* La funda es cuadrada, como un vinilo: si se estira a lo ancho deja
+           de parecer un disco y parece un fotograma. Se sale por abajo a
+           propósito, que para eso está metida en el cajón. */
+        .caja-disco {
+            position: absolute; left: 8%; top: 5%; width: 80%; aspect-ratio: 1;
+            background-color: #0b1714; background-size: cover; background-position: center;
+            box-shadow:
+                0 2px 4px rgba(0,0,0,0.5),
+                0 10px 18px rgba(0,0,0,0.45),
+                inset 0 0 0 1px rgba(244,241,236,0.17);
+            transition: transform 0.4s var(--ease-spring);
         }
         /* El brillo del plástico de la funda */
-        .caja-portada::after {
+        .caja-disco::after {
             content: ''; position: absolute; inset: 0;
-            background: linear-gradient(118deg, rgba(255, 255, 255, 0.18) 0 16%, transparent 44%);
+            background: linear-gradient(118deg, rgba(255,255,255,0.16) 0 15%, transparent 42%);
         }
+        /* Al señalarlo, el disco se asoma como cuando tiras de él */
+        .caja:hover .caja-disco,
+        .caja:focus-visible .caja-disco { transform: translateY(-7%); }
+
+        /* EL FRENTE, con la onda recortada.
+           La forma sale de una máscara SVG estirada, así que se adapta a
+           cualquier ancho; y el filo claro de la onda es el mismo trazo
+           pintado dentro, que la máscara recorta justo por la curva. */
+        .caja-frente {
+            position: absolute; left: 0; right: 0; bottom: 0; height: 57%;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            padding: 0 11px 10px; color: #2b1d10;
+            background-image:
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60' preserveAspectRatio='none'%3E%3Cpath d='M0 1.7 H9 C27 1.7 30 29.7 50 29.7 C70 29.7 73 1.7 91 1.7 H100' fill='none' stroke='rgba(255,238,212,0.5)' stroke-width='1.8'/%3E%3C/svg%3E"),
+                repeating-linear-gradient(90deg, rgba(92, 68, 42, 0.14) 0 1px, transparent 1px 10px),
+                linear-gradient(180deg, #cdbb9c 0%, #bba886 46%, #a28d69 100%);
+            background-size: 100% 100%, auto, auto;
+            background-repeat: no-repeat, repeat, no-repeat;
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60' preserveAspectRatio='none'%3E%3Cpath d='M0 0 H9 C27 0 30 28 50 28 C70 28 73 0 91 0 H100 V60 H0 Z' fill='%23000'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60' preserveAspectRatio='none'%3E%3Cpath d='M0 0 H9 C27 0 30 28 50 28 C70 28 73 0 91 0 H100 V60 H0 Z' fill='%23000'/%3E%3C/svg%3E");
+            -webkit-mask-size: 100% 100%;
+            mask-size: 100% 100%;
+            filter: drop-shadow(0 -3px 6px rgba(0, 0, 0, 0.5));
+            transition: filter 0.3s ease;
+        }
+        .caja:hover .caja-frente,
+        .caja:focus-visible .caja-frente { filter: drop-shadow(0 -3px 6px rgba(0, 0, 0, 0.5)) brightness(1.06); }
+
+        /* El número, a fuego en la madera */
         .caja-num {
-            position: absolute; top: 8px; left: 8px; z-index: 2;
-            padding: 3px 7px; border-radius: 2px;
-            background: rgba(8, 17, 14, 0.78); color: var(--text-color);
-            font-size: 0.58rem; letter-spacing: 0.1em;
+            position: absolute; top: 8%; right: 9px;
+            font-size: 0.52rem; letter-spacing: 0.1em;
+            color: rgba(43, 29, 16, 0.45);
         }
 
-        /* La pegatina del anticuario, pegada en el canto de abajo */
-        .caja-etiqueta { background: #f4f1ec; color: #11231E; padding: 10px; border-top: 2px solid #11231E; }
-        .caja-nombre { display: block; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.35; }
-        .caja-cuenta { display: block; margin-top: 4px; font-size: 0.56rem; letter-spacing: 0.12em; opacity: 0.6; }
-        .caja:hover .caja-etiqueta, .caja:focus-visible .caja-etiqueta { background: var(--accent-color); color: #08110e; }
+        .caja-nombre {
+            display: block; font-size: 0.68rem; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.3;
+            transition: color 0.3s ease;
+        }
+        .caja-cuenta { display: block; margin-top: 3px; font-size: 0.54rem; letter-spacing: 0.12em; opacity: 0.6; }
+        .caja:hover .caja-nombre,
+        .caja:focus-visible .caja-nombre { color: #8c2419; }
 
         .indice-cerrar {
             font-family: 'Space Mono', monospace; font-size: 0.68rem; font-weight: 700;
@@ -699,11 +793,14 @@ const T = textos[idioma];
             .btn-volver { white-space: nowrap; }
             /* Arriba manda el volver a casa: el índice empieza por debajo */
             .indice { align-items: flex-start; padding: 52px 14px 18px; }
-            .indice-cajas { grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 12px; }
+            .indice-cajas { grid-template-columns: repeat(2, 1fr); gap: 9px; }
+            .mueble { padding: 9px; margin-bottom: 44px; }
+            .caja-nombre { font-size: 0.56rem; letter-spacing: 0.07em; }
+            .caja-cuenta { font-size: 0.5rem; }
+            .caja-frente { padding: 0 8px 8px; }
             .indice-cabecera h2 { letter-spacing: 0.26em; }
             .indice-cabecera p { margin-bottom: 20px; font-size: 0.62rem; }
-            .caja-nombre { font-size: 0.58rem; }
-            .caja:hover, .caja:focus-visible { transform: none; }
+            .caja:hover .caja-disco, .caja:focus-visible .caja-disco { transform: none; }
 
             /* Arriba no cabe con el indicador: baja al centro, justo encima
                de las flechas para no pisarlas */
@@ -791,25 +888,29 @@ const T = textos[idioma];
                     <p>{T.portfolio.indiceAyuda}</p>
                 </div>
 
-                <ul class="indice-cajas">
-                    {estaciones.map((est, i) => {
-                        const discos = est.izquierda.length + est.derecha.length;
-                        const portada = (est.izquierda[0] ?? est.derecha[0]).portada;
-                        return (
-                            <li>
-                                <button type="button" class="caja" data-ir={i}>
-                                    <span class="caja-portada" style={`background-image: url('${portada}')`}>
-                                        <span class="caja-num">{String(i + 1).padStart(2, '0')}</span>
-                                    </span>
-                                    <span class="caja-etiqueta">
-                                        <span class="caja-nombre">{t(est.nombre, idioma)}</span>
-                                        <span class="caja-cuenta">{discos} {discos === 1 ? T.portfolio.disco : T.portfolio.discos}</span>
-                                    </span>
-                                </button>
-                            </li>
-                        );
-                    })}
-                </ul>
+                <div class="mueble">
+                    <ul class="indice-cajas">
+                        {estaciones.map((est, i) => {
+                            const discos = est.izquierda.length + est.derecha.length;
+                            const portada = (est.izquierda[0] ?? est.derecha[0]).portada;
+                            return (
+                                <li>
+                                    <button type="button" class="caja" data-ir={i}>
+                                        <span class="caja-hueco">
+                                            <span class="caja-pila" aria-hidden="true"></span>
+                                            <span class="caja-disco" style={`background-image: url('${portada}')`}></span>
+                                            <span class="caja-frente">
+                                                <span class="caja-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                                                <span class="caja-nombre">{t(est.nombre, idioma)}</span>
+                                                <span class="caja-cuenta">{discos} {discos === 1 ? T.portfolio.disco : T.portfolio.discos}</span>
+                                            </span>
+                                        </span>
+                                    </button>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
 
                 <button type="button" class="indice-cerrar" id="indice-cerrar">{T.portfolio.indiceCerrar}</button>
             </div>
