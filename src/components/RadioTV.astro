@@ -235,16 +235,41 @@ const paso = ARCO / (emisoras.length - 1);
                 if (!panel.classList.contains('is-open')) return;
                 if (document.visibilityState !== 'visible') return;
 
-                if (video.paused) { video.play().catch(() => {}); return; }
+                if (video.paused) { video.playbackRate = 1; video.play().catch(() => {}); return; }
+                if (!video.duration || !Number.isFinite(audio.currentTime)) return;
 
-                // Y si se ha despegado de la musica, se vuelve a colocar
-                if (video.duration && Math.abs(video.currentTime - audio.currentTime) > 0.6) {
-                    ponerImagenEn(audio.currentTime % video.duration);
+                // Cuanto se ha despegado la imagen de la musica. Los dos dan
+                // vueltas por su cuenta y no duran exactamente lo mismo (el
+                // video 54,68 s y las pistas entre 54,667 y 54,720), asi que
+                // la cuenta se hace en redondo: si no, en el punto en el que
+                // uno vuelve a empezar saldria un desfase de casi un minuto.
+                const vuelta = video.duration;
+                let desfase = (audio.currentTime % vuelta) - video.currentTime;
+                if (desfase > vuelta / 2) desfase -= vuelta;
+                if (desfase < -vuelta / 2) desfase += vuelta;
+
+                if (Math.abs(desfase) > 0.5) {
+                    // Demasiado lejos para disimularlo: se salta
+                    video.playbackRate = 1;
+                    ponerImagenEn(audio.currentTime % vuelta);
+                } else if (Math.abs(desfase) > 0.06) {
+                    // Cerca: se corrige acelerando o frenando la imagen, tanto
+                    // mas cuanto mas lejos este y nunca mas de un 8%. Eso no se
+                    // ve; el salto si se veria. Y al acercarse afloja sola, asi
+                    // que entra en sitio sin pasarse.
+                    const empuje = Math.min(0.08, Math.max(0.02, Math.abs(desfase) * 0.25));
+                    video.playbackRate = desfase > 0 ? 1 + empuje : 1 - empuje;
+                } else if (video.playbackRate !== 1) {
+                    video.playbackRate = 1;
                 }
-            }, 1000);
+            }, 400);
         }
 
-        function soltarVigilante() { clearInterval(vigilante); vigilante = undefined; }
+        function soltarVigilante() {
+            clearInterval(vigilante);
+            vigilante = undefined;
+            video.playbackRate = 1;
+        }
 
         function sintonizar(nuevo: number) {
             indice = (nuevo + emisoras.length) % emisoras.length;
@@ -257,6 +282,7 @@ const paso = ARCO / (emisoras.length - 1);
             // exactamente en la pista. El video se congela mientras carga,
             // que es menos feo que verlo correr con el sonido a destiempo.
             const desde = video.currentTime;
+            video.playbackRate = 1;
             video.pause();
             audio.src = emisoras[indice].src;
 
