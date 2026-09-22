@@ -205,6 +205,47 @@ const paso = ARCO / (emisoras.length - 1);
         /* ------------------------------------------------------------------
            Sintonizar: mueve el dial y cambia la musica
            ------------------------------------------------------------------ */
+        /* Arrancar la imagen en un punto.
+           Llamar a play() justo despues de mover currentTime no vale: el salto
+           cancela la reproduccion recien pedida, la promesa se rompe y el
+           video se queda parado para siempre. Asi que si hay que saltar, se
+           espera a que el salto termine. */
+        function ponerImagenEn(t: number) {
+            const arrancar = () => { if (encendida) video.play().catch(() => {}); };
+            if (Number.isFinite(t) && Math.abs(video.currentTime - t) > 0.12) {
+                video.addEventListener('seeked', arrancar, { once: true });
+                video.currentTime = t;
+            } else {
+                arrancar();
+            }
+        }
+
+        /* El vigilante.
+           La escena no puede depender de que llegue un evento concreto: si se
+           pierde uno —la pestana estaba oculta y Chrome paro el video mudo, un
+           salto que aborto el play, dos cambios de estilo seguidos— la imagen
+           se queda congelada con la musica sonando, que es justo lo que se veia.
+           Esto lo mira una vez por segundo y lo arregla solo. */
+        let vigilante: ReturnType<typeof setInterval> | undefined;
+
+        function vigilarImagen() {
+            clearInterval(vigilante);
+            vigilante = setInterval(() => {
+                if (!encendida || audio.paused) return;
+                if (!panel.classList.contains('is-open')) return;
+                if (document.visibilityState !== 'visible') return;
+
+                if (video.paused) { video.play().catch(() => {}); return; }
+
+                // Y si se ha despegado de la musica, se vuelve a colocar
+                if (video.duration && Math.abs(video.currentTime - audio.currentTime) > 0.6) {
+                    ponerImagenEn(audio.currentTime % video.duration);
+                }
+            }, 1000);
+        }
+
+        function soltarVigilante() { clearInterval(vigilante); vigilante = undefined; }
+
         function sintonizar(nuevo: number) {
             indice = (nuevo + emisoras.length) % emisoras.length;
             pintarEmisora();
@@ -226,13 +267,7 @@ const paso = ARCO / (emisoras.length - 1);
             );
             audio.addEventListener(
                 'playing',
-                () => {
-                    if (!encendida) return;
-                    if (Math.abs(video.currentTime - audio.currentTime) > 0.12) {
-                        video.currentTime = audio.currentTime;
-                    }
-                    video.play().catch(() => {});
-                },
+                () => { if (encendida) ponerImagenEn(audio.currentTime); },
                 { once: true }
             );
 
@@ -273,7 +308,9 @@ const paso = ARCO / (emisoras.length - 1);
                 video.play().catch(() => {});
                 sintonizar(indice);
                 precargarPistas();
+                vigilarImagen();
             } else {
+                soltarVigilante();
                 audio.pause();
                 video.pause();
                 estado(R.apagada, null);
@@ -344,7 +381,7 @@ const paso = ARCO / (emisoras.length - 1);
             panel.classList.add('is-open');
             backdrop?.classList.add('is-open');
             disparadores.forEach((d) => d.setAttribute('aria-expanded', 'true'));
-            if (encendida) video.play().catch(() => {});
+            if (encendida) { video.play().catch(() => {}); vigilarImagen(); }
             powerBtn.focus();
         }
 
@@ -353,6 +390,7 @@ const paso = ARCO / (emisoras.length - 1);
             backdrop?.classList.remove('is-open');
             disparadores.forEach((d) => d.setAttribute('aria-expanded', 'false'));
             // La musica sigue sonando; la escena no hace falta si no se ve
+            soltarVigilante();
             video.pause();
             origen?.focus();
             setTimeout(() => {
@@ -399,6 +437,7 @@ const paso = ARCO / (emisoras.length - 1);
         document.addEventListener(
             'astro:before-swap',
             () => {
+                soltarVigilante();
                 audio.pause();
                 video.pause();
                 limpieza.abort();
