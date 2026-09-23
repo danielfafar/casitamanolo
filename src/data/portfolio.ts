@@ -70,14 +70,19 @@ export const estaciones: Estacion[] = [
     tema: 'duelo',
     nombre: { es: 'El Último Duelo', en: 'The Final Duel' },
     rotulo: { es: 'EL DUELO', en: 'THE DUEL' },
+    // Había dos discos, cara A y cara B, y los dos llevaban al mismo vídeo:
+    // solo existe un montaje. La idea de las dos caras es buena y vuelve el
+    // día que haya un segundo; de momento, un disco y la ficha al lado, como
+    // en las demás estaciones de un solo trabajo. La carátula de Messi sigue
+    // en public/portfolio/duelo-messi.webp para cuando toque.
     izquierda: [
       {
-        id: 'duelo-cristiano',
-        etiqueta: { es: 'CARA A · CRISTIANO', en: 'SIDE A · CRISTIANO' },
+        id: 'duelo',
+        etiqueta: igual('EL ÚLTIMO DUELO'),
         titulo: { es: 'El Último Duelo', en: 'The Final Duel' },
         detalle: {
-          es: 'Documental · Música original · Cara A: Cristiano',
-          en: 'Documentary · Original music · Side A: Cristiano',
+          es: 'Documental · Música original',
+          en: 'Documentary · Original music',
         },
         portada: `${P}/duelo-cristiano.webp`,
         galleta: '#c9a24a',
@@ -86,22 +91,13 @@ export const estaciones: Estacion[] = [
         medio: { tipo: 'vimeo', id: '1203280837' },
       },
     ],
-    derecha: [
-      {
-        id: 'duelo-messi',
-        etiqueta: { es: 'CARA B · MESSI', en: 'SIDE B · MESSI' },
-        titulo: { es: 'El Último Duelo', en: 'The Final Duel' },
-        detalle: {
-          es: 'Documental · Música original · Cara B: Messi',
-          en: 'Documentary · Original music · Side B: Messi',
-        },
-        portada: `${P}/duelo-messi.webp`,
-        galleta: '#004d98',
-        forma: 'balon',
-        pentagonos: ['#a50044', '#004d98'],
-        medio: { tipo: 'vimeo', id: '1203280837' },
+    derecha: [],
+    notas: {
+      texto: {
+        es: 'El último duelo entre Cristiano y Messi, contado en documental. La música es de la casa.',
+        en: 'The final duel between Cristiano and Messi, told as a documentary. The music is ours.',
       },
-    ],
+    },
   },
   {
     tema: 'tarara',
