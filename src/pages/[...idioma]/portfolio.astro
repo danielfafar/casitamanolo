@@ -234,8 +234,14 @@ const T = textos[idioma];
         /* La funda es cuadrada, como un vinilo: si se estira a lo ancho deja
            de parecer un disco y parece un fotograma. Se sale por abajo a
            propósito, que para eso está metida en el cajón. */
+        /* OJO con el margen de arriba: el cajón recorta lo que lleva dentro,
+           así que lo que sube la funda al asomarse tiene que caber en este
+           hueco. Y no es una cuenta directa: el % de translateY va sobre el
+           alto de la propia funda, que es cuadrada y algo más baja que el
+           cajón, así que un 4% de funda son ~3,5% de cajón. Con 7% aquí
+           sobra holgura; si se sube el salto, hay que subir esto también. */
         .caja-disco {
-            position: absolute; left: 8%; top: 5%; width: 80%; aspect-ratio: 1;
+            position: absolute; left: 8%; top: 7%; width: 80%; aspect-ratio: 1;
             background-color: #0b1714; background-size: cover; background-position: center;
             box-shadow:
                 0 2px 4px rgba(0,0,0,0.5),
@@ -250,7 +256,7 @@ const T = textos[idioma];
         }
         /* Al señalarlo, el disco se asoma como cuando tiras de él */
         .caja:hover .caja-disco,
-        .caja:focus-visible .caja-disco { transform: translateY(-7%); }
+        .caja:focus-visible .caja-disco { transform: translateY(-4%); }
 
         /* EL FRENTE, con la onda recortada.
            La forma sale de una máscara SVG estirada, así que se adapta a
