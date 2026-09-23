@@ -1,0 +1,8 @@
+# Redirecciones de Netlify.
+#
+# /radio y /television eran una versión anterior del televisor, sueltas y
+# solo en español. Se han quitado, pero estuvieron publicadas: quien llegue
+# por un enlace viejo va a casa, que es donde está ahora el televisor, en
+# vez de encontrarse una puerta cerrada.
+/radio        /   301
+/television   /   301

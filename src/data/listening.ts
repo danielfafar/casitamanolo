@@ -16,8 +16,9 @@ export const moods = [
 export type MoodId = (typeof moods)[number]['id'];
 
 // Las mismas emisoras en los idiomas de la casa. Las usa el televisor del
-// home (src/components/RadioTV.astro); /radio y /television son las páginas
-// viejas y siguen tirando de los campos de arriba, solo en español.
+// home (src/components/RadioTV.astro), que es el único sitio donde suena
+// esto: las páginas sueltas /radio y /television eran una versión anterior,
+// solo en español y sin enlazar, y se han quitado.
 export const emisoras: Record<MoodId, { nombre: Texto; titulo: Texto }> = {
   orquesta: {
     nombre: { es: 'Orquesta', en: 'Orchestral' },
