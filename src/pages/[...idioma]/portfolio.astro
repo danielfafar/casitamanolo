@@ -176,17 +176,50 @@ const T = textos[idioma];
         }
         .caja:focus-visible { outline: none; }
 
-        /* El hueco del cajón: por dentro está oscuro */
+        /* EL HUECO del mueble: el agujero, que no se mueve. Por dentro
+           está oscuro y se le ve el fondo cuando el cajón sale. */
         .caja-hueco {
-            position: relative; display: block; overflow: hidden;
+            position: relative; display: block;
             aspect-ratio: 1 / 0.92;
             border-radius: 2px;
-            background: linear-gradient(180deg, #1a120c, #100b07);
+            perspective: 760px;
+            background: linear-gradient(180deg, #120c08, #090604);
             box-shadow:
-                inset 0 0 0 1px rgba(0,0,0,0.55),
-                inset 0 7px 15px rgba(0,0,0,0.62);
+                inset 0 0 0 1px rgba(0,0,0,0.6),
+                inset 0 9px 20px rgba(0,0,0,0.75);
         }
-        .caja:focus-visible .caja-hueco { box-shadow: inset 0 0 0 3px var(--accent-color); }
+
+        /* EL CAJÓN: esto sí se mueve. Sale hacia ti de verdad —translateZ con
+           perspectiva— en vez de deslizarse en plano, que es lo que hace un
+           cajón: se acerca, y al acercarse se ve más grande y tapa su hueco.
+           Recorta él lo que lleva dentro, así la funda no se sale por abajo. */
+        .caja-cajon {
+            position: absolute; inset: 0; overflow: hidden;
+            border-radius: 2px;
+            background: linear-gradient(180deg, #1a120c, #100b07);
+            transform: translate3d(0, 0, 0);
+            transition: transform 0.45s var(--ease-spring), box-shadow 0.45s ease;
+        }
+        .caja:hover .caja-cajon,
+        .caja:focus-visible .caja-cajon {
+            /* Baja al salir, y bastante: lo que vende que es un cajón no es
+               que se acerque, es que detrás se quede el hueco vacío. */
+            transform: translate3d(0, 9%, 34px);
+            box-shadow:
+                0 6px 12px rgba(0,0,0,0.45),
+                0 20px 34px rgba(0,0,0,0.45),
+                0 40px 56px rgba(0,0,0,0.4);
+        }
+        .caja:focus-visible .caja-cajon {
+            box-shadow:
+                inset 0 0 0 3px var(--accent-color),
+                0 6px 12px rgba(0,0,0,0.45),
+                0 20px 34px rgba(0,0,0,0.45),
+                0 40px 56px rgba(0,0,0,0.4);
+        }
+        /* El que sale se pone delante de sus vecinos */
+        .indice-cajas li { position: relative; }
+        .indice-cajas li:hover, .indice-cajas li:focus-within { z-index: 5; }
 
         /* Los discos de detrás, solo insinuados por el canto */
         .caja-pila {
@@ -801,6 +834,7 @@ const T = textos[idioma];
             .indice-cabecera h2 { letter-spacing: 0.26em; }
             .indice-cabecera p { margin-bottom: 20px; font-size: 0.62rem; }
             .caja:hover .caja-disco, .caja:focus-visible .caja-disco { transform: none; }
+            .caja:hover .caja-cajon, .caja:focus-visible .caja-cajon { transform: translate3d(0, 0, 0); }
 
             /* Arriba no cabe con el indicador: baja al centro, justo encima
                de las flechas para no pisarlas */
@@ -844,6 +878,9 @@ const T = textos[idioma];
         }
 
         @media (prefers-reduced-motion: reduce) {
+        .caja-cajon, .caja-disco { transition: none; }
+        .caja:hover .caja-cajon, .caja:focus-visible .caja-cajon { transform: translate3d(0, 0, 0); }
+        .caja:hover .caja-disco, .caja:focus-visible .caja-disco { transform: none; }
             .fondo--airbnb::after { animation: none; }
             .fondo { transition: none; }
         }
@@ -897,12 +934,14 @@ const T = textos[idioma];
                                 <li>
                                     <button type="button" class="caja" data-ir={i}>
                                         <span class="caja-hueco">
-                                            <span class="caja-pila" aria-hidden="true"></span>
-                                            <span class="caja-disco" style={`background-image: url('${portada}')`}></span>
-                                            <span class="caja-frente">
-                                                <span class="caja-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-                                                <span class="caja-nombre">{t(est.nombre, idioma)}</span>
-                                                <span class="caja-cuenta">{discos} {discos === 1 ? T.portfolio.disco : T.portfolio.discos}</span>
+                                            <span class="caja-cajon">
+                                                <span class="caja-pila" aria-hidden="true"></span>
+                                                <span class="caja-disco" style={`background-image: url('${portada}')`}></span>
+                                                <span class="caja-frente">
+                                                    <span class="caja-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                                                    <span class="caja-nombre">{t(est.nombre, idioma)}</span>
+                                                    <span class="caja-cuenta">{discos} {discos === 1 ? T.portfolio.disco : T.portfolio.discos}</span>
+                                                </span>
                                             </span>
                                         </span>
                                     </button>
