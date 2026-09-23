@@ -68,6 +68,10 @@ const T = textos[idioma];
                     
                     <form id="contact-form" class="ticket-form" action="https://formsubmit.co/infocasitamanolo@gmail.com" method="POST" data-astro-reload>
                         <input type="hidden" name="_subject" value={T.contacto.asunto} />
+                        <!-- Trampa para robots: la gente no la ve y no la rellena;
+                             los que la rellenan no son gente. FormSubmit tira el
+                             envío si viene con algo. -->
+                        <input type="text" name="_honey" class="trampa" tabindex="-1" autocomplete="off" aria-hidden="true" />
                         <input type="hidden" name="_template" value="table" />
                         <input type="hidden" name="Fecha_UTC" id="submission-date" value="" />
                         <div class="form-row">
@@ -94,11 +98,19 @@ const T = textos[idioma];
                                 data-enviar={T.contacto.enviar}
                                 data-enviando={T.contacto.enviando}
                                 data-aviso={T.contacto.aviso}
+                                data-error={T.contacto.errorEnvio}
                             >
                                 {T.contacto.enviar}
                             </button>
                         </div>
                     </form>
+
+                    <!-- El acuse: sale en el propio ticket, sin salir de la web -->
+                    <div class="ticket-recibido" id="ticket-recibido" role="status" tabindex="-1" hidden>
+                        <p class="recibido-sello">{T.contacto.recibidoSello}</p>
+                        <p class="recibido-texto">{T.contacto.recibidoTexto}</p>
+                    </div>
+
                     <p class="contact-direct">{T.contacto.tambien} <a href={`mailto:${correo}`}>{correo}</a>.</p>
 
                     <!-- Para quien no quiere rellenar nada: WhatsApp, con el mensaje ya empezado -->
@@ -336,6 +348,11 @@ const T = textos[idioma];
         flex-direction: column;
         gap: 15px;
     }
+    /* `hidden` esconde poniendo display:none, y un display puesto a mano le
+       gana: sin esto, al enviarse el ticket se quedaban a la vez el
+       formulario y el sello de recibido. */
+    .ticket-form[hidden],
+    .ticket-recibido[hidden] { display: none; }
 
     .form-row {
         display: flex;
@@ -419,6 +436,44 @@ const T = textos[idioma];
     }
 
     .stamp-btn:disabled { opacity: 0.5; cursor: wait; }
+
+    /* Fuera de la vista pero dentro del formulario */
+    .trampa { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+    /* EL ACUSE DE RECIBO
+       El mismo sello de caucho que el botón, pero ya estampado: cae sobre el
+       ticket, rebota y se queda torcido, como cuando lo aprietas de verdad. */
+    .ticket-recibido { text-align: center; margin-top: 34px; }
+    .ticket-recibido:focus { outline: none; }
+
+    .recibido-sello {
+        display: inline-block;
+        border: 3px solid var(--accent-red);
+        color: var(--accent-red);
+        font-family: 'Space Mono', monospace;
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        padding: 10px 20px;
+        border-radius: 4px;
+        transform: rotate(-4deg);
+        animation: sellar 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes sellar {
+        0%   { transform: rotate(-15deg) scale(1.7); opacity: 0; }
+        55%  { opacity: 1; }
+        100% { transform: rotate(-4deg) scale(1); opacity: 1; }
+    }
+
+    .recibido-texto { margin-top: 20px; font-size: 0.8rem; line-height: 1.7; }
+
+    /* Cuando el aviso trae malas noticias no puede seguir en verde */
+    .system-toast.es-error { color: #ff9b8f; border-color: #5a2a24; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .recibido-sello { animation: none; }
+    }
     .contact-direct { margin-top: 20px; font-size: 0.8rem; line-height: 1.7; text-align: center; overflow-wrap: anywhere; }
     .contact-direct a { color: inherit; text-underline-offset: 3px; }
 
@@ -531,23 +586,67 @@ const T = textos[idioma];
         if (form && toast && submitBtn) {
             const lifetime = new AbortController();
             const options = { signal: lifetime.signal };
+            const recibido = document.getElementById('ticket-recibido');
+            // El «a rellenar por el cliente» se va con el formulario: sin él
+            // debajo, esa línea se queda dando una instrucción imposible.
+            const instrucciones = document.querySelector<HTMLElement>('.form-instructions');
+
             const resetSubmit = () => {
                 submitBtn.disabled = false;
                 submitBtn.textContent = submitBtn.dataset.enviar ?? '';
-                toast.classList.remove('active');
+                toast.classList.remove('active', 'es-error');
                 toast.textContent = '';
+                // Si se vuelve atrás, el ticket está otra vez para rellenar
+                form.hidden = false;
+                if (instrucciones) instrucciones.hidden = false;
+                if (recibido) recibido.hidden = true;
             };
             resetSubmit();
-            form.addEventListener('submit', (event) => {
+
+            const avisar = (texto: string, mal = false) => {
+                toast.textContent = texto;
+                toast.classList.toggle('es-error', mal);
+                toast.classList.add('active');
+            };
+
+            form.addEventListener('submit', async (event) => {
                 if (submitBtn.disabled) { event.preventDefault(); return; }
                 if (submissionDate) submissionDate.value = new Date().toISOString();
+
+                // Sin fetch no hay nada que interceptar: sigue el envío de toda
+                // la vida, que funciona igual aunque no haya JavaScript.
+                if (typeof fetch !== 'function') return;
+
+                event.preventDefault();
                 submitBtn.disabled = true;
                 submitBtn.textContent = submitBtn.dataset.enviando ?? '';
-                toast.textContent = submitBtn.dataset.aviso ?? '';
-                toast.classList.add('active');
-                // Native POST works without JavaScript, keeps FormSubmit's CAPTCHA,
-                // and lets the provider handle activation, errors and confirmation.
-                // Keep the user's fields intact when returning to this page.
+                avisar(submitBtn.dataset.aviso ?? '');
+
+                try {
+                    // La misma dirección del formulario, pero por la puerta que
+                    // contesta en vez de llevarte a su página.
+                    const puerta = form.action.replace('formsubmit.co/', 'formsubmit.co/ajax/');
+                    const respuesta = await fetch(puerta, {
+                        method: 'POST',
+                        headers: { Accept: 'application/json' },
+                        body: new FormData(form),
+                    });
+                    if (!respuesta.ok) throw new Error(String(respuesta.status));
+
+                    // El proveedor devuelve success:"false" mientras el correo
+                    // no esté confirmado: eso no es un envío, es un aviso.
+                    const datos = await respuesta.json().catch(() => null);
+                    if (datos && String(datos.success) === 'false') throw new Error('sin confirmar');
+
+                    form.hidden = true;
+                    if (instrucciones) instrucciones.hidden = true;
+                    toast.classList.remove('active', 'es-error');
+                    if (recibido) { recibido.hidden = false; recibido.focus(); }
+                } catch {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = submitBtn.dataset.enviar ?? '';
+                    avisar(submitBtn.dataset.error ?? '', true);
+                }
             }, options);
             window.addEventListener('pageshow', resetSubmit, options);
             document.addEventListener('astro:before-swap', () => lifetime.abort(), { once: true, signal: lifetime.signal });
