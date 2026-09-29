@@ -600,10 +600,23 @@ const T = textos[idioma];
             flex: 0 0 100vw; height: 100%; display: flex; align-items: center; justify-content: center; position: relative;
         }
 
+        /* Tres columnas con los lados iguales, no un reparto a partes.
+           Con `space-between` el plato se colocaba donde lo dejaban los dos
+           lados, así que en las estaciones con ficha —más ancha que una
+           funda— se iba 30px a la izquierda. En El Duelo se notaba porque el
+           círculo central del campo está pintado en el medio de la pantalla
+           y el plato tiene que caer dentro. Con 1fr a cada lado, el plato
+           queda en el centro pase lo que pase a los lados. */
         .jukebox-stage {
-            width: 100%; max-width: 1100px; display: flex; flex-direction: row;
-            align-items: center; justify-content: space-between; gap: 40px; z-index: 10;
+            width: 100%; max-width: 1100px;
+            /* minmax(0,...) y no 1fr a secas: si el lado se queda pequeño para
+               lo que lleva, con 1fr la columna crece y vuelve a descentrar el
+               plato. Así los dos lados miden siempre lo mismo. */
+            display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+            align-items: center; gap: 40px; z-index: 10;
         }
+        .jukebox-stage > .rack:first-child { justify-self: start; }
+        .jukebox-stage > .rack:last-child { justify-self: end; }
 
         /* El nombre de la caja, en grande al fondo.
            Estaba relleno al 3%: a ese tono una letra gorda no se lee como
@@ -805,6 +818,31 @@ const T = textos[idioma];
            mantiene el gesto de arrastrar el disco al plato. El script
            del arrastre lee la escala real, así que el disco sigue al dedo.
            ======================================================== */
+        /* ENTRE EL MÓVIL Y EL ESCRITORIO
+           La escena necesita unos 860px con la ficha puesta. Entre 561 y 920
+           no caben, y antes la ficha se salía de la ventana: hasta 160px
+           fuera a 700px de ancho.
+           La clave es fijarle el ancho antes de encoger. Si se la deja
+           estrecharse, lo que se encoge es el hueco entre las fundas y el
+           plato —hasta que se pisan—; dándole su ancho de siempre y
+           escalándola entera, la escena sigue igual, solo que más pequeña.
+           Es lo mismo que ya se hacía en el móvil. */
+        @media (min-width: 561px) and (max-width: 920px) {
+            .jukebox-stage {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 900px;
+                max-width: none;
+                --encoge: 0.88;
+                transform: translate(-50%, -50%) scale(var(--encoge));
+            }
+        }
+        @media (min-width: 561px) and (max-width: 840px) { .jukebox-stage { --encoge: 0.80; } }
+        @media (min-width: 561px) and (max-width: 760px) { .jukebox-stage { --encoge: 0.71; } }
+        @media (min-width: 561px) and (max-width: 680px) { .jukebox-stage { --encoge: 0.63; } }
+        @media (min-width: 561px) and (max-width: 610px) { .jukebox-stage { --encoge: 0.57; } }
+
         @media (max-width: 560px) {
             /* Centrado explícito: siendo más ancha que la pantalla, el
                justify-content del flex la desbordaba solo hacia la derecha */
@@ -818,7 +856,7 @@ const T = textos[idioma];
                 transform: translate(-50%, -50%) scale(calc(var(--zoom) * var(--reduccion, 1)));
             }
             /* Con tarjeta de notas la escena es más ancha: se reduce algo más */
-            .station--tarara, .station--airbnb { --ancho: 860px; --reduccion: 0.93; }
+            .station--duelo, .station--tarara, .station--airbnb { --ancho: 860px; --reduccion: 0.93; }
             .station--publicidad { --ancho: 740px; }
 
             .header-ui { top: 14px; padding: 0 14px; }
