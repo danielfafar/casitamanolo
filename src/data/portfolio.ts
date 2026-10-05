@@ -50,6 +50,9 @@ export type Tema = 'duelo' | 'tarara' | 'airbnb' | 'paula' | 'publicidad' | 'obr
 export interface Estacion {
   tema: Tema;
   /** Nombre en la cabecera */
+  /** Corto y en mayúsculas: es la chapa del cajón y el rótulo de arriba.
+   *  El título largo del trabajo va en el disco, y la palabra de ambiente
+   *  del fondo es `rotulo`. */
   nombre: Texto;
   /** Rótulo gigante de fondo */
   rotulo: Texto;
@@ -68,7 +71,7 @@ const igual = (texto: string): Texto => ({ es: texto, en: texto });
 export const estaciones: Estacion[] = [
   {
     tema: 'duelo',
-    nombre: { es: 'El Último Duelo', en: 'The Final Duel' },
+    nombre: { es: 'DOCUS', en: 'DOCS' },
     rotulo: { es: 'EL DUELO', en: 'THE DUEL' },
     // Había dos discos, cara A y cara B, y los dos llevaban al mismo vídeo:
     // solo existe un montaje. La idea de las dos caras es buena y vuelve el
@@ -101,7 +104,7 @@ export const estaciones: Estacion[] = [
   },
   {
     tema: 'tarara',
-    nombre: igual('Spain, Where Talent Ignites'),
+    nombre: igual('FILM'),
     rotulo: igual('CANNES'),
     izquierda: [
       {
@@ -133,7 +136,7 @@ export const estaciones: Estacion[] = [
   },
   {
     tema: 'airbnb',
-    nombre: igual('Airbnb · Roots & Heritage'),
+    nombre: igual('AIRBNB'),
     rotulo: { es: 'RAÍCES', en: 'ROOTS' },
     izquierda: [
       {
@@ -161,7 +164,7 @@ export const estaciones: Estacion[] = [
   },
   {
     tema: 'paula',
-    nombre: { es: 'Publicidad', en: 'Advertising' },
+    nombre: { es: 'PUBLI', en: 'ADS' },
     rotulo: { es: 'PUBLICIDAD', en: 'ADVERTISING' },
     izquierda: [
       {
@@ -209,7 +212,7 @@ export const estaciones: Estacion[] = [
   },
   {
     tema: 'publicidad',
-    nombre: { es: 'Marcas', en: 'Brands' },
+    nombre: { es: 'MARCAS', en: 'BRANDS' },
     rotulo: { es: 'MARCAS', en: 'BRANDS' },
     izquierda: [
       {
@@ -303,7 +306,7 @@ export const estaciones: Estacion[] = [
   },
   {
     tema: 'obra',
-    nombre: { es: 'Obra propia', en: 'Our own work' },
+    nombre: { es: 'OBRA', en: 'OURS' },
     rotulo: { es: 'OBRA PROPIA', en: 'OUR OWN WORK' },
     izquierda: [
       {
